@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Local Scene | XRKR80HD Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --neon-cyan: #00f5ff;
+            --neon-magenta: #ff00aa;
+            --neon-purple: #8b5cf6;
+            --neon-blue: #3b82f6;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Blue/cyan themed background for Your Local Scene */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 30% 10%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 90%, rgba(0, 245, 255, 0.04) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--neon-cyan);
+        }
+
+        .nav-links a.active {
+            color: var(--neon-cyan);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--neon-cyan);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 10rem 2rem 4rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--neon-blue);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .hero-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 700;
+            letter-spacing: -2px;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title .accent {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 1rem;
+        }
+
+        .era-tag {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Filter Tags */
+        .filter-section {
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .filter-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            padding: 0.5rem 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-tag:hover {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+        }
+
+        .filter-tag.active {
+            background: rgba(0, 245, 255, 0.15);
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+        }
+
+        /* Band Grid */
+        .band-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .band-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .band-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 8px 40px rgba(0, 245, 255, 0.15);
+        }
+
+        .band-card-image {
+            aspect-ratio: 16/10;
+            background: linear-gradient(135deg, var(--bg-card-hover), var(--bg-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .band-card-image::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(59, 130, 246, 0.05));
+        }
+
+        .band-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-placeholder {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            z-index: 1;
+        }
+
+        .band-card-content {
+            padding: 1.5rem;
+        }
+
+        .band-card-year {
+            font-size: 0.8rem;
+            color: var(--neon-cyan);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .band-card-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .band-card-genre {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-dark);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .band-card-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .band-card-arrow {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--neon-cyan);
+            font-weight: 500;
+        }
+
+        .band-card-arrow svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+            transition: transform 0.3s ease;
+        }
+
+        .band-card:hover .band-card-arrow svg {
+            transform: translateX(4px);
+        }
+
+        /* Coming Soon Card */
+        .band-card.coming-soon {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .band-card.coming-soon .band-card-image::after {
+            content: 'Coming Soon';
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 10, 15, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Era Navigation */
+        .era-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .era-link {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .era-link:hover {
+            border-color: var(--neon-purple);
+            color: var(--neon-purple);
+        }
+
+        .era-link.active {
+            background: rgba(0, 245, 255, 0.15);
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+        }
+
+        /* Back CTA */
+        .back-cta {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 3rem;
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.05), rgba(59, 130, 246, 0.05));
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+        }
+
+        .back-cta p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.875rem 2rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+            color: var(--bg-dark);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 35px rgba(0, 245, 255, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 4rem;
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 8rem 1.5rem 3rem;
+            }
+
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .band-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .era-nav {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="logo">XRKR80HD</a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#music">Music</a></li>
+            <li><a href="index.html#about">About</a></li>
+            <li><a href="memory-lane.html">Local Legends Archive</a></li>
+            <li><a href="modern-era.html" class="active">Your Local Scene</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <span class="hero-badge">🎤 Local Scene</span>
+        <h1 class="hero-title">
+            <span class="accent">Your Local</span> Scene
+        </h1>
+        <p class="hero-subtitle">
+            The scene continues. Local bands carrying the torch forward into today.
+        </p>
+        <span class="era-tag">2000s — Present</span>
+    </section>
+
+    <main class="main-content">
+        <!-- Era Navigation -->
+        <div class="era-nav">
+            <a href="memory-lane.html" class="era-link">Local Legends Archive (96+)</a>
+            <a href="modern-era.html" class="era-link active">Your Local Scene (2000s+)</a>
+        </div>
+
+        <div class="filter-section">
+            <span class="filter-label">Filter by genre</span>
+            <div class="filter-tags">
+                <button class="filter-tag active" data-filter="all">All Bands</button>
+                <button class="filter-tag" data-filter="rock">Rock</button>
+                <button class="filter-tag" data-filter="punk">Punk</button>
+                <button class="filter-tag" data-filter="metal">Metal</button>
+                <button class="filter-tag" data-filter="acoustic">Acoustic</button>
+                <button class="filter-tag" data-filter="worship">Worship</button>
+            </div>
+        </div>
+
+        <div class="band-grid" id="band-grid">
+            <!-- 
+                BAND CARDS - Add your modern era bands here!
+                Copy a band-card template and update:
+                - href: link to the band's page (e.g., "bands/band-name.html")
+                - data-genre: for filtering (rock, punk, metal, acoustic, worship)
+                - Image: add <img src="images/band-name.jpg" alt="Band Name">
+                - Year, Name, Genre tag, Description
+            -->
+
+            <!-- Placeholder Band Card 1 -->
+            <div class="band-card coming-soon" data-genre="rock">
+                <div class="band-card-image">
+                    <span class="image-placeholder">[ Band Photo ]</span>
+                </div>
+                <div class="band-card-content">
+                    <div class="band-card-year">Year Active</div>
+                    <h3 class="band-card-name">Your Modern Band</h3>
+                    <span class="band-card-genre">Rock</span>
+                    <p class="band-card-desc">
+                        Add band photos and info to bring this card to life.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Placeholder Band Card 2 -->
+            <div class="band-card coming-soon" data-genre="alternative">
+                <div class="band-card-image">
+                    <span class="image-placeholder">[ Band Photo ]</span>
+                </div>
+                <div class="band-card-content">
+                    <div class="band-card-year">Year Active</div>
+                    <h3 class="band-card-name">Another Band</h3>
+                    <span class="band-card-genre">Alternative</span>
+                    <p class="band-card-desc">
+                        Ready for your memories and photos.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="back-cta">
+            <p>Want to hear some new sounds?</p>
+            <a href="index.html#music" class="btn btn-primary">Listen to XRKR80HD</a>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 XRKR80HD Studio. The scene continues.</p>
+    </footer>
+
+    <script>
+        // Filter functionality
+        const filterTags = document.querySelectorAll('.filter-tag');
+        const bandCards = document.querySelectorAll('.band-card');
+
+        filterTags.forEach(tag => {
+            tag.addEventListener('click', () => {
+                // Update active state
+                filterTags.forEach(t => t.classList.remove('active'));
+                tag.classList.add('active');
+
+                const filter = tag.dataset.filter;
+
+                bandCards.forEach(card => {
+                    if (filter === 'all' || card.dataset.genre === filter) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

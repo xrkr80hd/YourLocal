@@ -1,0 +1,277 @@
+# XRKR80HD Studio - Site Management Guide
+
+## Your Site Structure
+
+```
+StarTroBlox/
+├── index.html          → Your main page (music player, about you)
+├── memory-lane.html    → Local Legends Archive (96+ Christian bands archive)
+├── modern-era.html     → Your Local Scene (2000s+ local scene bands)
+├── bands/              → Individual band pages go here
+│   └── template.html   → Copy this for each new band
+├── images/             → ALL your pictures go here
+│   └── gallery/        → Band gallery photos
+├── music/              → Your personal MP3s
+│   └── bands/          → Band sample MP3s
+└── admin/              → Your backend (DO NOT UPLOAD TO WEB)
+    └── index.html      → Band management panel
+```
+
+---
+
+## ADDING YOUR MUSIC (Main Page Player)
+
+1. Put your MP3 files in the `/music/` folder
+   - Example: `music/my-track.mp3`
+
+2. Open `index.html` in a text editor (like Notepad or VS Code)
+
+3. Find this section near the bottom (search for "const playlist"):
+   ```javascript
+   const playlist = [
+       // Add your tracks here
+   ];
+   ```
+
+4. Add your tracks like this:
+   ```javascript
+   const playlist = [
+       { title: 'Song Name', artist: 'XRKR80HD', src: 'music/my-track.mp3', duration: '3:45' },
+       { title: 'Another Song', artist: 'XRKR80HD', src: 'music/song2.mp3', duration: '4:20' },
+   ];
+   ```
+
+5. Save the file. Done!
+
+---
+
+## ADDING A BAND (The Easy Way - Using Admin Panel)
+
+### Step 1: Open the Admin Panel
+- Open `admin/index.html` in your web browser
+- This is YOUR private panel - visitors can't see it
+
+### Step 2: Add Band Info
+- Click "Add New Band"
+- Fill out the form:
+  - Band Name
+  - Years Active (e.g., "2008 — 2012")
+  - Genre
+  - Image filename (just the name, like `myband.jpg`)
+  - Story/history
+  - Members (click "+ Add Member" for each person)
+  - Tracks (click "+ Add Track" for each song)
+
+### Step 3: Save
+- Click "Save Band"
+- Your data is stored in your browser
+
+### Step 4: Export Your Data (IMPORTANT!)
+- Go to "Export / Import" in the sidebar
+- Click "Download JSON" to save a backup
+- Keep this file safe - it's your data backup
+
+### Step 5: Generate the HTML
+- Click "Generate All Pages"
+- This downloads a JSON file with all the HTML code
+- Open that file to copy the code into your site files
+
+---
+
+## ADDING A BAND (The Manual Way)
+
+### Step 1: Create the Band Page
+1. Go to the `/bands/` folder
+2. Copy `template.html`
+3. Rename it to your band name: `my-band-name.html` (lowercase, dashes for spaces)
+
+### Step 2: Edit the Band Page
+Open the new file and update these sections:
+
+**Page Title (line ~7):**
+```html
+<title>Band Name | Local Legends Archive | XRKR80HD Studio</title>
+```
+
+**Band Info (around line 150):**
+```html
+<span class="band-tag year">2008 — 2012</span>
+<span class="band-tag">Rock</span>
+```
+```html
+<h1 class="band-name">Your Band Name</h1>
+```
+
+**Band Image:**
+```html
+<img src="../images/band-name.jpg" alt="Band Name">
+```
+
+**The Story:**
+```html
+<div class="story-text">
+    <p>First paragraph of the band's history...</p>
+    <p>Second paragraph...</p>
+</div>
+```
+
+**Members:** Copy/paste this block for each member:
+```html
+<div class="member-card">
+    <div class="member-avatar">
+        <svg>...</svg>  <!-- Or replace with <img src="../images/member.jpg"> -->
+    </div>
+    <div class="member-name">John Smith</div>
+    <div class="member-role">Vocals / Guitar</div>
+</div>
+```
+
+**Music Tracks:** Copy/paste for each track:
+```html
+<div class="music-track" data-src="../music/bands/bandname-song1.mp3">
+    <button class="track-play-btn">...</button>
+    <div class="track-info">
+        <div class="track-title">Song Title</div>
+        <div class="track-meta">Album Name • 2010</div>
+    </div>
+    <span class="track-duration">3:45</span>
+</div>
+```
+
+### Step 3: Add to Local Legends Archive or Your Local Scene
+Open `memory-lane.html` or `modern-era.html` and add a card:
+
+```html
+<a href="bands/my-band-name.html" class="band-card" data-genre="rock">
+    <div class="band-card-image">
+        <img src="images/my-band.jpg" alt="My Band">
+    </div>
+    <div class="band-card-content">
+        <div class="band-card-year">2008 — 2012</div>
+        <h3 class="band-card-name">My Band Name</h3>
+        <span class="band-card-genre">Rock</span>
+        <p class="band-card-desc">
+            Brief description of the band.
+        </p>
+        <div class="band-card-arrow">
+            View Full Story
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+            </svg>
+        </div>
+    </div>
+</a>
+```
+
+---
+
+## ADDING PICTURES
+
+### Where to Put Images
+- ALL images go in the `/images/` folder
+- Gallery photos go in `/images/gallery/`
+
+### Image Naming
+- Use lowercase
+- Use dashes instead of spaces
+- Examples:
+  - `my-band.jpg`
+  - `john-smith-drums.jpg`
+  - `band-live-2010.jpg`
+
+### Recommended Sizes
+| Use | Size | Aspect Ratio |
+|-----|------|--------------|
+| Band card (Local Legends Archive) | 800 x 500 px | 16:10 |
+| Band page hero | 800 x 800 px | Square |
+| Member photo | 200 x 200 px | Square |
+| Gallery photo | 800 x 600 px | 4:3 |
+| Your profile | 600 x 600 px | Square |
+
+### How to Reference Images
+- From main pages: `images/filename.jpg`
+- From band pages: `../images/filename.jpg`
+
+---
+
+## ADDING BAND MUSIC SAMPLES
+
+1. Put MP3s in `/music/bands/`
+   - Name them: `bandname-songname.mp3`
+
+2. In the band page, update the `data-src`:
+   ```html
+   <div class="music-track" data-src="../music/bands/myband-song1.mp3">
+   ```
+
+---
+
+## UPLOADING TO YOUR WEBSITE
+
+### What to Upload
+Upload these folders/files to your web hosting:
+- `index.html`
+- `memory-lane.html`
+- `modern-era.html`
+- `/bands/` folder (with your band pages)
+- `/images/` folder (with your pictures)
+- `/music/` folder (with your MP3s)
+
+### What NOT to Upload
+- `/admin/` folder - Keep this private on your computer only
+- `README` files - Not needed on the web
+
+---
+
+## QUICK REFERENCE
+
+### Genre Options (for filtering)
+- rock
+- punk
+- metal
+- acoustic
+- worship
+- alternative
+- hardcore
+- ska
+
+### File Path Cheat Sheet
+| From | To Images | To Music | To Band Pages |
+|------|-----------|----------|---------------|
+| index.html | `images/` | `music/` | `bands/` |
+| memory-lane.html | `images/` | `music/` | `bands/` |
+| bands/page.html | `../images/` | `../music/` | (same folder) |
+
+---
+
+## TROUBLESHOOTING
+
+### Image not showing?
+- Check the filename matches exactly (case-sensitive)
+- Make sure it's in the `/images/` folder
+- Check the path (`images/` vs `../images/`)
+
+### Music not playing?
+- Make sure MP3 is in the right folder
+- Check the filename in the code matches the actual file
+- Try a different browser
+
+### Changes not showing?
+- Hard refresh: Ctrl + F5 (Windows) or Cmd + Shift + R (Mac)
+- Clear browser cache
+
+---
+
+## BACKUP YOUR WORK
+
+Always keep copies of:
+1. Your `/images/` folder
+2. Your `/music/` folder  
+3. Your exported JSON from the admin panel
+4. The entire `StarTroBlox` folder
+
+---
+
+**Questions?** Open the files in VS Code and look for comments marked with `<!-- CUSTOMIZE: -->` for hints on what to change.
+
+© 2026 XRKR80HD Studio

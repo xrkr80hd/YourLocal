@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CUSTOMIZE: Change "Band Name" to the actual band name -->
+    <title>Band Name | Local Legends Archive | XRKR80HD Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --neon-cyan: #00f5ff;
+            --neon-magenta: #ff00aa;
+            --neon-purple: #8b5cf6;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 30%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(255, 0, 170, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--neon-purple);
+        }
+
+        /* Back Button */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--neon-purple);
+        }
+
+        .back-link svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* Hero Section */
+        .band-hero {
+            padding: 8rem 2rem 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .band-hero-content {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .band-image-container {
+            position: sticky;
+            top: 100px;
+        }
+
+        .band-image {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-card-hover));
+            border-radius: 16px;
+            border: 1px solid var(--border-subtle);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .band-image::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(255, 0, 170, 0.05));
+        }
+
+        .band-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-placeholder {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            z-index: 1;
+        }
+
+        .band-info {
+            padding-top: 1rem;
+        }
+
+        .band-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .band-tag {
+            padding: 0.4rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .band-tag.year {
+            color: var(--neon-purple);
+            border-color: rgba(139, 92, 246, 0.3);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .band-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 700;
+            letter-spacing: -2px;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .band-tagline {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        /* Content Sections */
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title .icon {
+            width: 28px;
+            height: 28px;
+            fill: var(--neon-purple);
+        }
+
+        .section-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        /* Story Section */
+        .story-text {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        .story-text p {
+            margin-bottom: 1.5rem;
+        }
+
+        .story-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Members Section */
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .member-card {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .member-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-magenta));
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .member-avatar svg {
+            width: 32px;
+            height: 32px;
+            fill: var(--bg-dark);
+        }
+
+        .member-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .member-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .member-role {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Music Section */
+        .music-player {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .music-track {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-card-hover);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .music-track:last-child {
+            margin-bottom: 0;
+        }
+
+        .music-track:hover {
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .track-play-btn {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-magenta));
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .track-play-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .track-play-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--bg-dark);
+        }
+
+        .track-info {
+            flex: 1;
+        }
+
+        .track-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .track-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .track-duration {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Gallery Section */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .gallery-item {
+            aspect-ratio: 4/3;
+            background: var(--bg-dark);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .gallery-item:hover {
+            border-color: var(--neon-purple);
+            transform: scale(1.02);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-placeholder {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Navigation between bands */
+        .band-nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .band-nav-link {
+            flex: 1;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .band-nav-link:hover {
+            border-color: var(--neon-purple);
+        }
+
+        .band-nav-link.prev {
+            text-align: left;
+        }
+
+        .band-nav-link.next {
+            text-align: right;
+        }
+
+        .band-nav-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.25rem;
+        }
+
+        .band-nav-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            color: var(--neon-purple);
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .band-hero-content {
+                grid-template-columns: 1fr;
+            }
+
+            .band-image-container {
+                position: static;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+
+            nav {
+                padding: 1rem 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .band-hero {
+                padding: 6rem 1.5rem 3rem;
+            }
+
+            .content-section {
+                padding: 0 1.5rem 3rem;
+            }
+
+            .members-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .band-nav {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">XRKR80HD</a>
+        <ul class="nav-links">
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../index.html#music">Music</a></li>
+            <li><a href="../index.html#about">About</a></li>
+            <li><a href="../memory-lane.html" class="active">Local Legends Archive</a></li>
+            <li><a href="../modern-era.html">Your Local Scene</a></li>
+        </ul>
+    </nav>
+
+    <section class="band-hero">
+        <a href="../memory-lane.html" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+            Back to Local Legends Archive
+        </a>
+
+        <div class="band-hero-content">
+            <div class="band-image-container">
+                <div class="band-image">
+                    <!-- CUSTOMIZE: Add band photo -->
+                    <!-- <img src="../images/band-name.jpg" alt="Band Name"> -->
+                    <span class="image-placeholder">[ Band Photo ]</span>
+                </div>
+            </div>
+
+            <div class="band-info">
+                <div class="band-meta">
+                    <!-- CUSTOMIZE: Update years active and genre (e.g., "1996 — 2000" or "2008 — 2012") -->
+                    <span class="band-tag year">Year — Year</span>
+                    <span class="band-tag">Genre</span>
+                    <span class="band-tag">Local Scene</span>
+                </div>
+                
+                <!-- CUSTOMIZE: Update band name -->
+                <h1 class="band-name">Band Name</h1>
+                
+                <!-- CUSTOMIZE: Add a tagline or memorable quote -->
+                <p class="band-tagline">
+                    "A memorable quote or tagline that captures their spirit."
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Story -->
+    <section class="content-section">
+        <h2 class="section-title">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            </svg>
+            The Story
+        </h2>
+        <div class="section-card">
+            <div class="story-text">
+                <!-- CUSTOMIZE: Write the band's history -->
+                <p>
+                    Write the band's story here. How did they form? What was their mission? 
+                    What made them unique in the local scene?
+                </p>
+                <p>
+                    Share memories, notable shows, and the impact they had on the community.
+                    This is where you preserve their legacy.
+                </p>
+                <p>
+                    Add as many paragraphs as needed to tell their full story.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Members -->
+    <section class="content-section">
+        <h2 class="section-title">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+            </svg>
+            The Members
+        </h2>
+        <div class="section-card">
+            <div class="members-grid">
+                <!-- CUSTOMIZE: Add member cards. Copy and paste for each member -->
+                <div class="member-card">
+                    <div class="member-avatar">
+                        <!-- Optional: Add member photo -->
+                        <!-- <img src="../images/member1.jpg" alt="Member Name"> -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                    </div>
+                    <div class="member-name">Member Name</div>
+                    <div class="member-role">Vocals / Guitar</div>
+                </div>
+
+                <div class="member-card">
+                    <div class="member-avatar">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                    </div>
+                    <div class="member-name">Member Name</div>
+                    <div class="member-role">Bass</div>
+                </div>
+
+                <div class="member-card">
+                    <div class="member-avatar">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                    </div>
+                    <div class="member-name">Member Name</div>
+                    <div class="member-role">Drums</div>
+                </div>
+
+                <div class="member-card">
+                    <div class="member-avatar">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                    </div>
+                    <div class="member-name">Member Name</div>
+                    <div class="member-role">Keys</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Music -->
+    <section class="content-section">
+        <h2 class="section-title">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+            </svg>
+            Music Samples
+        </h2>
+        <div class="section-card">
+            <div class="music-player">
+                <!-- CUSTOMIZE: Add tracks. Update src with path to audio file -->
+                <div class="music-track" data-src="../music/bands/track1.mp3">
+                    <button class="track-play-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                    <div class="track-info">
+                        <div class="track-title">Track Title</div>
+                        <div class="track-meta">Album Name • 1997</div>
+                    </div>
+                    <span class="track-duration">3:45</span>
+                </div>
+
+                <div class="music-track" data-src="../music/bands/track2.mp3">
+                    <button class="track-play-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                    <div class="track-info">
+                        <div class="track-title">Another Track</div>
+                        <div class="track-meta">Album Name • 1998</div>
+                    </div>
+                    <span class="track-duration">4:12</span>
+                </div>
+
+                <div class="music-track" data-src="../music/bands/track3.mp3">
+                    <button class="track-play-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                    <div class="track-info">
+                        <div class="track-title">Third Song</div>
+                        <div class="track-meta">Demo • 1999</div>
+                    </div>
+                    <span class="track-duration">3:28</span>
+                </div>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center;">
+                Add audio files to <code style="background: var(--bg-dark); padding: 0.2rem 0.5rem; border-radius: 4px;">music/bands/</code> folder
+            </p>
+        </div>
+    </section>
+
+    <!-- Gallery -->
+    <section class="content-section">
+        <h2 class="section-title">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+            </svg>
+            Photo Gallery
+        </h2>
+        <div class="section-card">
+            <div class="gallery-grid">
+                <!-- CUSTOMIZE: Add photos. Replace placeholder with img tags -->
+                <div class="gallery-item">
+                    <!-- <img src="../images/gallery/photo1.jpg" alt="Band photo"> -->
+                    <span class="gallery-placeholder">[ Photo 1 ]</span>
+                </div>
+                <div class="gallery-item">
+                    <span class="gallery-placeholder">[ Photo 2 ]</span>
+                </div>
+                <div class="gallery-item">
+                    <span class="gallery-placeholder">[ Photo 3 ]</span>
+                </div>
+                <div class="gallery-item">
+                    <span class="gallery-placeholder">[ Photo 4 ]</span>
+                </div>
+                <div class="gallery-item">
+                    <span class="gallery-placeholder">[ Photo 5 ]</span>
+                </div>
+                <div class="gallery-item">
+                    <span class="gallery-placeholder">[ Photo 6 ]</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigate to other bands -->
+    <div class="band-nav">
+        <!-- CUSTOMIZE: Update links to previous/next bands -->
+        <a href="#" class="band-nav-link prev">
+            <div class="band-nav-label">← Previous Band</div>
+            <div class="band-nav-name">Previous Band Name</div>
+        </a>
+        <a href="#" class="band-nav-link next">
+            <div class="band-nav-label">Next Band →</div>
+            <div class="band-nav-name">Next Band Name</div>
+        </a>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 XRKR80HD Studio. Preserving the legacy.</p>
+    </footer>
+
+    <script>
+        // Simple audio player for tracks
+        const audio = new Audio();
+        let currentlyPlaying = null;
+
+        document.querySelectorAll('.music-track').forEach(track => {
+            const playBtn = track.querySelector('.track-play-btn');
+            
+            playBtn.addEventListener('click', () => {
+                const src = track.dataset.src;
+                
+                if (currentlyPlaying === track) {
+                    // Pause current track
+                    audio.pause();
+                    playBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+                    currentlyPlaying = null;
+                } else {
+                    // Stop any playing track
+                    if (currentlyPlaying) {
+                        currentlyPlaying.querySelector('.track-play-btn').innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+                    }
+                    
+                    // Play new track
+                    audio.src = src;
+                    audio.play().catch(() => {
+                        alert('Audio file not found. Add MP3 files to the music/bands/ folder.');
+                    });
+                    playBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+                    currentlyPlaying = track;
+                }
+            });
+        });
+
+        audio.addEventListener('ended', () => {
+            if (currentlyPlaying) {
+                currentlyPlaying.querySelector('.track-play-btn').innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+                currentlyPlaying = null;
+            }
+        });
+    </script>
+</body>
+</html>
