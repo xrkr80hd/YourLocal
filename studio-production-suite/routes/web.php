@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminMediaController;
 use App\Http\Controllers\Admin\AdminPodcastEpisodeController;
 use App\Http\Controllers\Admin\AdminProjectController;
+use App\Http\Controllers\Admin\AdminSupabaseSessionController;
 use App\Http\Controllers\Admin\AdminTrackController;
 use App\Http\Controllers\Admin\AdminUploadController;
 use App\Http\Controllers\Bands\BandShowController;
@@ -46,10 +47,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest')->group(function () {
         Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('login');
         Route::post('/login', [AdminAuthController::class, 'login'])->name('login.attempt');
+        Route::post('/supabase/session', [AdminSupabaseSessionController::class, 'store'])->name('supabase.session.store');
     });
 
-    Route::middleware('auth')->group(function () {
-        Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+    Route::middleware('admin.access')->group(function () {
+        Route::post('/logout', [AdminSupabaseSessionController::class, 'destroy'])->name('logout');
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
 
         Route::get('/bio', [AdminBioController::class, 'edit'])->name('bio.edit');

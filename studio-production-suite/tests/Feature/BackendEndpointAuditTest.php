@@ -12,6 +12,7 @@ use App\Models\Track;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class BackendEndpointAuditTest extends TestCase
@@ -94,7 +95,7 @@ class BackendEndpointAuditTest extends TestCase
 
     public function test_admin_auth_flow_works(): void
     {
-        $password = 'changeme123!';
+        $password = 'test-password-123!';
         $user = User::factory()->create([
             'email' => 'admin@example.com',
             'password' => bcrypt($password),
@@ -322,5 +323,51 @@ class BackendEndpointAuditTest extends TestCase
             'kind' => 'image',
             'file' => UploadedFile::fake()->image('cover.jpg'),
         ])->assertOk()->assertJsonStructure(['url']);
+    }
+
+    public function test_supabase_admin_token_can_open_admin_dashboard_without_local_user_session(): void
+    {
+        config([
+            'supabase.url' => 'https://example.supabase.co',
+            'supabase.anon_key' => 'anon-test-key',
+            'supabase.admin_emails' => ['admin@example.com'],
+            'supabase.admin_roles' => ['admin'],
+        ]);
+
+        Http::fake([
+            'https://example.supabase.co/auth/v1/user' => Http::response([
+                'email' => 'admin@example.com',
+                'app_metadata' => ['role' => 'admin'],
+            ], 200),
+        ]);
+
+        $this->post('/admin/supabase/session', [
+            'access_token' => 'valid-token',
+        ])->assertRedirect('/admin/dashboard');
+
+        $this->withHeader('Authorization', 'Bearer valid-token')
+            ->get('/admin/dashboard')
+            ->assertOk();
+    }
+
+    public function test_supabase_non_admin_token_is_rejected_for_admin_routes(): void
+    {
+        config([
+            'supabase.url' => 'https://example.supabase.co',
+            'supabase.anon_key' => 'anon-test-key',
+            'supabase.admin_emails' => ['admin@example.com'],
+            'supabase.admin_roles' => ['admin'],
+        ]);
+
+        Http::fake([
+            'https://example.supabase.co/auth/v1/user' => Http::response([
+                'email' => 'viewer@example.com',
+                'app_metadata' => ['role' => 'viewer'],
+            ], 200),
+        ]);
+
+        $this->withHeader('Authorization', 'Bearer viewer-token')
+            ->get('/admin/dashboard')
+            ->assertRedirect('/admin/login');
     }
 }

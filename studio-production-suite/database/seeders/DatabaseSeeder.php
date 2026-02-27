@@ -20,13 +20,20 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        User::query()->updateOrCreate(
-            ['email' => 'xrkr80hd@gmail.com'],
-            [
-                'name' => 'XRKR80HD',
-                'password' => Hash::make('changeme123!'),
-            ]
-        );
+        if (filter_var(env('ADMIN_SEED_ENABLED', false), FILTER_VALIDATE_BOOL)) {
+            $seedAdminEmail = (string) env('ADMIN_SEED_EMAIL', '');
+            $seedAdminPassword = (string) env('ADMIN_SEED_PASSWORD', '');
+
+            if ($seedAdminEmail !== '' && $seedAdminPassword !== '') {
+                User::query()->updateOrCreate(
+                    ['email' => $seedAdminEmail],
+                    [
+                        'name' => (string) env('ADMIN_SEED_NAME', 'Admin'),
+                        'password' => Hash::make($seedAdminPassword),
+                    ]
+                );
+            }
+        }
 
         SiteProfile::query()->updateOrCreate(
             ['id' => 1],

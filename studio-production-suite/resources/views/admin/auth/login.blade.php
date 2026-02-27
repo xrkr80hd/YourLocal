@@ -18,6 +18,19 @@
         </div>
         <button class="button primary" type="submit">Login</button>
     </form>
-    <p class="meta" style="margin-top:1rem">Seeded admin: <code>xrkr80hd@gmail.com</code> / <code>changeme123!</code></p>
+
+    @if(config('supabase.enabled'))
+        <hr style="margin:1.25rem 0;border:0;border-top:1px solid rgba(255,255,255,0.16);">
+        <p class="meta" style="margin:0 0 .5rem">Supabase admin session token</p>
+        <form method="POST" action="{{ route('admin.supabase.session.store') }}">
+            @csrf
+            <div class="form-row">
+                <label>Access Token</label>
+                <textarea name="access_token" rows="4" required>{{ old('access_token') }}</textarea>
+                @error('access_token')<p class="error">{{ $message }}</p>@enderror
+            </div>
+            <button class="button" type="submit">Continue with Supabase</button>
+        </form>
+    @endif
 </section>
 @endsection
