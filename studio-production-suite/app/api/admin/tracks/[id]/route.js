@@ -36,6 +36,35 @@ function parseTrackId(rawId) {
   return id;
 }
 
+function normalizeStorageKey(value) {
+  return String(value || '')
+    .trim()
+    .replace(/[^a-zA-Z0-9._/-]/g, '-')
+    .replace(/\/+/g, '/')
+    .replace(/^\/+|\/+$/g, '');
+}
+
+function getStorageKeyFromPublicUrl(value, bucket) {
+  const raw = String(value || '').trim();
+  if (!raw) {
+    return '';
+  }
+
+  const withoutQuery = raw.split('?')[0];
+  const marker = `/storage/v1/object/public/${bucket}/`;
+  const markerIndex = withoutQuery.indexOf(marker);
+  if (markerIndex < 0) {
+    return '';
+  }
+
+  const encodedKey = withoutQuery.slice(markerIndex + marker.length);
+  try {
+    return normalizeStorageKey(decodeURIComponent(encodedKey));
+  } catch {
+    return normalizeStorageKey(encodedKey);
+  }
+}
+
 function buildTrackPayload(raw) {
   const title = clampText(raw?.title, 255);
   const artistName = clampText(raw?.artist_name || 'xrkr80hd', 255);
@@ -145,10 +174,29 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ error: 'Track not found.' }, { status: 404 });
   }
 
+  const bucket = process.env.SUPABASE_STORAGE_BUCKET || 'uploads';
+  const audioKey = getStorageKeyFromPublicUrl(existing.data.audio_url, bucket);
+  const coverKey = getStorageKeyFromPublicUrl(existing.data.cover_image_url, bucket);
+  const keysToDelete = Array.from(new Set([audioKey, coverKey].filter(Boolean)));
+
   const deleted = await supabase.from('tracks').delete().eq('id', id);
   if (deleted.error) {
     return NextResponse.json({ error: deleted.error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true });
+  let storageWarnings = [];
+  if (keysToDelete.length) {
+    const removeResult = await supabase.storage.from(bucket).remove(keysToDelete);
+    if (removeResult.error) {
+      storageWarnings.push(`Track row deleted, but storage cleanup failed: ${removeResult.error.message}`);
+    }
+  }
+
+  return NextResponse.json({
+    ok: true,
+    storage_cleanup: {
+      attempted: keysToDelete.length,
+      warnings: storageWarnings,
+    },
+  });
 }

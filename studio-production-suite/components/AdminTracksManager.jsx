@@ -188,8 +188,11 @@ export default function AdminTracksManager({ initialTracks = [] }) {
             value={form.audio_url}
             onChange={(value) => setForm((current) => ({ ...current, audio_url: value }))}
             folder="audio/tracks"
+            replaceMode={Boolean(form.id)}
+            replaceKey={form.id ? `audio/tracks/${String(form.id)}/main` : ''}
             accept="audio/*"
             placeholder="https://... or /..."
+            help="Upload directly here. In edit mode, upload replaces this track's current audio file."
           />
 
           <MediaUrlInput
@@ -198,9 +201,13 @@ export default function AdminTracksManager({ initialTracks = [] }) {
             value={form.cover_image_url}
             onChange={(value) => setForm((current) => ({ ...current, cover_image_url: value }))}
             folder="images/posts"
+            replaceMode={Boolean(form.id)}
+            replaceKey={form.id ? `images/posts/tracks/${String(form.id)}/cover` : ''}
             accept="image/*"
             placeholder="https://... or /..."
+            help="Optional. In edit mode, upload replaces this track's cover image."
           />
+          <p className="meta">If upload fails: verify bucket MIME/file-size settings and `UPLOAD_MAX_BYTES` on the server.</p>
         </AdminAccordionSection>
 
         <AdminAccordionSection title="Release and Visibility" note="Sort, date and home player toggle." defaultOpen={false}>
@@ -301,7 +308,8 @@ export default function AdminTracksManager({ initialTracks = [] }) {
                         }
 
                         await reloadTracks();
-                        setStatus(`Deleted "${track.title}".`);
+                        const warnings = Array.isArray(body?.storage_cleanup?.warnings) ? body.storage_cleanup.warnings : [];
+                        setStatus(warnings.length ? `Deleted "${track.title}" with warning: ${warnings[0]}` : `Deleted "${track.title}".`);
                         router.refresh();
                       }}
                     >

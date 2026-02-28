@@ -154,8 +154,24 @@ export async function POST(request) {
     const message = String(upload.error.message || 'Upload failed.');
     const hint = /mime|content[- ]?type/i.test(message)
       ? ' Check Supabase bucket MIME restrictions (include audio/mpeg for .mp3).'
-      : '';
-    return NextResponse.json({ error: `${message}${hint}` }, { status: 500 });
+      : /size|too large|payload/i.test(message)
+        ? ` File exceeds allowed size. Current server max is ${(maxBytes / (1024 * 1024)).toFixed(0)}MB.`
+        : /bucket|not found/i.test(message)
+          ? ' Verify SUPABASE_STORAGE_BUCKET exists and is public.'
+          : '';
+    return NextResponse.json(
+      {
+        error: `${message}${hint}`,
+        details: {
+          bucket,
+          folder,
+          key,
+          max_bytes: maxBytes,
+          replace_mode: replaceRequested,
+        },
+      },
+      { status: 500 }
+    );
   }
 
   const { data: publicData } = supabase.storage.from(bucket).getPublicUrl(key);
