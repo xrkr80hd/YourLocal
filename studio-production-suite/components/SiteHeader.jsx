@@ -51,12 +51,19 @@ const publicNavItems = [
   { href: '/contact', label: 'Contact', className: 'nav-cool' },
 ];
 
-const adminNavItems = [
-  { href: '/admin', label: 'Dashboard', className: 'nav-admin-link' },
-  { href: '/admin/bands', label: 'Band Editor', className: 'nav-admin-link' },
-  { href: '/upload', label: 'Upload', className: 'nav-admin-link' },
-  { href: '/admin/users', label: 'Admin Users', className: 'nav-admin-link' },
-];
+function getAdminNavItems(ownerMode) {
+  const items = [
+    { href: '/admin', label: 'Dashboard', className: 'nav-admin-link' },
+    { href: '/admin/bands', label: 'Band Editor', className: 'nav-admin-link' },
+    { href: '/upload', label: 'Upload', className: 'nav-admin-link' },
+  ];
+
+  if (ownerMode) {
+    items.push({ href: '/admin/users', label: 'Admin Users', className: 'nav-admin-link' });
+  }
+
+  return items;
+}
 
 function isActive(pathname, href) {
   if (href === '/') {
@@ -66,10 +73,10 @@ function isActive(pathname, href) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export default function SiteHeader({ adminMode = false, adminUser = '' }) {
+export default function SiteHeader({ adminMode = false, ownerMode = false, adminUser = '' }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const navItems = adminMode ? [...adminNavItems, ...publicNavItems] : publicNavItems;
+  const navItems = adminMode ? [...getAdminNavItems(ownerMode), ...publicNavItems] : publicNavItems;
 
   return (
     <header className={`nav ${adminMode ? 'admin-mode' : ''}`.trim()}>

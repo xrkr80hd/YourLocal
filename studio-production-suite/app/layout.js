@@ -2,7 +2,7 @@ import { Space_Grotesk, Syne } from 'next/font/google';
 import { cookies } from 'next/headers';
 import BackgroundRotator from '../components/BackgroundRotator';
 import SiteHeader from '../components/SiteHeader';
-import { ADMIN_SESSION_COOKIE, ADMIN_SESSION_USER_COOKIE, isAdminSessionValid } from '../lib/admin-auth';
+import { ADMIN_SESSION_COOKIE, ADMIN_SESSION_USER_COOKIE, isAdminSessionValid, isOwnerUsername } from '../lib/admin-auth';
 import './globals.css';
 
 const space = Space_Grotesk({
@@ -39,12 +39,13 @@ export default function RootLayout({ children }) {
   const sessionValue = cookieStore.get(ADMIN_SESSION_COOKIE)?.value || '';
   const sessionUser = cookieStore.get(ADMIN_SESSION_USER_COOKIE)?.value || '';
   const adminMode = isAdminSessionValid(sessionValue);
+  const ownerMode = adminMode && isOwnerUsername(sessionUser);
 
   return (
     <html lang="en">
       <body className={`${space.variable} ${syne.variable} page-standard`}>
         <BackgroundRotator />
-        <SiteHeader adminMode={adminMode} adminUser={adminMode ? sessionUser : ''} />
+        <SiteHeader adminMode={adminMode} ownerMode={ownerMode} adminUser={adminMode ? sessionUser : ''} />
         <main>
           <div className="container">{children}</div>
         </main>

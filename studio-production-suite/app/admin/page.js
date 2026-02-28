@@ -26,9 +26,11 @@ export default function AdminPage() {
           <Link className="button" href="/admin/bands">
             Manage Band Socials
           </Link>
-          <Link className="button" href="/admin/users">
-            Manage Admin Users
-          </Link>
+          {ownerMode ? (
+            <Link className="button" href="/admin/users">
+              Manage Admin Users
+            </Link>
+          ) : null}
           <Link className="button primary" href="/upload">
             Upload Media
           </Link>
