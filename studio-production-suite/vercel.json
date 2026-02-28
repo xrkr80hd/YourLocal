@@ -1,16 +1,3 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "api/index.php", "use": "vercel-php@0.6.2" },
-    { "src": "public/**", "use": "@vercel/static" }
-  ],
-  "routes": [
-    { "src": "/(build|storage|uploads)/(.*)", "dest": "/public/$1/$2" },
-    { "src": "/(favicon\\.ico|robots\\.txt|sitemap\\.xml)", "dest": "/public/$1" },
-    {
-      "src": "/(.*\\.(?:css|js|map|png|jpg|jpeg|gif|svg|ico|webp|avif|mp3|mp4|webm|woff|woff2|ttf|eot|json|txt|xml))",
-      "dest": "/public/$1"
-    },
-    { "src": "/(.*)", "dest": "/api/index.php" }
-  ]
+  "framework": "nextjs"
 }
