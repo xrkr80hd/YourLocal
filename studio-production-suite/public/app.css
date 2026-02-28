@@ -37,6 +37,10 @@ body {
   line-height: 1.5;
 }
 
+body.no-scroll {
+  overflow: hidden;
+}
+
 a { color: inherit; }
 
 h1, h2, h3, h4 {
@@ -687,6 +691,19 @@ label {
   object-fit: cover;
 }
 
+.band-photo-trigger {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.band-photo-trigger img {
+  display: block;
+}
+
 .band-main-copy h1 {
   margin: 0 0 0.6rem;
 }
@@ -723,6 +740,71 @@ label {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.member-avatar-trigger {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 50%;
+  cursor: zoom-in;
+}
+
+.member-avatar-trigger img {
+  display: block;
+}
+
+.band-lightbox {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 120;
+  padding: 1rem;
+  background: rgba(3, 7, 12, 0.88);
+  backdrop-filter: blur(5px);
+}
+
+.band-lightbox.open {
+  display: flex;
+}
+
+.band-lightbox-dialog {
+  width: min(1300px, 100%);
+  max-height: 95vh;
+  position: relative;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: rgba(8, 12, 22, 0.97);
+  padding: 0.75rem;
+  box-shadow: 0 28px 60px rgba(2, 7, 16, 0.78);
+}
+
+.band-lightbox-close {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  border: 1px solid var(--line);
+  background: rgba(6, 12, 20, 0.9);
+  color: #eff6ff;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  font-size: 1.45rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.band-lightbox-image {
+  width: 100%;
+  max-height: calc(95vh - 1.6rem);
+  object-fit: contain;
+  border-radius: 10px;
+  border: 1px solid rgba(127, 216, 255, 0.24);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .member-name {

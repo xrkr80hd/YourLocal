@@ -7,9 +7,12 @@ services:
     ports:
       - "8000:8000"
     working_dir: /var/www/html
+    environment:
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /var/www/html/storage/sqlite/database.sqlite
     volumes:
       - uploads_data:/var/www/html/public/uploads
-      - sqlite_data:/var/www/html/database
+      - sqlite_data:/var/www/html/storage/sqlite
     restart: unless-stopped
 
 volumes:

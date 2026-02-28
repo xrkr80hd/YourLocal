@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\SupabaseStorageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -10,6 +11,10 @@ use Throwable;
 
 class AdminUploadController extends Controller
 {
+    public function __construct(
+        private readonly SupabaseStorageService $supabaseStorage,
+    ) {}
+
     public function __invoke(Request $request): JsonResponse
     {
         $request->validate([
@@ -35,6 +40,26 @@ class AdminUploadController extends Controller
             return response()->json([
                 'message' => 'File type not allowed for this field. Allowed: ' . implode(', ', $allowed),
             ], 422);
+        }
+
+        if ($this->supabaseStorage->isEnabled()) {
+            if (! $this->supabaseStorage->isConfigured()) {
+                return response()->json([
+                    'message' => $this->supabaseStorage->configurationError(),
+                ], 500);
+            }
+
+            try {
+                return response()->json([
+                    'url' => $this->supabaseStorage->upload($file, $kind, $extension),
+                ]);
+            } catch (Throwable $e) {
+                report($e);
+
+                return response()->json([
+                    'message' => 'Upload failed while sending file to Supabase Storage.',
+                ], 500);
+            }
         }
 
         $directory = match ($kind) {
