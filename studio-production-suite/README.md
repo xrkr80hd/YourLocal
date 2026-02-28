@@ -40,6 +40,7 @@ Optional:
 - `NEXT_PUBLIC_SUPABASE_URL` (falls back to `SUPABASE_URL`)
 - `SUPABASE_STORAGE_BUCKET` (default: `uploads`)
 - `SUPABASE_ALLOWED_FOLDERS` (comma-separated overrides for folder prefixes)
+- `UPLOAD_MAX_BYTES` (default: `209715200` = 200MB)
 - `ADMIN_SESSION_TOKEN` (required to protect admin routes)
 - `ADMIN_LOGIN_CREDENTIALS` (comma-separated `username:password` pairs)
 - `ADMIN_OWNER_USERNAME` (owner account for admin-user management page; default `xrkradmin`)
@@ -68,6 +69,7 @@ These are protected by middleware when admin auth env vars are configured:
 - `/admin`
 - `/admin/bands`
 - `/admin/bands/[slug]/socials`
+- `/admin/blog`
 - `/admin/podcasts`
 - `/admin/password`
 - `/admin/home` (owner-only)
@@ -105,6 +107,7 @@ create index if not exists admin_users_enabled_idx on public.admin_users (is_ena
 - `/local-legends-archive`
 - `/bands/[slug]`
 - `/podcast`
+- `/podcast/[slug]`
 - `/music`
 - `/projects`
 - `/blog`

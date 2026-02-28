@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import AdminAccordionSection from './AdminAccordionSection';
 
 function SqlBlock({ sql }) {
   if (!sql) {
@@ -107,211 +108,212 @@ export default function AdminUsersManager({ initialUsers, missingTable, initialE
   return (
     <>
       <section className="card section-space">
-        <h2 className="section-title">Create Admin User</h2>
-        <p className="meta">Owner account: {ownerUsername}</p>
-        <form
-          onSubmit={async (event) => {
-            event.preventDefault();
-            setSaving(true);
-            setStatus('Creating admin user...');
+        <AdminAccordionSection title="Create Admin User" note={`Owner account: ${ownerUsername}`} defaultOpen>
+          <form
+            onSubmit={async (event) => {
+              event.preventDefault();
+              setSaving(true);
+              setStatus('Creating admin user...');
 
-            const response = await fetch('/api/admin/users', {
-              method: 'POST',
-              headers: { 'content-type': 'application/json' },
-              body: JSON.stringify({ username, displayName, password }),
-            });
+              const response = await fetch('/api/admin/users', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ username, displayName, password }),
+              });
 
-            const payload = await response.json().catch(() => ({}));
+              const payload = await response.json().catch(() => ({}));
 
-            if (!response.ok) {
-              setStatus(payload.error || 'Create failed.');
+              if (!response.ok) {
+                setStatus(payload.error || 'Create failed.');
+                setSaving(false);
+                return;
+              }
+
+              setUsername('');
+              setDisplayName('');
+              setPassword('');
+              setStatus('Admin user created.');
               setSaving(false);
-              return;
-            }
-
-            setUsername('');
-            setDisplayName('');
-            setPassword('');
-            setStatus('Admin user created.');
-            setSaving(false);
-            await refreshUsers();
-          }}
-        >
-          <div className="grid cols-3">
-            <div className="form-row">
-              <label htmlFor="admin-user-username">Username</label>
-              <input
-                id="admin-user-username"
-                type="text"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                placeholder="mattadmin"
-                required
-              />
+              await refreshUsers();
+            }}
+          >
+            <div className="grid cols-3">
+              <div className="form-row">
+                <label htmlFor="admin-user-username">Username</label>
+                <input
+                  id="admin-user-username"
+                  type="text"
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                  placeholder="mattadmin"
+                  required
+                />
+              </div>
+              <div className="form-row">
+                <label htmlFor="admin-user-display">Display Name (optional)</label>
+                <input
+                  id="admin-user-display"
+                  type="text"
+                  value={displayName}
+                  onChange={(event) => setDisplayName(event.target.value)}
+                  placeholder="Matt"
+                />
+              </div>
+              <div className="form-row">
+                <label htmlFor="admin-user-password">Password</label>
+                <input
+                  id="admin-user-password"
+                  type={showCreatePassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="At least 10 chars"
+                  required
+                />
+                <button
+                  className="button"
+                  type="button"
+                  style={{ marginTop: '0.45rem' }}
+                  onClick={() => setShowCreatePassword((value) => !value)}
+                >
+                  {showCreatePassword ? 'Hide Password' : 'Show Password'}
+                </button>
+              </div>
             </div>
-            <div className="form-row">
-              <label htmlFor="admin-user-display">Display Name (optional)</label>
-              <input
-                id="admin-user-display"
-                type="text"
-                value={displayName}
-                onChange={(event) => setDisplayName(event.target.value)}
-                placeholder="Matt"
-              />
-            </div>
-            <div className="form-row">
-              <label htmlFor="admin-user-password">Password</label>
-              <input
-                id="admin-user-password"
-                type={showCreatePassword ? 'text' : 'password'}
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="At least 10 chars"
-                required
-              />
-              <button
-                className="button"
-                type="button"
-                style={{ marginTop: '0.45rem' }}
-                onClick={() => setShowCreatePassword((value) => !value)}
-              >
-                {showCreatePassword ? 'Hide Password' : 'Show Password'}
+            <div className="actions">
+              <button className="button primary" type="submit" disabled={saving || missingTable}>
+                {saving ? 'Creating...' : 'Create Admin'}
               </button>
             </div>
-          </div>
-          <div className="actions">
-            <button className="button primary" type="submit" disabled={saving || missingTable}>
-              {saving ? 'Creating...' : 'Create Admin'}
-            </button>
-          </div>
-        </form>
-        {status ? <p className="meta" style={{ marginTop: '0.7rem' }}>{status}</p> : null}
+          </form>
+          {status ? <p className="meta" style={{ marginTop: '0.7rem' }}>{status}</p> : null}
+        </AdminAccordionSection>
       </section>
 
       <section className="card section-space">
-        <h2 className="section-title">Existing Admin Users</h2>
-        {users.length ? (
-          <div className="grid cols-2">
-            {users.map((user) => (
-              <article key={user.username} className="card">
-                <h3 className="section-title" style={{ marginBottom: '0.2rem' }}>{user.username}</h3>
-                <p className="meta">{user.display_name || 'No display name'}</p>
-                <div className="form-row" style={{ marginTop: '0.6rem' }}>
-                  <label htmlFor={`reset-password-${user.username}`}>Reset Password (if they forgot)</label>
-                  <input
-                    id={`reset-password-${user.username}`}
-                    type={isResetPasswordVisible(user.username) ? 'text' : 'password'}
-                    value={getResetPasswordValue(user.username)}
-                    onChange={(event) => setResetPasswordValue(user.username, event.target.value)}
-                    placeholder="Set temporary password (min 10 chars)"
-                  />
-                  <button
-                    className="button"
-                    type="button"
-                    style={{ marginTop: '0.45rem' }}
-                    onClick={() => setShowResetPasswordValue(user.username, !isResetPasswordVisible(user.username))}
-                  >
-                    {isResetPasswordVisible(user.username) ? 'Hide Password' : 'Show Password'}
-                  </button>
-                </div>
-                <div className="actions">
-                  <button
-                    className="button"
-                    type="button"
-                    onClick={async () => {
-                      const text = buildAdminLoginMessage(user.username);
-                      const copied = await copyToClipboard(text);
-                      setDeliveryMessageValue(user.username, text);
-                      setStatus(copied ? `Copied login link for ${user.username}.` : `Clipboard blocked. Use manual copy box for ${user.username}.`);
-                    }}
-                  >
-                    Copy Login Link
-                  </button>
-                  <button
-                    className="button"
-                    type="button"
-                    onClick={async () => {
-                      let nextPassword = getResetPasswordValue(user.username);
-
-                      if (nextPassword.length < 10) {
-                        nextPassword = generateTemporaryPassword();
-                        setResetPasswordValue(user.username, nextPassword);
-                      }
-
-                      const response = await fetch(`/api/admin/users/${encodeURIComponent(user.username)}`, {
-                        method: 'PATCH',
-                        headers: { 'content-type': 'application/json' },
-                        body: JSON.stringify({ password: nextPassword }),
-                      });
-                      const payload = await response.json().catch(() => ({}));
-
-                      if (!response.ok) {
-                        setStatus(payload.error || 'Password reset failed.');
-                        return;
-                      }
-
-                      const text = buildAdminLoginMessage(user.username, nextPassword);
-                      const copied = await copyToClipboard(text);
-                      setDeliveryMessageValue(user.username, text);
-                      setShowResetPasswordValue(user.username, true);
-                      setStatus(
-                        copied
-                          ? `Password reset for ${user.username}. New login details copied.`
-                          : `Password reset for ${user.username}. Clipboard blocked; use manual copy box.`
-                      );
-                    }}
-                  >
-                    Reset Password + Copy
-                  </button>
-                  <button
-                    className="button danger"
-                    type="button"
-                    onClick={async () => {
-                      const response = await fetch(`/api/admin/users/${encodeURIComponent(user.username)}`, { method: 'DELETE' });
-                      const payload = await response.json().catch(() => ({}));
-
-                      if (!response.ok) {
-                        setStatus(payload.error || 'Delete failed.');
-                        return;
-                      }
-
-                      setStatus(`Deleted ${user.username}.`);
-                      await refreshUsers();
-                    }}
-                  >
-                    Delete
-                  </button>
-                </div>
-                {getDeliveryMessageValue(user.username) ? (
-                  <div className="form-row" style={{ marginTop: '0.7rem' }}>
-                    <label htmlFor={`delivery-${user.username}`}>Manual Copy Box</label>
-                    <textarea
-                      id={`delivery-${user.username}`}
-                      readOnly
-                      rows={5}
-                      value={getDeliveryMessageValue(user.username)}
-                      onFocus={(event) => event.target.select()}
+        <AdminAccordionSection title={`Existing Admin Users (${users.length})`} note="Manage passwords and remove users." defaultOpen={false}>
+          {users.length ? (
+            <div className="grid cols-2">
+              {users.map((user) => (
+                <article key={user.username} className="card">
+                  <h3 className="section-title" style={{ marginBottom: '0.2rem' }}>{user.username}</h3>
+                  <p className="meta">{user.display_name || 'No display name'}</p>
+                  <div className="form-row" style={{ marginTop: '0.6rem' }}>
+                    <label htmlFor={`reset-password-${user.username}`}>Reset Password (if they forgot)</label>
+                    <input
+                      id={`reset-password-${user.username}`}
+                      type={isResetPasswordVisible(user.username) ? 'text' : 'password'}
+                      value={getResetPasswordValue(user.username)}
+                      onChange={(event) => setResetPasswordValue(user.username, event.target.value)}
+                      placeholder="Set temporary password (min 10 chars)"
                     />
-                    <div className="actions" style={{ marginTop: '0.45rem' }}>
-                      <button
-                        className="button"
-                        type="button"
-                        onClick={async () => {
-                          const copied = await copyToClipboard(getDeliveryMessageValue(user.username));
-                          setStatus(copied ? `Copied message for ${user.username}.` : 'Select text in box and copy manually.');
-                        }}
-                      >
-                        Copy From Box
-                      </button>
-                    </div>
+                    <button
+                      className="button"
+                      type="button"
+                      style={{ marginTop: '0.45rem' }}
+                      onClick={() => setShowResetPasswordValue(user.username, !isResetPasswordVisible(user.username))}
+                    >
+                      {isResetPasswordVisible(user.username) ? 'Hide Password' : 'Show Password'}
+                    </button>
                   </div>
-                ) : null}
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p className="meta">No DB-managed admins yet.</p>
-        )}
+                  <div className="actions">
+                    <button
+                      className="button"
+                      type="button"
+                      onClick={async () => {
+                        const text = buildAdminLoginMessage(user.username);
+                        const copied = await copyToClipboard(text);
+                        setDeliveryMessageValue(user.username, text);
+                        setStatus(copied ? `Copied login link for ${user.username}.` : `Clipboard blocked. Use manual copy box for ${user.username}.`);
+                      }}
+                    >
+                      Copy Login Link
+                    </button>
+                    <button
+                      className="button"
+                      type="button"
+                      onClick={async () => {
+                        let nextPassword = getResetPasswordValue(user.username);
+
+                        if (nextPassword.length < 10) {
+                          nextPassword = generateTemporaryPassword();
+                          setResetPasswordValue(user.username, nextPassword);
+                        }
+
+                        const response = await fetch(`/api/admin/users/${encodeURIComponent(user.username)}`, {
+                          method: 'PATCH',
+                          headers: { 'content-type': 'application/json' },
+                          body: JSON.stringify({ password: nextPassword }),
+                        });
+                        const payload = await response.json().catch(() => ({}));
+
+                        if (!response.ok) {
+                          setStatus(payload.error || 'Password reset failed.');
+                          return;
+                        }
+
+                        const text = buildAdminLoginMessage(user.username, nextPassword);
+                        const copied = await copyToClipboard(text);
+                        setDeliveryMessageValue(user.username, text);
+                        setShowResetPasswordValue(user.username, true);
+                        setStatus(
+                          copied
+                            ? `Password reset for ${user.username}. New login details copied.`
+                            : `Password reset for ${user.username}. Clipboard blocked; use manual copy box.`
+                        );
+                      }}
+                    >
+                      Reset Password + Copy
+                    </button>
+                    <button
+                      className="button danger"
+                      type="button"
+                      onClick={async () => {
+                        const response = await fetch(`/api/admin/users/${encodeURIComponent(user.username)}`, { method: 'DELETE' });
+                        const payload = await response.json().catch(() => ({}));
+
+                        if (!response.ok) {
+                          setStatus(payload.error || 'Delete failed.');
+                          return;
+                        }
+
+                        setStatus(`Deleted ${user.username}.`);
+                        await refreshUsers();
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  {getDeliveryMessageValue(user.username) ? (
+                    <div className="form-row" style={{ marginTop: '0.7rem' }}>
+                      <label htmlFor={`delivery-${user.username}`}>Manual Copy Box</label>
+                      <textarea
+                        id={`delivery-${user.username}`}
+                        readOnly
+                        rows={5}
+                        value={getDeliveryMessageValue(user.username)}
+                        onFocus={(event) => event.target.select()}
+                      />
+                      <div className="actions" style={{ marginTop: '0.45rem' }}>
+                        <button
+                          className="button"
+                          type="button"
+                          onClick={async () => {
+                            const copied = await copyToClipboard(getDeliveryMessageValue(user.username));
+                            setStatus(copied ? `Copied message for ${user.username}.` : 'Select text in box and copy manually.');
+                          }}
+                        >
+                          Copy From Box
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="meta">No DB-managed admins yet.</p>
+          )}
+        </AdminAccordionSection>
       </section>
 
       {missingTable ? (

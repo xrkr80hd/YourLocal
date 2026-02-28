@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MediaUrlInput from './MediaUrlInput';
+import AdminAccordionSection from './AdminAccordionSection';
 
 function emptyTrack() {
   return {
@@ -137,171 +138,183 @@ export default function AdminTracksManager({ initialTracks = [] }) {
         <h2 className="section-title">{form.id ? 'Edit Track' : 'Add Track'}</h2>
         <p className="meta">Owner-only tracks panel. Set order and choose what appears in the home player.</p>
 
-        <div className="grid cols-3">
-          <div className="form-row">
-            <label htmlFor="track-title">Title</label>
-            <input
-              id="track-title"
-              type="text"
-              value={form.title}
-              onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
-              required
-            />
+        <AdminAccordionSection title="Track Basics" note="Name, artist, genre and description." defaultOpen>
+          <div className="grid cols-3">
+            <div className="form-row">
+              <label htmlFor="track-title">Title</label>
+              <input
+                id="track-title"
+                type="text"
+                value={form.title}
+                onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
+                required
+              />
+            </div>
+            <div className="form-row">
+              <label htmlFor="track-artist">Artist Name</label>
+              <input
+                id="track-artist"
+                type="text"
+                value={form.artist_name}
+                onChange={(event) => setForm((current) => ({ ...current, artist_name: event.target.value }))}
+              />
+            </div>
+            <div className="form-row">
+              <label htmlFor="track-genre">Genre</label>
+              <input
+                id="track-genre"
+                type="text"
+                value={form.genre}
+                onChange={(event) => setForm((current) => ({ ...current, genre: event.target.value }))}
+                placeholder="metalcore"
+              />
+            </div>
           </div>
-          <div className="form-row">
-            <label htmlFor="track-artist">Artist Name</label>
-            <input
-              id="track-artist"
-              type="text"
-              value={form.artist_name}
-              onChange={(event) => setForm((current) => ({ ...current, artist_name: event.target.value }))}
-            />
-          </div>
-          <div className="form-row">
-            <label htmlFor="track-genre">Genre</label>
-            <input
-              id="track-genre"
-              type="text"
-              value={form.genre}
-              onChange={(event) => setForm((current) => ({ ...current, genre: event.target.value }))}
-              placeholder="metalcore"
-            />
-          </div>
-        </div>
 
-        <div className="form-row">
-          <label htmlFor="track-description">Description</label>
-          <textarea
-            id="track-description"
-            value={form.description}
-            onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+          <div className="form-row">
+            <label htmlFor="track-description">Description</label>
+            <textarea
+              id="track-description"
+              value={form.description}
+              onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+            />
+          </div>
+        </AdminAccordionSection>
+
+        <AdminAccordionSection title="Track Media" note="Upload audio and cover art." defaultOpen>
+          <MediaUrlInput
+            id="track-audio-url"
+            label="Audio URL"
+            value={form.audio_url}
+            onChange={(value) => setForm((current) => ({ ...current, audio_url: value }))}
+            folder="audio/tracks"
+            accept="audio/*"
+            placeholder="https://... or /..."
           />
-        </div>
 
-        <MediaUrlInput
-          id="track-audio-url"
-          label="Audio URL"
-          value={form.audio_url}
-          onChange={(value) => setForm((current) => ({ ...current, audio_url: value }))}
-          folder="audio/tracks"
-          accept="audio/*"
-          placeholder="https://... or /..."
-        />
+          <MediaUrlInput
+            id="track-cover-image-url"
+            label="Cover Image URL"
+            value={form.cover_image_url}
+            onChange={(value) => setForm((current) => ({ ...current, cover_image_url: value }))}
+            folder="images/posts"
+            accept="image/*"
+            placeholder="https://... or /..."
+          />
+        </AdminAccordionSection>
 
-        <MediaUrlInput
-          id="track-cover-image-url"
-          label="Cover Image URL"
-          value={form.cover_image_url}
-          onChange={(value) => setForm((current) => ({ ...current, cover_image_url: value }))}
-          folder="images/posts"
-          accept="image/*"
-          placeholder="https://... or /..."
-        />
-
-        <div className="grid cols-3">
-          <div className="form-row">
-            <label htmlFor="track-external-url">External Link (optional)</label>
-            <input
-              id="track-external-url"
-              type="text"
-              value={form.external_url}
-              onChange={(event) => setForm((current) => ({ ...current, external_url: event.target.value }))}
-              placeholder="https://spotify.com/..."
-            />
+        <AdminAccordionSection title="Release and Visibility" note="Sort, date and home player toggle." defaultOpen={false}>
+          <div className="grid cols-3">
+            <div className="form-row">
+              <label htmlFor="track-external-url">External Link (optional)</label>
+              <input
+                id="track-external-url"
+                type="text"
+                value={form.external_url}
+                onChange={(event) => setForm((current) => ({ ...current, external_url: event.target.value }))}
+                placeholder="https://spotify.com/..."
+              />
+            </div>
+            <div className="form-row">
+              <label htmlFor="track-release-date">Release Date</label>
+              <input
+                id="track-release-date"
+                type="date"
+                value={form.release_date}
+                onChange={(event) => setForm((current) => ({ ...current, release_date: event.target.value }))}
+              />
+            </div>
+            <div className="form-row">
+              <label htmlFor="track-sort-order">Sort Order</label>
+              <input
+                id="track-sort-order"
+                type="number"
+                min="0"
+                value={form.sort_order}
+                onChange={(event) => setForm((current) => ({ ...current, sort_order: event.target.value }))}
+              />
+            </div>
           </div>
-          <div className="form-row">
-            <label htmlFor="track-release-date">Release Date</label>
-            <input
-              id="track-release-date"
-              type="date"
-              value={form.release_date}
-              onChange={(event) => setForm((current) => ({ ...current, release_date: event.target.value }))}
-            />
-          </div>
-          <div className="form-row">
-            <label htmlFor="track-sort-order">Sort Order</label>
-            <input
-              id="track-sort-order"
-              type="number"
-              min="0"
-              value={form.sort_order}
-              onChange={(event) => setForm((current) => ({ ...current, sort_order: event.target.value }))}
-            />
-          </div>
-        </div>
 
-        <div className="actions">
-          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
-            <input
-              type="checkbox"
-              checked={form.is_featured}
-              onChange={(event) => setForm((current) => ({ ...current, is_featured: event.target.checked }))}
-            />
-            <span className="meta">Show on home player</span>
-          </label>
-        </div>
+          <div className="actions">
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+              <input
+                type="checkbox"
+                checked={form.is_featured}
+                onChange={(event) => setForm((current) => ({ ...current, is_featured: event.target.checked }))}
+              />
+              <span className="meta">Show on home player</span>
+            </label>
+          </div>
+        </AdminAccordionSection>
 
-        <div className="actions">
-          <button className="button primary" type="submit" disabled={saving}>
-            {saving ? 'Saving...' : form.id ? 'Update Track' : 'Create Track'}
-          </button>
-          {form.id ? (
-            <button className="button" type="button" onClick={resetForm}>
-              Cancel Edit
+        <AdminAccordionSection title="Save Track" note="Create/update or cancel current edit." defaultOpen>
+          <div className="actions">
+            <button className="button primary" type="submit" disabled={saving}>
+              {saving ? 'Saving...' : form.id ? 'Update Track' : 'Create Track'}
             </button>
-          ) : null}
-        </div>
-        {status ? <p className="meta">{status}</p> : null}
+            {form.id ? (
+              <button className="button" type="button" onClick={resetForm}>
+                Cancel Edit
+              </button>
+            ) : null}
+          </div>
+          {status ? <p className="meta">{status}</p> : null}
+        </AdminAccordionSection>
       </form>
 
       <section className="card section-space">
-        <h3 className="section-title">Tracks</h3>
-        <p className="meta">Ordered by `sort_order`, then release date. Home player uses tracks with `Show on home player` enabled.</p>
-        {sortedTracks.length ? (
-          <div className="grid">
-            {sortedTracks.map((track) => (
-              <article key={track.id} className="card">
-                <h4>{track.title}</h4>
-                <p className="meta">
-                  {track.artist_name || 'xrkr80hd'} | {track.genre || 'other'} | {formatReleaseDate(track.release_date)} | sort {track.sort_order}
-                </p>
-                <p className="meta">Home player: {track.is_featured ? 'on' : 'off'}</p>
-                {track.audio_url ? <audio controls src={track.audio_url} style={{ width: '100%' }} /> : null}
-                <div className="actions">
-                  <button className="button primary" type="button" onClick={() => startEdit(track)}>
-                    Edit
-                  </button>
-                  <button
-                    className="button danger"
-                    type="button"
-                    onClick={async () => {
-                      const confirmed = window.confirm(`Delete track "${track.title}"?`);
-                      if (!confirmed) {
-                        return;
-                      }
+        <AdminAccordionSection
+          title={`Track Library (${sortedTracks.length})`}
+          note="Ordered by sort order, then release date."
+          defaultOpen={false}
+        >
+          {sortedTracks.length ? (
+            <div className="grid">
+              {sortedTracks.map((track) => (
+                <article key={track.id} className="card">
+                  <h4>{track.title}</h4>
+                  <p className="meta">
+                    {track.artist_name || 'xrkr80hd'} | {track.genre || 'other'} | {formatReleaseDate(track.release_date)} | sort {track.sort_order}
+                  </p>
+                  <p className="meta">Home player: {track.is_featured ? 'on' : 'off'}</p>
+                  {track.audio_url ? <audio controls src={track.audio_url} style={{ width: '100%' }} /> : null}
+                  <div className="actions">
+                    <button className="button primary" type="button" onClick={() => startEdit(track)}>
+                      Edit
+                    </button>
+                    <button
+                      className="button danger"
+                      type="button"
+                      onClick={async () => {
+                        const confirmed = window.confirm(`Delete track "${track.title}"?`);
+                        if (!confirmed) {
+                          return;
+                        }
 
-                      setStatus(`Deleting "${track.title}"...`);
-                      const response = await fetch(`/api/admin/tracks/${encodeURIComponent(track.id)}`, { method: 'DELETE' });
-                      const body = await response.json().catch(() => ({}));
-                      if (!response.ok) {
-                        setStatus(body.error || 'Delete failed.');
-                        return;
-                      }
+                        setStatus(`Deleting "${track.title}"...`);
+                        const response = await fetch(`/api/admin/tracks/${encodeURIComponent(track.id)}`, { method: 'DELETE' });
+                        const body = await response.json().catch(() => ({}));
+                        if (!response.ok) {
+                          setStatus(body.error || 'Delete failed.');
+                          return;
+                        }
 
-                      await reloadTracks();
-                      setStatus(`Deleted "${track.title}".`);
-                      router.refresh();
-                    }}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p className="meta">No tracks yet.</p>
-        )}
+                        await reloadTracks();
+                        setStatus(`Deleted "${track.title}".`);
+                        router.refresh();
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="meta">No tracks yet.</p>
+          )}
+        </AdminAccordionSection>
       </section>
     </>
   );

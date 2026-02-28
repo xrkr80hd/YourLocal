@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MediaUrlInput from './MediaUrlInput';
+import AdminAccordionSection from './AdminAccordionSection';
 
 function slugify(value) {
   return String(value || '')
@@ -53,6 +54,8 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
     const merged = Array.from(new Set(genreOptions.map((value) => String(value || '').trim()).filter(Boolean)));
     return merged.sort((a, b) => a.localeCompare(b));
   }, [genreOptions]);
+  const workingSlug = slugify(slug || name) || slugify(initialBand?.slug || '') || 'band';
+  const stableSlug = isEdit ? slugify(initialBand?.slug || '') || workingSlug : workingSlug;
 
   const setMemberValue = (index, key, value) => {
     setMembers((current) => current.map((member, idx) => (idx === index ? { ...member, [key]: value } : member)));
@@ -115,112 +118,123 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
       <h2 className="section-title">{isEdit ? 'Edit Band' : 'Create Band'}</h2>
       <p className="meta">Create the band and members in one save. This only appears in admin backend.</p>
 
-      <div className="grid cols-3">
-        <div className="form-row">
-          <label htmlFor="band-name">Band Name</label>
-          <input
-            id="band-name"
-            type="text"
-            value={name}
-            onChange={(event) => {
-              const nextName = event.target.value;
-              setName(nextName);
-              if (!slugTouched) {
-                setSlug(slugify(nextName));
-              }
-            }}
-            required
-          />
+      <AdminAccordionSection title="Band Basics" note="Name, slug, page, genre and ordering." defaultOpen>
+        <div className="grid cols-3">
+          <div className="form-row">
+            <label htmlFor="band-name">Band Name</label>
+            <input
+              id="band-name"
+              type="text"
+              value={name}
+              onChange={(event) => {
+                const nextName = event.target.value;
+                setName(nextName);
+                if (!slugTouched) {
+                  setSlug(slugify(nextName));
+                }
+              }}
+              required
+            />
+          </div>
+          <div className="form-row">
+            <label htmlFor="band-slug">Slug</label>
+            <input
+              id="band-slug"
+              type="text"
+              value={slug}
+              onChange={(event) => {
+                setSlugTouched(true);
+                setSlug(slugify(event.target.value));
+              }}
+              required
+            />
+          </div>
+          <div className="form-row">
+            <label htmlFor="band-era">Page</label>
+            <select id="band-era" value={era} onChange={(event) => setEra(event.target.value)}>
+              <option value="archive">YourLocal Legends (Archive)</option>
+              <option value="scene">YourLocal Scene (Current)</option>
+            </select>
+          </div>
         </div>
-        <div className="form-row">
-          <label htmlFor="band-slug">Slug</label>
-          <input
-            id="band-slug"
-            type="text"
-            value={slug}
-            onChange={(event) => {
-              setSlugTouched(true);
-              setSlug(slugify(event.target.value));
-            }}
-            required
-          />
+
+        <div className="grid cols-3">
+          <div className="form-row">
+            <label htmlFor="band-years-active">Years Active</label>
+            <input id="band-years-active" type="text" value={yearsActive} onChange={(event) => setYearsActive(event.target.value)} placeholder="2008 - 2013" />
+          </div>
+          <div className="form-row">
+            <label htmlFor="band-genre">Genre (create new by typing)</label>
+            <input id="band-genre" list="band-genre-options" type="text" value={genre} onChange={(event) => setGenre(event.target.value)} placeholder="metalcore" />
+            <datalist id="band-genre-options">
+              {genreDataList.map((item) => (
+                <option key={item} value={item} />
+              ))}
+            </datalist>
+          </div>
+          <div className="form-row">
+            <label htmlFor="band-sort-order">Sort Order</label>
+            <input id="band-sort-order" type="number" min="0" value={sortOrder} onChange={(event) => setSortOrder(event.target.value)} />
+          </div>
         </div>
+      </AdminAccordionSection>
+
+      <AdminAccordionSection title="Band Story" note="Tagline, summary and details." defaultOpen={false}>
         <div className="form-row">
-          <label htmlFor="band-era">Page</label>
-          <select id="band-era" value={era} onChange={(event) => setEra(event.target.value)}>
-            <option value="archive">YourLocal Legends (Archive)</option>
-            <option value="scene">YourLocal Scene (Current)</option>
-          </select>
+          <label htmlFor="band-tagline">Tagline</label>
+          <input id="band-tagline" type="text" value={tagline} onChange={(event) => setTagline(event.target.value)} />
         </div>
-      </div>
 
-      <div className="grid cols-3">
         <div className="form-row">
-          <label htmlFor="band-years-active">Years Active</label>
-          <input id="band-years-active" type="text" value={yearsActive} onChange={(event) => setYearsActive(event.target.value)} placeholder="2008 - 2013" />
+          <label htmlFor="band-summary">Summary</label>
+          <textarea id="band-summary" value={summary} onChange={(event) => setSummary(event.target.value)} required />
         </div>
+
         <div className="form-row">
-          <label htmlFor="band-genre">Genre (create new by typing)</label>
-          <input id="band-genre" list="band-genre-options" type="text" value={genre} onChange={(event) => setGenre(event.target.value)} placeholder="metalcore" />
-          <datalist id="band-genre-options">
-            {genreDataList.map((item) => (
-              <option key={item} value={item} />
-            ))}
-          </datalist>
+          <label htmlFor="band-story">Story</label>
+          <textarea id="band-story" value={story} onChange={(event) => setStory(event.target.value)} />
         </div>
-        <div className="form-row">
-          <label htmlFor="band-sort-order">Sort Order</label>
-          <input id="band-sort-order" type="number" min="0" value={sortOrder} onChange={(event) => setSortOrder(event.target.value)} />
-        </div>
-      </div>
+      </AdminAccordionSection>
 
-      <div className="form-row">
-        <label htmlFor="band-tagline">Tagline</label>
-        <input id="band-tagline" type="text" value={tagline} onChange={(event) => setTagline(event.target.value)} />
-      </div>
+      <AdminAccordionSection title="Band Images" note="Card, banner, and profile photo." defaultOpen={false}>
+        <MediaUrlInput
+          id="band-image-url"
+          label="Card Image URL"
+          value={imageUrl}
+          onChange={setImageUrl}
+          folder="images/bands"
+          replaceMode={isEdit}
+          replaceKey={isEdit ? `images/bands/${stableSlug}/card` : ''}
+          accept="image/*"
+          placeholder="https://... or /..."
+        />
 
-      <div className="form-row">
-        <label htmlFor="band-summary">Summary</label>
-        <textarea id="band-summary" value={summary} onChange={(event) => setSummary(event.target.value)} required />
-      </div>
+        <MediaUrlInput
+          id="band-banner-image-url"
+          label="Banner Image URL"
+          value={bannerImageUrl}
+          onChange={setBannerImageUrl}
+          folder="images/bands"
+          replaceMode={isEdit}
+          replaceKey={isEdit ? `images/bands/${stableSlug}/banner` : ''}
+          accept="image/*"
+          placeholder="https://... or /..."
+        />
 
-      <div className="form-row">
-        <label htmlFor="band-story">Story</label>
-        <textarea id="band-story" value={story} onChange={(event) => setStory(event.target.value)} />
-      </div>
+        <MediaUrlInput
+          id="band-photo-url"
+          label="Band Photo URL"
+          value={bandPhotoUrl}
+          onChange={setBandPhotoUrl}
+          folder="images/bands"
+          replaceMode={isEdit}
+          replaceKey={isEdit ? `images/bands/${stableSlug}/profile` : ''}
+          accept="image/*"
+          placeholder="https://... or /..."
+        />
+      </AdminAccordionSection>
 
-      <MediaUrlInput
-        id="band-image-url"
-        label="Card Image URL"
-        value={imageUrl}
-        onChange={setImageUrl}
-        folder="images/bands"
-        accept="image/*"
-        placeholder="https://... or /..."
-      />
-
-      <MediaUrlInput
-        id="band-banner-image-url"
-        label="Banner Image URL"
-        value={bannerImageUrl}
-        onChange={setBannerImageUrl}
-        folder="images/bands"
-        accept="image/*"
-        placeholder="https://... or /..."
-      />
-
-      <MediaUrlInput
-        id="band-photo-url"
-        label="Band Photo URL"
-        value={bandPhotoUrl}
-        onChange={setBandPhotoUrl}
-        folder="images/bands"
-        accept="image/*"
-        placeholder="https://... or /..."
-      />
-
-      <section className="section-space">
-        <h3 className="section-title">{isSoloArtist ? 'Artist Team' : 'Band Members'}</h3>
+      <AdminAccordionSection title={isSoloArtist ? 'Artist Team' : 'Band Members'} note="Create and manage members." defaultOpen={false}>
         <div className="grid">
           {members.map((member, index) => (
             <article key={`member-${index}`} className="card">
@@ -277,49 +291,51 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
             Add Member
           </button>
         </div>
-      </section>
+      </AdminAccordionSection>
 
-      <div className="actions">
-        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
-          <input type="checkbox" checked={isSoloArtist} onChange={(event) => setIsSoloArtist(event.target.checked)} />
-          <span className="meta">Solo Artist</span>
-        </label>
-        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
-          <input type="checkbox" checked={isPublished} onChange={(event) => setIsPublished(event.target.checked)} />
-          <span className="meta">Published</span>
-        </label>
-      </div>
+      <AdminAccordionSection title="Publish and Save" note="Visibility and final actions." defaultOpen>
+        <div className="actions">
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+            <input type="checkbox" checked={isSoloArtist} onChange={(event) => setIsSoloArtist(event.target.checked)} />
+            <span className="meta">Solo Artist</span>
+          </label>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+            <input type="checkbox" checked={isPublished} onChange={(event) => setIsPublished(event.target.checked)} />
+            <span className="meta">Published</span>
+          </label>
+        </div>
 
-      <div className="actions">
-        <button className="button primary" type="submit" disabled={saving}>
-          {saving ? 'Saving...' : isEdit ? 'Update Band' : 'Create Band'}
-        </button>
-        {isEdit ? (
-          <button
-            className="button danger"
-            type="button"
-            onClick={async () => {
-              const confirmed = window.confirm('Delete this band? This cannot be undone.');
-              if (!confirmed) {
-                return;
-              }
-
-              const response = await fetch(`/api/admin/bands/${encodeURIComponent(initialBand.slug)}`, { method: 'DELETE' });
-              const body = await response.json().catch(() => ({}));
-              if (!response.ok) {
-                setStatus(body.error || 'Delete failed.');
-                return;
-              }
-
-              router.push('/admin/bands');
-              router.refresh();
-            }}
-          >
-            Delete Band
+        <div className="actions">
+          <button className="button primary" type="submit" disabled={saving}>
+            {saving ? 'Saving...' : isEdit ? 'Update Band' : 'Create Band'}
           </button>
-        ) : null}
-      </div>
-      {status ? <p className="meta">{status}</p> : null}
+          {isEdit ? (
+            <button
+              className="button danger"
+              type="button"
+              onClick={async () => {
+                const confirmed = window.confirm('Delete this band? This cannot be undone.');
+                if (!confirmed) {
+                  return;
+                }
+
+                const response = await fetch(`/api/admin/bands/${encodeURIComponent(initialBand.slug)}`, { method: 'DELETE' });
+                const body = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                  setStatus(body.error || 'Delete failed.');
+                  return;
+                }
+
+                router.push('/admin/bands');
+                router.refresh();
+              }}
+            >
+              Delete Band
+            </button>
+          ) : null}
+        </div>
+        {status ? <p className="meta">{status}</p> : null}
+      </AdminAccordionSection>
     </form>
   );
 }

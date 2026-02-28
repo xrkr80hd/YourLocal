@@ -55,6 +55,14 @@ const guideCardDefaults = [
     image: '/assets/cards/local-podcast-card.png',
   },
   {
+    key: 'business',
+    title: 'YourLocal Business',
+    body: 'Local businesses we support across print, sound, repair, food, and media.',
+    href: '/your-local-business',
+    cta: 'Open Business',
+    image: '/assets/cards/contact-card.png',
+  },
+  {
     key: 'contact',
     title: 'Contact',
     body: 'Want your band, solo project, or podcast featured? Send your links and profile details here.',
@@ -67,6 +75,9 @@ const guideCardDefaults = [
 export default async function HomePage() {
   const [profile, homeTracks] = await Promise.all([getSiteProfile(), getHomeTracks(12)]);
   const guideCards = guideCardDefaults.map((card) => {
+    if (card.key === 'hub' && profile?.home_hub_card_image_url) {
+      return { ...card, image: profile.home_hub_card_image_url };
+    }
     if (card.key === 'legends' && profile?.home_legends_card_image_url) {
       return { ...card, image: profile.home_legends_card_image_url };
     }
@@ -75,6 +86,9 @@ export default async function HomePage() {
     }
     if (card.key === 'podcast' && profile?.home_podcast_card_image_url) {
       return { ...card, image: profile.home_podcast_card_image_url };
+    }
+    if (card.key === 'contact' && profile?.home_contact_card_image_url) {
+      return { ...card, image: profile.home_contact_card_image_url };
     }
     return card;
   });
@@ -104,7 +118,7 @@ export default async function HomePage() {
 
       <section className="section-space home-radio home-unboxed">
         <div className="home-player-head">
-          <h3 className="section-title">Local Radio</h3>
+          <h3 className="section-title">XRKR Radio</h3>
           <span className="meta">Bands, artists, and XRKR80HD tracks</span>
         </div>
         <HomeTracksPlayer tracks={homeTracks} />

@@ -214,45 +214,143 @@ export async function getBandBySlugForAdmin(slug) {
   };
 }
 
-export async function getPodcastEpisodes() {
-  return runQuery(
-    'podcasts',
-    (supabase) =>
-      supabase
-        .from('podcast_episodes')
-        .select('*')
-        .eq('is_published', true)
-        .order('published_at', { ascending: false, nullsFirst: false })
-        .order('created_at', { ascending: false }),
-    []
-  );
+async function fetchPodcasts({ publishedOnly = false } = {}) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return [];
+  }
+
+  const run = (includeSortOrder) => {
+    let query = supabase.from('podcasts').select('*');
+    if (publishedOnly) {
+      query = query.eq('is_published', true);
+    }
+    if (includeSortOrder) {
+      query = query.order('sort_order', { ascending: true });
+    }
+    return query.order('title', { ascending: true });
+  };
+
+  try {
+    const ordered = await run(true);
+    if (!ordered.error) {
+      return ordered.data || [];
+    }
+
+    const message = String(ordered.error.message || '');
+    if (!message.includes('sort_order')) {
+      if (!message.includes('Could not find the table')) {
+        console.error('[content:podcasts]', message);
+      }
+      return [];
+    }
+
+    const fallback = await run(false);
+    if (fallback.error) {
+      console.error('[content:podcasts_fallback]', fallback.error.message);
+      return [];
+    }
+
+    return (fallback.data || []).map((item) => ({ ...item, sort_order: 0 }));
+  } catch (error) {
+    console.error('[content:podcasts_error]', error);
+    return [];
+  }
 }
 
-export async function getPodcastEpisodesForAdmin() {
-  return runQuery(
-    'podcasts_admin',
-    (supabase) =>
-      supabase
-        .from('podcast_episodes')
-        .select('*')
-        .order('published_at', { ascending: false, nullsFirst: false })
-        .order('created_at', { ascending: false }),
-    []
-  );
+async function fetchPodcastEpisodesByPodcastId(podcastId, { publishedOnly = false, limit = null } = {}) {
+  const safeId = Number.parseInt(String(podcastId || ''), 10);
+  if (!Number.isFinite(safeId) || safeId <= 0) {
+    return [];
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return [];
+  }
+
+  const run = (includeSortOrder) => {
+    let query = supabase.from('podcast_episodes').select('*').eq('podcast_id', safeId);
+    if (publishedOnly) {
+      query = query.eq('is_published', true);
+    }
+    if (includeSortOrder) {
+      query = query.order('sort_order', { ascending: true });
+    }
+    query = query.order('published_at', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false });
+    return Number.isInteger(limit) ? query.limit(limit) : query;
+  };
+
+  try {
+    const ordered = await run(true);
+    if (!ordered.error) {
+      return ordered.data || [];
+    }
+
+    const message = String(ordered.error.message || '');
+    if (!message.includes('sort_order')) {
+      if (!message.includes('Could not find the table')) {
+        console.error('[content:podcast_episodes]', message);
+      }
+      return [];
+    }
+
+    const fallback = await run(false);
+    if (fallback.error) {
+      console.error('[content:podcast_episodes_fallback]', fallback.error.message);
+      return [];
+    }
+
+    return (fallback.data || []).map((item) => ({ ...item, sort_order: 0 }));
+  } catch (error) {
+    console.error('[content:podcast_episodes_error]', error);
+    return [];
+  }
 }
 
-export async function getPodcastEpisodeBySlugForAdmin(slug) {
+export async function getPublishedPodcasts() {
+  return fetchPodcasts({ publishedOnly: true });
+}
+
+export async function getPodcastsForAdmin() {
+  return fetchPodcasts({ publishedOnly: false });
+}
+
+export async function getPodcastBySlugForAdmin(slug) {
   return runQuery(
-    `podcast_admin_${slug}`,
+    `podcast_show_admin_${slug}`,
     (supabase) =>
       supabase
-        .from('podcast_episodes')
+        .from('podcasts')
         .select('*')
         .eq('slug', slug)
         .limit(1)
         .maybeSingle(),
     null
   );
+}
+
+export async function getPublishedPodcastBySlug(slug) {
+  return runQuery(
+    `podcast_show_public_${slug}`,
+    (supabase) =>
+      supabase
+        .from('podcasts')
+        .select('*')
+        .eq('slug', slug)
+        .eq('is_published', true)
+        .limit(1)
+        .maybeSingle(),
+    null
+  );
+}
+
+export async function getPodcastEpisodesForPodcast(podcastId, limit = null) {
+  return fetchPodcastEpisodesByPodcastId(podcastId, { publishedOnly: true, limit });
+}
+
+export async function getPodcastEpisodesForPodcastAdmin(podcastId) {
+  return fetchPodcastEpisodesByPodcastId(podcastId, { publishedOnly: false, limit: null });
 }
 
 export async function getProjects() {
@@ -285,6 +383,33 @@ export async function getPostBySlug(slug) {
         .select('*')
         .eq('slug', slug)
         .eq('is_published', true)
+        .limit(1)
+        .maybeSingle(),
+    null
+  );
+}
+
+export async function getPostsForAdmin() {
+  return runQuery(
+    'blog_posts_admin',
+    (supabase) =>
+      supabase
+        .from('blog_posts')
+        .select('*')
+        .order('published_at', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false }),
+    []
+  );
+}
+
+export async function getPostBySlugForAdmin(slug) {
+  return runQuery(
+    `blog_post_admin_${slug}`,
+    (supabase) =>
+      supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('slug', slug)
         .limit(1)
         .maybeSingle(),
     null

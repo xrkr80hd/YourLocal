@@ -1,9 +1,18 @@
 import Link from 'next/link';
 import { formatDate } from '../../lib/format';
-import { getPodcastEpisodes } from '../../lib/content';
+import { getPodcastEpisodesForPodcast, getPublishedPodcasts } from '../../lib/content';
 
 export default async function PodcastPage() {
-  const episodes = await getPodcastEpisodes();
+  const podcasts = await getPublishedPodcasts();
+  const cards = await Promise.all(
+    podcasts.map(async (podcast) => {
+      const latest = await getPodcastEpisodesForPodcast(podcast.id, 1);
+      return {
+        podcast,
+        latest: latest[0] || null,
+      };
+    })
+  );
 
   return (
     <>
@@ -12,7 +21,7 @@ export default async function PodcastPage() {
         <h1>
           <span className="hero-accent">YourLocal</span> Podcasts
         </h1>
-        <p>Local stories, artist interviews, and scene conversations in one archive-friendly feed.</p>
+        <p>Local podcast profiles. Open each page to hear the latest drops and learn who they are.</p>
         <div className="actions">
           <Link className="button" href="/local-legends-archive">
             YourLocal Legends
@@ -28,29 +37,34 @@ export default async function PodcastPage() {
 
       <section className="section-space">
         <div className="band-grid">
-          {episodes.length ? (
-            episodes.map((episode) => (
-              <article key={episode.id} className="band-card podcast-card">
+          {cards.length ? (
+            cards.map(({ podcast, latest }) => (
+              <article key={podcast.id} className="band-card podcast-card">
                 <div className="band-card-image">
-                  {episode.cover_image_url ? (
-                    <img src={episode.cover_image_url} alt={`${episode.title} cover`} />
+                  {podcast.cover_image_url ? (
+                    <img src={podcast.cover_image_url} alt={`${podcast.title} cover`} />
                   ) : (
                     <span className="image-placeholder">[ Podcast Cover ]</span>
                   )}
                 </div>
                 <div className="band-card-content">
-                  {episode.published_at ? <div className="band-card-year">{formatDate(episode.published_at)}</div> : null}
-                  <h3 className="band-card-name">{episode.title}</h3>
-                  <span className="band-card-genre">Podcast Episode</span>
-                  {episode.summary ? <p className="band-card-desc">{episode.summary}</p> : null}
-                  {!episode.summary && episode.description ? <p className="band-card-desc">{episode.description}</p> : null}
-                  {episode.audio_url ? <audio controls preload="none" src={episode.audio_url} /> : null}
+                  {latest?.published_at ? <div className="band-card-year">Latest: {formatDate(latest.published_at)}</div> : null}
+                  <h3 className="band-card-name">{podcast.title}</h3>
+                  <span className="band-card-genre">{podcast.topic || 'Local Podcast'}</span>
+                  {podcast.hosts ? <p className="band-card-desc">Hosts: {podcast.hosts}</p> : null}
+                  {podcast.summary ? <p className="band-card-desc">{podcast.summary}</p> : null}
+                  {latest?.title ? <p className="band-card-desc">Current Episode: {latest.title}</p> : null}
+                  <div className="actions">
+                    <Link className="button primary" href={`/podcast/${podcast.slug}`}>
+                      Open Podcast Page
+                    </Link>
+                  </div>
                 </div>
               </article>
             ))
           ) : (
             <article className="card">
-              <p className="meta">No podcast episodes yet.</p>
+              <p className="meta">No podcasts yet.</p>
             </article>
           )}
         </div>

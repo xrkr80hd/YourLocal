@@ -12,6 +12,17 @@ export default function AdminPage() {
   const links = getSupabaseAdminLinks();
   const actingUser = cookies().get(ADMIN_SESSION_USER_COOKIE)?.value || '';
   const ownerMode = isOwnerUsername(actingUser);
+  const ownerActions = [
+    { href: '/admin/home', label: 'Homepage Controls', detail: 'Landing profile and Site Guide card photos.' },
+    { href: '/admin/tracks', label: 'Tracks Manager', detail: 'Upload audio, sort tracks, choose home player list.' },
+    { href: '/admin/users', label: 'Manage Admin Users', detail: 'Create/remove lower-tier admins.' },
+  ];
+  const commonActions = [
+    { href: '/admin/blog', label: 'Blog Manager', detail: 'Write and publish blog posts.' },
+    { href: '/admin/bands', label: 'Band Manager', detail: 'Create/edit bands, photos, members, socials.' },
+    { href: '/admin/podcasts', label: 'Podcast Manager', detail: 'Create podcast profiles and manage episodes.' },
+    { href: '/admin/password', label: 'My Password', detail: 'Update your own login password.' },
+  ];
 
   return (
     <>
@@ -21,42 +32,47 @@ export default function AdminPage() {
       </section>
 
       <section className="card section-space">
-        <h3 className="section-title">Site Admin Actions</h3>
-        <div className="actions">
-          <Link className="button" href="/admin/bands">
-            Band Manager
-          </Link>
-          <Link className="button" href="/admin/podcasts">
-            Podcast Manager
-          </Link>
-          <Link className="button" href="/admin/password">
-            My Password
-          </Link>
-          {ownerMode ? (
-            <Link className="button" href="/admin/home">
-              Homepage Controls
+        <h3 className="section-title">Edit Panels</h3>
+        <div className="admin-action-grid">
+          {commonActions.map((item) => (
+            <Link key={item.href} className="admin-action-tile" href={item.href}>
+              <strong>{item.label}</strong>
+              <span>{item.detail}</span>
             </Link>
-          ) : null}
-          {ownerMode ? (
-            <Link className="button" href="/admin/tracks">
-              Tracks Manager
-            </Link>
-          ) : null}
-          {ownerMode ? (
-            <Link className="button" href="/admin/users">
-              Manage Admin Users
-            </Link>
-          ) : null}
-          <a className="button" href={links.tableEditor} target="_blank" rel="noreferrer">
-            Supabase Table Editor
+          ))}
+          {ownerMode
+            ? ownerActions.map((item) => (
+                <Link key={item.href} className="admin-action-tile owner" href={item.href}>
+                  <strong>{item.label}</strong>
+                  <span>{item.detail}</span>
+                </Link>
+              ))
+            : null}
+        </div>
+
+        <h3 className="section-title" style={{ marginTop: '1rem' }}>
+          Supabase Tools
+        </h3>
+        <div className="admin-action-grid compact">
+          <a className="admin-action-tile" href={links.tableEditor} target="_blank" rel="noreferrer">
+            <strong>Table Editor</strong>
+            <span>Open DB rows/columns.</span>
           </a>
-          <a className="button" href={links.storage} target="_blank" rel="noreferrer">
-            Supabase Storage
+          <a className="admin-action-tile" href={links.storage} target="_blank" rel="noreferrer">
+            <strong>Storage</strong>
+            <span>Open files and buckets.</span>
           </a>
-          <a className="button" href={links.project} target="_blank" rel="noreferrer">
-            Supabase Project
+          <a className="admin-action-tile" href={links.project} target="_blank" rel="noreferrer">
+            <strong>Project</strong>
+            <span>Open Supabase project settings.</span>
           </a>
-          <AdminLogoutButton />
+          <div className="admin-action-tile danger">
+            <strong>Session</strong>
+            <span>Sign out of admin mode.</span>
+            <div className="actions" style={{ marginTop: '0.55rem' }}>
+              <AdminLogoutButton />
+            </div>
+          </div>
         </div>
         <p className="meta" style={{ marginTop: '0.8rem' }}>
           Note: the old Laravel `/admin/*` controllers were replaced during the Next.js migration. This is the active admin entry for the current app.

@@ -1,26 +1,37 @@
 import { NextResponse } from 'next/server';
-import { slugify, clampText, toBoolean, toInteger, isValidMediaUrl } from '../../../../lib/admin-crud-utils';
+import { slugify, clampText, toBoolean, isValidMediaUrl } from '../../../../lib/admin-crud-utils';
 import { getSupabaseAdmin } from '../../../../lib/supabase-admin';
 
 export const runtime = 'nodejs';
 
-function podcastsTableHelp() {
-  return 'Run the SQL patch in SUPABASE_ADMIN_SCHEMA_PATCH.md to create public.podcasts.';
+function formatDateTimeForDb(value) {
+  const raw = String(value || '').trim();
+  if (!raw) {
+    return null;
+  }
+
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date.toISOString();
 }
 
-function buildPodcastPayload(raw) {
+function buildPostPayload(raw) {
   const title = clampText(raw?.title, 255);
   const slugInput = clampText(raw?.slug, 255);
-  const hosts = clampText(raw?.hosts, 255);
-  const topic = clampText(raw?.topic, 120);
-  const summary = clampText(raw?.summary, 320);
-  const description = String(raw?.description || '').trim();
+  const excerpt = clampText(raw?.excerpt, 300);
+  const content = String(raw?.content || '').trim();
   const coverImageUrl = String(raw?.cover_image_url || '').trim();
-  const isPublished = raw?.is_published === undefined ? true : toBoolean(raw?.is_published);
-  const sortOrder = toInteger(raw?.sort_order, 0, 0, 9999);
+  const publishedAt = formatDateTimeForDb(raw?.published_at);
+  const isPublished = toBoolean(raw?.is_published);
 
   if (!title) {
-    return { ok: false, error: 'Podcast name is required.' };
+    return { ok: false, error: 'Post title is required.' };
+  }
+  if (!content) {
+    return { ok: false, error: 'Post content is required.' };
   }
   if (!isValidMediaUrl(coverImageUrl)) {
     return { ok: false, error: 'Cover image URL must start with https:// or /' };
@@ -36,13 +47,11 @@ function buildPodcastPayload(raw) {
     slug: generatedSlug,
     payload: {
       title,
-      hosts: hosts || null,
-      topic: topic || null,
-      summary: summary || null,
-      description: description || null,
+      excerpt: excerpt || null,
+      content,
       cover_image_url: coverImageUrl || null,
+      published_at: isPublished ? publishedAt || new Date().toISOString() : null,
       is_published: isPublished,
-      sort_order: sortOrder,
     },
   };
 }
@@ -52,7 +61,7 @@ async function ensureUniqueSlug(supabase, baseSlug) {
   let candidate = baseSlug;
 
   while (counter < 200) {
-    const existing = await supabase.from('podcasts').select('id').eq('slug', candidate).limit(1).maybeSingle();
+    const existing = await supabase.from('blog_posts').select('id').eq('slug', candidate).limit(1).maybeSingle();
     if (existing.error) {
       return { ok: false, error: existing.error.message };
     }
@@ -74,18 +83,13 @@ export async function GET() {
   }
 
   const response = await supabase
-    .from('podcasts')
+    .from('blog_posts')
     .select('*')
-    .order('topic', { ascending: true })
-    .order('sort_order', { ascending: true })
-    .order('title', { ascending: true });
+    .order('published_at', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false });
 
   if (response.error) {
-    const message = String(response.error.message || '');
-    if (message.includes('public.podcasts')) {
-      return NextResponse.json({ error: `${message} ${podcastsTableHelp()}` }, { status: 500 });
-    }
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: response.error.message }, { status: 500 });
   }
 
   return NextResponse.json({ items: response.data || [] });
@@ -98,7 +102,7 @@ export async function POST(request) {
   }
 
   const body = await request.json().catch(() => ({}));
-  const parsed = buildPodcastPayload(body);
+  const parsed = buildPostPayload(body);
   if (!parsed.ok) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
@@ -109,7 +113,7 @@ export async function POST(request) {
   }
 
   const insert = await supabase
-    .from('podcasts')
+    .from('blog_posts')
     .insert({
       ...parsed.payload,
       slug: slugResult.slug,
@@ -119,11 +123,7 @@ export async function POST(request) {
     .maybeSingle();
 
   if (insert.error) {
-    const message = String(insert.error.message || '');
-    if (message.includes('public.podcasts')) {
-      return NextResponse.json({ error: `${message} ${podcastsTableHelp()}` }, { status: 500 });
-    }
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: insert.error.message }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, item: insert.data });

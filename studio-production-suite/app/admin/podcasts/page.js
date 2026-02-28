@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getPodcastEpisodesForAdmin } from '../../../lib/content';
+import { getPodcastsForAdmin } from '../../../lib/content';
 
 export const metadata = {
   title: 'Admin Podcasts | xrkr80hd Studio',
@@ -20,17 +20,17 @@ function groupByTopic(items) {
 }
 
 export default async function AdminPodcastsPage() {
-  const episodes = await getPodcastEpisodesForAdmin();
-  const groups = groupByTopic(episodes);
+  const podcasts = await getPodcastsForAdmin();
+  const groups = groupByTopic(podcasts);
 
   return (
     <>
       <section className="card hero">
         <h1>Podcast Manager</h1>
-        <p>Manage episodes by topic. Any admin can create new topics by typing them.</p>
+        <p>Manage local podcast profiles by topic. Open each profile to CRUD its episodes.</p>
         <div className="actions">
           <Link className="button primary" href="/admin/podcasts/new">
-            New Episode
+            New Podcast
           </Link>
           <Link className="button" href="/admin/bands">
             Band Manager
@@ -44,18 +44,18 @@ export default async function AdminPodcastsPage() {
             <article key={topic} className="card section-space">
               <h2 className="section-title">{topic}</h2>
               <div className="band-grid">
-                {items.map((episode) => (
-                  <article key={episode.id} className="band-card">
+                {items.map((podcast) => (
+                  <article key={podcast.id} className="band-card">
                     <div className="band-card-content">
-                      <div className="band-card-year">{episode.published_at || 'Draft'}</div>
-                      <h3 className="band-card-name">{episode.title}</h3>
-                      <span className="band-card-genre">{episode.topic || 'uncategorized'}</span>
-                      <p className="band-card-desc">{episode.summary || episode.description || 'No summary yet.'}</p>
+                      <div className="band-card-year">{podcast.is_published ? 'Published' : 'Draft'}</div>
+                      <h3 className="band-card-name">{podcast.title}</h3>
+                      <span className="band-card-genre">{podcast.topic || 'uncategorized'}</span>
+                      <p className="band-card-desc">{podcast.summary || podcast.description || 'No summary yet.'}</p>
                       <div className="actions">
-                        <Link className="button primary" href={`/admin/podcasts/${episode.slug}/edit`}>
-                          Edit Episode
+                        <Link className="button primary" href={`/admin/podcasts/${podcast.slug}/edit`}>
+                          Edit Podcast
                         </Link>
-                        <Link className="button" href="/podcast">
+                        <Link className="button" href={`/podcast/${podcast.slug}`}>
                           View Podcast Page
                         </Link>
                       </div>
@@ -67,7 +67,7 @@ export default async function AdminPodcastsPage() {
           ))
         ) : (
           <article className="card">
-            <p className="meta">No podcast episodes yet.</p>
+            <p className="meta">No podcasts yet.</p>
           </article>
         )}
       </section>

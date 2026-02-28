@@ -16,6 +16,10 @@ function groupByGenre(items) {
     map.get(key).push(item);
   }
 
+  for (const [, group] of map) {
+    group.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+  }
+
   return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
 }
 

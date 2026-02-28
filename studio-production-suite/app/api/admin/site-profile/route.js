@@ -22,8 +22,17 @@ function buildPayload(raw) {
   const legendsCardImageUrl = String(raw?.home_legends_card_image_url || '').trim();
   const sceneCardImageUrl = String(raw?.home_scene_card_image_url || '').trim();
   const podcastCardImageUrl = String(raw?.home_podcast_card_image_url || '').trim();
+  const hubCardImageUrl = String(raw?.home_hub_card_image_url || '').trim();
+  const contactCardImageUrl = String(raw?.home_contact_card_image_url || '').trim();
 
-  if (!isValidMediaUrl(avatarUrl) || !isValidMediaUrl(legendsCardImageUrl) || !isValidMediaUrl(sceneCardImageUrl) || !isValidMediaUrl(podcastCardImageUrl)) {
+  if (
+    !isValidMediaUrl(avatarUrl) ||
+    !isValidMediaUrl(legendsCardImageUrl) ||
+    !isValidMediaUrl(sceneCardImageUrl) ||
+    !isValidMediaUrl(podcastCardImageUrl) ||
+    !isValidMediaUrl(hubCardImageUrl) ||
+    !isValidMediaUrl(contactCardImageUrl)
+  ) {
     return { ok: false, error: 'Image URLs must start with https:// or /' };
   }
 
@@ -37,6 +46,8 @@ function buildPayload(raw) {
       home_legends_card_image_url: legendsCardImageUrl || null,
       home_scene_card_image_url: sceneCardImageUrl || null,
       home_podcast_card_image_url: podcastCardImageUrl || null,
+      home_hub_card_image_url: hubCardImageUrl || null,
+      home_contact_card_image_url: contactCardImageUrl || null,
     },
   };
 }
@@ -58,7 +69,13 @@ export async function GET(request) {
   const result = await getFirstProfileRow(supabase);
   if (result.error) {
     const message = String(result.error.message || '');
-    if (message.includes('home_legends_card_image_url') || message.includes('home_scene_card_image_url') || message.includes('home_podcast_card_image_url')) {
+    if (
+      message.includes('home_legends_card_image_url') ||
+      message.includes('home_scene_card_image_url') ||
+      message.includes('home_podcast_card_image_url') ||
+      message.includes('home_hub_card_image_url') ||
+      message.includes('home_contact_card_image_url')
+    ) {
       return NextResponse.json({ error: `${message} ${missingColumnsHelp()}` }, { status: 500 });
     }
     return NextResponse.json({ error: message }, { status: 500 });
@@ -96,7 +113,13 @@ export async function PUT(request) {
   const saved = await mutation;
   if (saved.error) {
     const message = String(saved.error.message || '');
-    if (message.includes('home_legends_card_image_url') || message.includes('home_scene_card_image_url') || message.includes('home_podcast_card_image_url')) {
+    if (
+      message.includes('home_legends_card_image_url') ||
+      message.includes('home_scene_card_image_url') ||
+      message.includes('home_podcast_card_image_url') ||
+      message.includes('home_hub_card_image_url') ||
+      message.includes('home_contact_card_image_url')
+    ) {
       return NextResponse.json({ error: `${message} ${missingColumnsHelp()}` }, { status: 500 });
     }
     return NextResponse.json({ error: message }, { status: 500 });

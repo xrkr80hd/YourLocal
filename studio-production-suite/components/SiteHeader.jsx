@@ -48,15 +48,27 @@ const publicNavItems = [
       </span>
     ),
   },
+  {
+    href: '/your-local-business',
+    label: (
+      <span className="split-label">
+        <span className="split-cool">YourLocal</span>
+        <span className="split-space"> </span>
+        <span className="split-white">Business</span>
+      </span>
+    ),
+  },
   { href: '/contact', label: 'Contact', className: 'nav-cool' },
 ];
 
 function getAdminNavItems(ownerMode) {
   const items = [
     { href: '/admin', label: 'Dashboard', className: 'nav-admin-link' },
+    { href: '/admin/blog', label: 'Blog Manager', className: 'nav-admin-link' },
     { href: '/admin/bands', label: 'Band Editor', className: 'nav-admin-link' },
     { href: '/admin/podcasts', label: 'Podcast Editor', className: 'nav-admin-link' },
     { href: '/admin/password', label: 'My Password', className: 'nav-admin-link' },
+    { href: '/', label: 'View Site', className: 'nav-admin-link nav-admin-secondary' },
   ];
 
   if (ownerMode) {
@@ -79,7 +91,7 @@ function isActive(pathname, href) {
 export default function SiteHeader({ adminMode = false, ownerMode = false, adminUser = '' }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const navItems = adminMode ? [...getAdminNavItems(ownerMode), ...publicNavItems] : publicNavItems;
+  const navItems = adminMode ? getAdminNavItems(ownerMode) : publicNavItems;
 
   return (
     <header className={`nav ${adminMode ? 'admin-mode' : ''}`.trim()}>
@@ -99,7 +111,6 @@ export default function SiteHeader({ adminMode = false, ownerMode = false, admin
           <span />
           <span />
         </button>
-        {adminMode ? <span className="admin-badge">{adminUser ? `Admin: ${adminUser}` : 'Admin Mode'}</span> : null}
         <nav className={`nav-links ${open ? 'open' : ''}`} id="site-nav">
           {navItems.map((item) => (
             <Link
@@ -111,6 +122,7 @@ export default function SiteHeader({ adminMode = false, ownerMode = false, admin
               {item.label}
             </Link>
           ))}
+          {adminMode && adminUser ? <span className="nav-admin-user">Signed in: {adminUser}</span> : null}
         </nav>
       </div>
     </header>

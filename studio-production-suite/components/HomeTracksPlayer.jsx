@@ -13,24 +13,28 @@ export default function HomeTracksPlayer({ tracks }) {
   const current = items[index] || items[0];
 
   return (
-    <>
-      <p>
-        <strong id="home-current-track">{current.title}</strong>{' '}
-        <span className="meta">{current.artist_name}</span>
-      </p>
-      <audio key={current.audio_url || current.id} id="home-main-player" className="home-mini-player" controls src={current.audio_url} />
-      <div className="home-track-list" id="home-track-list">
-        {items.map((track, trackIndex) => (
-          <button
-            key={`${track.id || track.title}-${trackIndex}`}
-            type="button"
-            className={`home-track-pill ${trackIndex === index ? 'active' : ''}`}
-            onClick={() => setIndex(trackIndex)}
-          >
-            {track.title} <span className="meta">{track.artist_name}</span>
-          </button>
-        ))}
+    <div className="xrkr-radio-shell">
+      <div className="xrkr-radio-skin">
+        <img className="xrkr-radio-skin-image" src="/assets/player/xrkr-radio-skin-desktop.png" alt="XRKR Radio player skin" />
+        <div className="xrkr-radio-display">
+          <p className="xrkr-radio-now">
+            <strong id="home-current-track">{current.title}</strong>
+          </p>
+          <audio key={current.audio_url || current.id} id="home-main-player" className="xrkr-radio-controls" controls src={current.audio_url} />
+        </div>
       </div>
-    </>
+      <div className="xrkr-radio-picker">
+        <label htmlFor="home-track-select" className="meta">
+          Choose track
+        </label>
+        <select id="home-track-select" value={String(index)} onChange={(event) => setIndex(Number(event.target.value) || 0)}>
+          {items.map((track, trackIndex) => (
+            <option key={`${track.id || track.title}-${trackIndex}`} value={String(trackIndex)}>
+              {track.title}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
   );
 }

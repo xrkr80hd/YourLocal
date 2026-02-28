@@ -1,27 +1,30 @@
 import { notFound } from 'next/navigation';
+import AdminPodcastEpisodesManager from '../../../../../components/AdminPodcastEpisodesManager';
 import AdminPodcastCrudForm from '../../../../../components/AdminPodcastCrudForm';
-import { getPodcastEpisodeBySlugForAdmin, getPodcastEpisodesForAdmin } from '../../../../../lib/content';
+import { getPodcastBySlugForAdmin, getPodcastEpisodesForPodcastAdmin, getPodcastsForAdmin } from '../../../../../lib/content';
 
 export const metadata = {
-  title: 'Edit Podcast Episode | Admin',
+  title: 'Edit Podcast | Admin',
 };
 
 export default async function AdminEditPodcastPage({ params }) {
-  const episode = await getPodcastEpisodeBySlugForAdmin(params.slug);
-  if (!episode) {
+  const podcast = await getPodcastBySlugForAdmin(params.slug);
+  if (!podcast) {
     notFound();
   }
 
-  const episodes = await getPodcastEpisodesForAdmin();
-  const topicOptions = Array.from(new Set(episodes.map((item) => String(item.topic || '').trim()).filter(Boolean)));
+  const podcasts = await getPodcastsForAdmin();
+  const topicOptions = Array.from(new Set(podcasts.map((item) => String(item.topic || '').trim()).filter(Boolean)));
+  const episodes = await getPodcastEpisodesForPodcastAdmin(podcast.id);
 
   return (
     <>
       <section className="card hero">
-        <h1>Edit Podcast Episode</h1>
-        <p>Update media, topic, and publish settings from backend admin.</p>
+        <h1>Edit Local Podcast</h1>
+        <p>Update podcast details, then CRUD episodes for this podcast profile.</p>
       </section>
-      <AdminPodcastCrudForm mode="edit" initialEpisode={episode} topicOptions={topicOptions} />
+      <AdminPodcastCrudForm mode="edit" initialPodcast={podcast} topicOptions={topicOptions} />
+      <AdminPodcastEpisodesManager podcastSlug={podcast.slug} initialEpisodes={episodes} />
     </>
   );
 }

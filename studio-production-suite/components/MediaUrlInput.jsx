@@ -8,6 +8,8 @@ export default function MediaUrlInput({
   value,
   onChange,
   folder,
+  replaceMode = false,
+  replaceKey = '',
   accept = '*/*',
   placeholder = '',
   help = '',
@@ -41,6 +43,15 @@ export default function MediaUrlInput({
             const form = new FormData();
             form.set('file', file);
             form.set('folder', folder);
+            if (replaceMode) {
+              form.set('replace', '1');
+              if (replaceKey) {
+                form.set('replace_key', replaceKey);
+              }
+              if (value) {
+                form.set('replace_from_url', value);
+              }
+            }
 
             setUploading(true);
             setStatus('Uploading...');
@@ -62,7 +73,7 @@ export default function MediaUrlInput({
               if (nextUrl) {
                 onChange(nextUrl);
               }
-              setStatus(nextUrl ? 'Uploaded and URL set.' : 'Upload complete.');
+              setStatus(nextUrl ? (replaceMode ? 'Uploaded and replaced.' : 'Uploaded and URL set.') : 'Upload complete.');
               setUploading(false);
             } catch {
               setStatus('Upload failed due to network error.');
