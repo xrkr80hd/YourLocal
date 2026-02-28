@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 function randomIndex(length, exclude = -1) {
   if (length <= 1) {
@@ -19,6 +19,9 @@ function randomIndex(length, exclude = -1) {
 export default function HomeTracksPlayer({ tracks }) {
   const items = useMemo(() => tracks || [], [tracks]);
   const [index, setIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [autoPlayOnChange, setAutoPlayOnChange] = useState(false);
+  const audioRef = useRef(null);
   const hasTracks = items.length > 0;
   const current = hasTracks ? items[index] || items[0] : null;
   const displayArtist = String(current?.artist_name || '').trim() || (hasTracks ? 'XRKR80HD' : 'SYSTEM');
@@ -29,6 +32,7 @@ export default function HomeTracksPlayer({ tracks }) {
   useEffect(() => {
     if (!items.length) {
       setIndex(0);
+      setIsPlaying(false);
       return;
     }
 
@@ -39,6 +43,81 @@ export default function HomeTracksPlayer({ tracks }) {
       return randomIndex(items.length);
     });
   }, [items.length]);
+
+  useEffect(() => {
+    if (!autoPlayOnChange || !current?.audio_url) {
+      return;
+    }
+
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+
+    const playResult = audio.play();
+    if (playResult && typeof playResult.then === 'function') {
+      playResult
+        .then(() => {
+          setIsPlaying(true);
+        })
+        .catch(() => {
+          setIsPlaying(false);
+        })
+        .finally(() => {
+          setAutoPlayOnChange(false);
+        });
+      return;
+    }
+
+    setIsPlaying(true);
+    setAutoPlayOnChange(false);
+  }, [autoPlayOnChange, current?.audio_url]);
+
+  function setTrackIndex(nextIndex, { autoplay = false } = {}) {
+    if (!hasTracks) {
+      return;
+    }
+
+    setIndex((currentIndex) => {
+      const safeCurrent = currentIndex >= 0 && currentIndex < items.length ? currentIndex : 0;
+      const resolved = typeof nextIndex === 'function' ? nextIndex(safeCurrent) : nextIndex;
+      if (!Number.isFinite(resolved)) {
+        return safeCurrent;
+      }
+      if (resolved < 0) {
+        return items.length - 1;
+      }
+      if (resolved >= items.length) {
+        return 0;
+      }
+      return resolved;
+    });
+
+    setAutoPlayOnChange(autoplay);
+  }
+
+  async function playCurrent() {
+    if (!current?.audio_url || !audioRef.current) {
+      return;
+    }
+
+    try {
+      await audioRef.current.play();
+      setIsPlaying(true);
+    } catch {
+      setIsPlaying(false);
+    }
+  }
+
+  function stopCurrent() {
+    if (!audioRef.current) {
+      return;
+    }
+
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+    setIsPlaying(false);
+  }
 
   return (
     <div className="xrkr-radio-shell">
@@ -53,26 +132,47 @@ export default function HomeTracksPlayer({ tracks }) {
           </p>
           {current?.audio_url ? (
             <audio
+              ref={audioRef}
               key={current.audio_url || current.id}
               id="home-main-player"
               className="xrkr-radio-controls"
-              controls
-              autoPlay
               src={current.audio_url}
-              onEnded={() =>
-                setIndex((currentIndex) => {
-                  if (items.length <= 1) {
-                    return 0;
-                  }
-                  return randomIndex(items.length, currentIndex);
-                })
-              }
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              onEnded={() => setTrackIndex((currentIndex) => randomIndex(items.length, currentIndex), { autoplay: true })}
             />
           ) : (
             <p className="xrkr-radio-controls-placeholder">Upload tracks in admin to activate player controls.</p>
           )}
         </div>
       </div>
+      {hasTracks ? (
+        <div className="xrkr-radio-icon-controls" role="group" aria-label="XRKR Radio controls">
+          <button type="button" className="icon-control" aria-label="First track" onClick={() => setTrackIndex(0, { autoplay: true })}>
+            {'<<'}
+          </button>
+          <button type="button" className="icon-control" aria-label="Previous track" onClick={() => setTrackIndex((currentIndex) => currentIndex - 1, { autoplay: true })}>
+            {'<'}
+          </button>
+          <button type="button" className="icon-control" aria-label="Play" onClick={playCurrent}>
+            {'\u25B6'}
+          </button>
+          <button type="button" className="icon-control" aria-label="Stop" onClick={stopCurrent}>
+            {'\u25A0'}
+          </button>
+          <button type="button" className="icon-control" aria-label="Next track" onClick={() => setTrackIndex((currentIndex) => currentIndex + 1, { autoplay: true })}>
+            {'>'}
+          </button>
+          <button
+            type="button"
+            className={`icon-control ${isPlaying ? 'is-active' : ''}`.trim()}
+            aria-label="Shuffle track"
+            onClick={() => setTrackIndex((currentIndex) => randomIndex(items.length, currentIndex), { autoplay: true })}
+          >
+            {'>>'}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

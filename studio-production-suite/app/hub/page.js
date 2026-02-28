@@ -25,6 +25,9 @@ export default async function HubPage() {
         <div className="hub-player-head">
           <h3 className="section-title">Tracks</h3>
           <span className="meta">{counts.tracks} total</span>
+          <Link className="button" href="/admin/tracks" prefetch={false}>
+            Upload Music
+          </Link>
         </div>
         <HubTracksPlayer tracks={tracks} />
       </section>

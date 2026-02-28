@@ -502,7 +502,7 @@ export async function getMediaByType(type) {
 
 export async function getHubData() {
   const [tracks, projects, posts, photos, videos, media] = await Promise.all([
-    getTracks(64),
+    getTracks(),
     getProjects(),
     getPublishedPosts(),
     getMediaByType('photo'),

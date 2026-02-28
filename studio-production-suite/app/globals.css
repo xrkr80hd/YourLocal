@@ -1148,14 +1148,13 @@ label {
 }
 
 .xrkr-radio-controls {
-  width: 100%;
+  width: 1px;
+  height: 1px;
   margin: 0;
-  height: 29px;
-  color-scheme: dark;
-  filter: saturate(0.18) brightness(0.98) contrast(1.18);
-  opacity: 0.98;
-  position: relative;
-  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
 }
 
 .xrkr-radio-controls-placeholder {
@@ -1167,6 +1166,40 @@ label {
   line-height: 1.18;
   position: relative;
   z-index: 1;
+}
+
+.xrkr-radio-icon-controls {
+  margin-top: 0.55rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-control {
+  min-width: 44px;
+  height: 40px;
+  padding: 0 0.72rem;
+  border: 1px solid rgba(110, 229, 255, 0.38);
+  border-radius: 9px;
+  background: linear-gradient(180deg, rgba(8, 20, 34, 0.95), rgba(4, 11, 20, 0.98));
+  color: #e9fbff;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(100, 228, 255, 0.16), 0 8px 14px rgba(0, 0, 0, 0.35);
+}
+
+.icon-control:hover {
+  border-color: rgba(130, 236, 255, 0.68);
+  color: #ffffff;
+}
+
+.icon-control.is-active {
+  border-color: rgba(153, 241, 255, 0.82);
+  box-shadow: inset 0 0 0 1px rgba(100, 228, 255, 0.32), 0 0 14px rgba(67, 212, 255, 0.24);
 }
 
 .xrkr-radio-picker {
@@ -1271,13 +1304,31 @@ label {
 }
 
 .hub-main-player {
-  width: min(980px, 100%);
-  margin: 0.75rem auto 0;
-  display: block;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
 }
 
 .hub-now-playing {
   margin-top: 0.35rem;
+  display: flex;
+  gap: 0.45rem;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hub-icon-controls {
+  margin: 0.7rem auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  justify-content: center;
 }
 
 .hub-genre-filter-wrap {
@@ -1790,9 +1841,6 @@ label {
   }
   .xrkr-radio-status {
     letter-spacing: 0.08em;
-  }
-  .xrkr-radio-controls {
-    height: 27px;
   }
   .xrkr-radio-picker {
     max-width: 100%;
