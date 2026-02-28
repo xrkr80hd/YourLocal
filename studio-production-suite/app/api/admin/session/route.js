@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { ADMIN_SESSION_COOKIE, areAdminCredentialsValid, getAdminConfig, isAdminConfigReady } from '../../../../lib/admin-auth';
+import { ADMIN_SESSION_COOKIE, ADMIN_SESSION_USER_COOKIE, getAdminConfig, isAdminConfigReady, matchEnvAdminCredentials } from '../../../../lib/admin-auth';
+import { normalizeAdminUsername, verifyDatabaseAdminCredentials } from '../../../../lib/admin-users';
 
 export const runtime = 'nodejs';
 
@@ -9,14 +10,24 @@ function getJsonBodySafe(request) {
 
 export async function POST(request) {
   if (!isAdminConfigReady()) {
-    return NextResponse.json({ error: 'Admin auth is not configured on the server.' }, { status: 500 });
+    return NextResponse.json({ error: 'Admin auth is not configured on the server (missing ADMIN_SESSION_TOKEN).' }, { status: 500 });
   }
 
   const body = await getJsonBodySafe(request);
   const username = String(body.username || '').trim();
   const password = String(body.password || '');
+  const normalizedUsername = normalizeAdminUsername(username);
 
-  if (!areAdminCredentialsValid(username, password)) {
+  let authenticatedUsername = matchEnvAdminCredentials(username, password);
+
+  if (!authenticatedUsername) {
+    const dbCheck = await verifyDatabaseAdminCredentials(normalizedUsername, password);
+    if (dbCheck.ok) {
+      authenticatedUsername = normalizedUsername;
+    }
+  }
+
+  if (!authenticatedUsername) {
     return NextResponse.json({ error: 'Invalid admin credentials.' }, { status: 401 });
   }
 
@@ -32,6 +43,15 @@ export async function POST(request) {
     path: '/',
     maxAge: 60 * 60 * 24 * 7,
   });
+  response.cookies.set({
+    name: ADMIN_SESSION_USER_COOKIE,
+    value: authenticatedUsername,
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 7,
+  });
 
   return response;
 }
@@ -41,6 +61,15 @@ export async function DELETE() {
 
   response.cookies.set({
     name: ADMIN_SESSION_COOKIE,
+    value: '',
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 0,
+  });
+  response.cookies.set({
+    name: ADMIN_SESSION_USER_COOKIE,
     value: '',
     httpOnly: true,
     secure: true,

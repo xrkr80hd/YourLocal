@@ -1,4 +1,5 @@
 export const ADMIN_SESSION_COOKIE = 'xrkr_admin_session';
+export const ADMIN_SESSION_USER_COOKIE = 'xrkr_admin_user';
 
 function getEnv(name, fallback = '') {
   return String(process.env[name] || fallback || '').trim();
@@ -27,17 +28,26 @@ function parseCredentialPair(value) {
 
 function getAdminAccounts() {
   const multi = getEnv('ADMIN_LOGIN_CREDENTIALS');
-  const parsed = multi
-    .split(',')
+  const parsedMulti = multi
+    .split(/[,;\n]/)
     .map((entry) => parseCredentialPair(entry))
     .filter(Boolean);
 
-  if (parsed.length) {
-    return parsed;
+  const fallback = parseCredentialPair(`${getEnv('ADMIN_LOGIN_USERNAME', 'admin')}:${getEnv('ADMIN_LOGIN_PASSWORD')}`);
+  const combined = [...parsedMulti, ...(fallback ? [fallback] : [])];
+  const unique = [];
+  const seen = new Set();
+
+  for (const account of combined) {
+    const key = `${account.username.toLowerCase()}::${account.password}`;
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    unique.push(account);
   }
 
-  const fallback = parseCredentialPair(`${getEnv('ADMIN_LOGIN_USERNAME', 'admin')}:${getEnv('ADMIN_LOGIN_PASSWORD')}`);
-  return fallback ? [fallback] : [];
+  return unique;
 }
 
 export function getAdminConfig() {
@@ -48,8 +58,8 @@ export function getAdminConfig() {
 }
 
 export function isAdminConfigReady() {
-  const { accounts, sessionToken } = getAdminConfig();
-  return Boolean(accounts.length && sessionToken);
+  const { sessionToken } = getAdminConfig();
+  return Boolean(sessionToken);
 }
 
 export function isAdminSessionValid(cookieValue) {
@@ -58,13 +68,27 @@ export function isAdminSessionValid(cookieValue) {
 }
 
 export function areAdminCredentialsValid(username, password) {
+  return Boolean(matchEnvAdminCredentials(username, password));
+}
+
+export function matchEnvAdminCredentials(username, password) {
   const config = getAdminConfig();
   if (!config.accounts.length || !config.sessionToken) {
-    return false;
+    return null;
   }
 
-  const safeUser = String(username || '').trim();
+  const safeUser = String(username || '').trim().toLowerCase();
   const safePass = String(password || '');
 
-  return config.accounts.some((account) => account.username === safeUser && account.password === safePass);
+  const match = config.accounts.find((account) => account.username.toLowerCase() === safeUser && account.password === safePass);
+  return match ? match.username : null;
+}
+
+export function getAdminOwnerUsername() {
+  return getEnv('ADMIN_OWNER_USERNAME', 'xrkradmin').toLowerCase();
+}
+
+export function isOwnerUsername(username) {
+  const safeUser = String(username || '').trim().toLowerCase();
+  return safeUser !== '' && safeUser === getAdminOwnerUsername();
 }

@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 import { getSupabaseAdminLinks } from '../../lib/admin-links';
 import AdminLogoutButton from '../../components/AdminLogoutButton';
+import { ADMIN_SESSION_USER_COOKIE, isOwnerUsername } from '../../lib/admin-auth';
 
 export const metadata = {
   title: 'Admin | xrkr80hd Studio',
@@ -8,6 +10,8 @@ export const metadata = {
 
 export default function AdminPage() {
   const links = getSupabaseAdminLinks();
+  const actingUser = cookies().get(ADMIN_SESSION_USER_COOKIE)?.value || '';
+  const ownerMode = isOwnerUsername(actingUser);
 
   return (
     <>
@@ -22,6 +26,11 @@ export default function AdminPage() {
           <Link className="button" href="/admin/bands">
             Manage Band Socials
           </Link>
+          {ownerMode ? (
+            <Link className="button" href="/admin/users">
+              Manage Admin Users
+            </Link>
+          ) : null}
           <Link className="button primary" href="/upload">
             Upload Media
           </Link>
@@ -39,6 +48,11 @@ export default function AdminPage() {
         <p className="meta" style={{ marginTop: '0.8rem' }}>
           Note: the old Laravel `/admin/*` controllers were replaced during the Next.js migration. This is the active admin entry for the current app.
         </p>
+        {ownerMode ? (
+          <p className="meta">Owner tools are enabled for this session.</p>
+        ) : (
+          <p className="meta">Standard admin mode: content CRUD + uploads.</p>
+        )}
       </section>
     </>
   );
