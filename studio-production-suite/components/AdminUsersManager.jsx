@@ -22,6 +22,7 @@ export default function AdminUsersManager({ initialUsers, missingTable, initialE
   const [showCreatePassword, setShowCreatePassword] = useState(false);
   const [resetPasswords, setResetPasswords] = useState({});
   const [showResetPassword, setShowResetPassword] = useState({});
+  const [deliveryMessages, setDeliveryMessages] = useState({});
   const [status, setStatus] = useState(initialError || '');
   const [saving, setSaving] = useState(false);
 
@@ -45,8 +46,31 @@ export default function AdminUsersManager({ initialUsers, missingTable, initialE
     setShowResetPassword((current) => ({ ...current, [targetUser]: value }));
   };
 
+  const setDeliveryMessageValue = (targetUser, value) => {
+    setDeliveryMessages((current) => ({ ...current, [targetUser]: value }));
+  };
+
   const getResetPasswordValue = (targetUser) => resetPasswords[targetUser] || '';
   const isResetPasswordVisible = (targetUser) => Boolean(showResetPassword[targetUser]);
+  const getDeliveryMessageValue = (targetUser) => deliveryMessages[targetUser] || '';
+
+  const generateTemporaryPassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*';
+    const bytes = new Uint32Array(18);
+    if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
+      window.crypto.getRandomValues(bytes);
+    } else {
+      for (let index = 0; index < bytes.length; index += 1) {
+        bytes[index] = Math.floor(Math.random() * 0xffffffff);
+      }
+    }
+
+    let output = '';
+    for (let index = 0; index < bytes.length; index += 1) {
+      output += chars[bytes[index] % chars.length];
+    }
+    return output;
+  };
 
   const copyToClipboard = async (text) => {
     if (!text) {
@@ -195,21 +219,23 @@ export default function AdminUsersManager({ initialUsers, missingTable, initialE
                     className="button"
                     type="button"
                     onClick={async () => {
-                      const copied = await copyToClipboard(buildAdminLoginMessage(user.username));
-                      setStatus(copied ? `Copied login info for ${user.username}.` : `Could not copy login info for ${user.username}.`);
+                      const text = buildAdminLoginMessage(user.username);
+                      const copied = await copyToClipboard(text);
+                      setDeliveryMessageValue(user.username, text);
+                      setStatus(copied ? `Copied login link for ${user.username}.` : `Clipboard blocked. Use manual copy box for ${user.username}.`);
                     }}
                   >
-                    Copy Login Info
+                    Copy Login Link
                   </button>
                   <button
                     className="button"
                     type="button"
                     onClick={async () => {
-                      const nextPassword = getResetPasswordValue(user.username);
+                      let nextPassword = getResetPasswordValue(user.username);
 
                       if (nextPassword.length < 10) {
-                        setStatus('Reset password must be at least 10 characters.');
-                        return;
+                        nextPassword = generateTemporaryPassword();
+                        setResetPasswordValue(user.username, nextPassword);
                       }
 
                       const response = await fetch(`/api/admin/users/${encodeURIComponent(user.username)}`, {
@@ -224,12 +250,14 @@ export default function AdminUsersManager({ initialUsers, missingTable, initialE
                         return;
                       }
 
-                      const copied = await copyToClipboard(buildAdminLoginMessage(user.username, nextPassword));
-                      setResetPasswordValue(user.username, '');
+                      const text = buildAdminLoginMessage(user.username, nextPassword);
+                      const copied = await copyToClipboard(text);
+                      setDeliveryMessageValue(user.username, text);
+                      setShowResetPasswordValue(user.username, true);
                       setStatus(
                         copied
                           ? `Password reset for ${user.username}. New login details copied.`
-                          : `Password reset for ${user.username}. Copy failed; send details manually.`
+                          : `Password reset for ${user.username}. Clipboard blocked; use manual copy box.`
                       );
                     }}
                   >
@@ -254,6 +282,30 @@ export default function AdminUsersManager({ initialUsers, missingTable, initialE
                     Delete
                   </button>
                 </div>
+                {getDeliveryMessageValue(user.username) ? (
+                  <div className="form-row" style={{ marginTop: '0.7rem' }}>
+                    <label htmlFor={`delivery-${user.username}`}>Manual Copy Box</label>
+                    <textarea
+                      id={`delivery-${user.username}`}
+                      readOnly
+                      rows={5}
+                      value={getDeliveryMessageValue(user.username)}
+                      onFocus={(event) => event.target.select()}
+                    />
+                    <div className="actions" style={{ marginTop: '0.45rem' }}>
+                      <button
+                        className="button"
+                        type="button"
+                        onClick={async () => {
+                          const copied = await copyToClipboard(getDeliveryMessageValue(user.username));
+                          setStatus(copied ? `Copied message for ${user.username}.` : 'Select text in box and copy manually.');
+                        }}
+                      >
+                        Copy From Box
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </article>
             ))}
           </div>

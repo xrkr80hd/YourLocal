@@ -1,0 +1,28 @@
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import AdminHomeSettingsForm from '../../../components/AdminHomeSettingsForm';
+import { ADMIN_SESSION_USER_COOKIE, isOwnerUsername } from '../../../lib/admin-auth';
+import { getSiteProfile } from '../../../lib/content';
+
+export const metadata = {
+  title: 'Homepage Controls | xrkr80hd Studio',
+};
+
+export default async function AdminHomeSettingsPage() {
+  const actingUser = cookies().get(ADMIN_SESSION_USER_COOKIE)?.value || '';
+  if (!isOwnerUsername(actingUser)) {
+    redirect('/admin');
+  }
+
+  const profile = await getSiteProfile();
+
+  return (
+    <>
+      <section className="card hero">
+        <h1>Homepage Controls</h1>
+        <p>Owner-only controls for your landing profile section and front-page card images.</p>
+      </section>
+      <AdminHomeSettingsForm initialProfile={profile} />
+    </>
+  );
+}

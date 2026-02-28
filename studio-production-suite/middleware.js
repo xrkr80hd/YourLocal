@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ADMIN_SESSION_COOKIE, isAdminConfigReady, isAdminSessionValid } from './lib/admin-auth';
+import { ADMIN_SESSION_COOKIE, ADMIN_SESSION_USER_COOKIE, isAdminConfigReady, isAdminSessionValid, isOwnerUsername } from './lib/admin-auth';
 
 function isProtectedPath(pathname) {
   if (pathname === '/admin/login' || pathname.startsWith('/api/admin/session')) {
@@ -7,6 +7,8 @@ function isProtectedPath(pathname) {
   }
 
   return (
+    pathname === '/hub' ||
+    pathname.startsWith('/hub/') ||
     pathname === '/admin' ||
     pathname.startsWith('/admin/') ||
     pathname === '/upload' ||
@@ -14,6 +16,25 @@ function isProtectedPath(pathname) {
     pathname === '/api/upload' ||
     pathname.startsWith('/api/upload/') ||
     pathname.startsWith('/api/admin/')
+  );
+}
+
+function isOwnerOnlyPath(pathname) {
+  return (
+    pathname === '/hub' ||
+    pathname.startsWith('/hub/') ||
+    pathname === '/admin/users' ||
+    pathname.startsWith('/admin/users/') ||
+    pathname === '/admin/home' ||
+    pathname.startsWith('/admin/home/') ||
+    pathname === '/admin/tracks' ||
+    pathname.startsWith('/admin/tracks/') ||
+    pathname === '/api/admin/users' ||
+    pathname.startsWith('/api/admin/users/') ||
+    pathname === '/api/admin/site-profile' ||
+    pathname.startsWith('/api/admin/site-profile/') ||
+    pathname === '/api/admin/tracks' ||
+    pathname.startsWith('/api/admin/tracks/')
   );
 }
 
@@ -39,6 +60,16 @@ export function middleware(request) {
   const sessionCookie = request.cookies.get(ADMIN_SESSION_COOKIE)?.value || '';
 
   if (isAdminSessionValid(sessionCookie)) {
+    if (isOwnerOnlyPath(pathname)) {
+      const sessionUser = request.cookies.get(ADMIN_SESSION_USER_COOKIE)?.value || '';
+      if (!isOwnerUsername(sessionUser)) {
+        const adminUrl = request.nextUrl.clone();
+        adminUrl.pathname = '/admin';
+        adminUrl.searchParams.set('error', 'owner');
+        return NextResponse.redirect(adminUrl);
+      }
+    }
+
     return NextResponse.next();
   }
 

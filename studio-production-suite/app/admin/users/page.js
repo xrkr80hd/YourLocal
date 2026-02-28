@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import AdminUsersManager from '../../../components/AdminUsersManager';
 import { ADMIN_SESSION_USER_COOKIE, getAdminOwnerUsername, isOwnerUsername } from '../../../lib/admin-auth';
 import { adminUsersBootstrapSql, listAdminUsers, normalizeAdminUsername } from '../../../lib/admin-users';
@@ -12,12 +13,7 @@ export default async function AdminUsersPage() {
   const ownerUsername = getAdminOwnerUsername();
 
   if (!isOwnerUsername(actingUser)) {
-    return (
-      <section className="card hero">
-        <h1>Admin Users</h1>
-        <p>Only the owner account can manage admin users from the site.</p>
-      </section>
-    );
+    redirect('/admin');
   }
 
   const result = await listAdminUsers();

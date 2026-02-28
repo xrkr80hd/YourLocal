@@ -50,32 +50,68 @@ export async function getSiteProfile() {
   return rows[0] || null;
 }
 
-export async function getHomeTracks(limit = 12) {
-  return runQuery(
-    'tracks_home',
-    (supabase) =>
-      supabase
-        .from('tracks')
-        .select('*')
-        .order('release_date', { ascending: false, nullsFirst: false })
-        .order('id', { ascending: false })
-        .limit(limit),
-    []
-  );
-}
+async function fetchTracksOrdered({ featuredOnly = false, limit = null } = {}) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return [];
+  }
 
-export async function getTracks(limit = null) {
-  const base = (supabase) => {
-    const query = supabase
-      .from('tracks')
-      .select('*')
-      .order('release_date', { ascending: false, nullsFirst: false })
-      .order('id', { ascending: false });
+  const run = (includeSortOrder) => {
+    let query = supabase.from('tracks').select('*');
+
+    if (featuredOnly) {
+      query = query.eq('is_featured', true);
+    }
+
+    if (includeSortOrder) {
+      query = query.order('sort_order', { ascending: true });
+    }
+
+    query = query.order('release_date', { ascending: false, nullsFirst: false }).order('id', { ascending: false });
 
     return Number.isInteger(limit) ? query.limit(limit) : query;
   };
 
-  return runQuery('tracks_all', base, []);
+  try {
+    const ordered = await run(true);
+    if (!ordered.error) {
+      return ordered.data || [];
+    }
+
+    const message = String(ordered.error.message || '');
+    if (!message.includes('sort_order')) {
+      console.error('[content:tracks_ordered]', message);
+      return [];
+    }
+
+    const fallback = await run(false);
+    if (fallback.error) {
+      console.error('[content:tracks_fallback]', fallback.error.message);
+      return [];
+    }
+
+    return (fallback.data || []).map((item) => ({ ...item, sort_order: 0 }));
+  } catch (error) {
+    console.error('[content:tracks]', error);
+    return [];
+  }
+}
+
+export async function getHomeTracks(limit = 12) {
+  const featured = await fetchTracksOrdered({ featuredOnly: true, limit });
+  if (featured.length) {
+    return featured;
+  }
+
+  return fetchTracksOrdered({ featuredOnly: false, limit });
+}
+
+export async function getTracks(limit = null) {
+  return fetchTracksOrdered({ featuredOnly: false, limit });
+}
+
+export async function getTracksForAdmin() {
+  return fetchTracksOrdered({ featuredOnly: false, limit: null });
 }
 
 export async function getBandsByEra(era) {
@@ -134,6 +170,24 @@ export async function getCurrentBandsForAdmin() {
   );
 }
 
+export async function getBandsForAdmin(era = null) {
+  const safeEra = era === 'archive' || era === 'scene' ? era : null;
+  return runQuery(
+    `admin_bands_${safeEra || 'all'}`,
+    (supabase) => {
+      const query = supabase
+        .from('bands')
+        .select('*')
+        .order('era', { ascending: true })
+        .order('sort_order', { ascending: true })
+        .order('name', { ascending: true });
+
+      return safeEra ? query.eq('era', safeEra) : query;
+    },
+    []
+  );
+}
+
 export async function getBandBySlugForAdmin(slug) {
   const band = await runQuery(
     `admin_band_${slug}`,
@@ -171,6 +225,33 @@ export async function getPodcastEpisodes() {
         .order('published_at', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false }),
     []
+  );
+}
+
+export async function getPodcastEpisodesForAdmin() {
+  return runQuery(
+    'podcasts_admin',
+    (supabase) =>
+      supabase
+        .from('podcast_episodes')
+        .select('*')
+        .order('published_at', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false }),
+    []
+  );
+}
+
+export async function getPodcastEpisodeBySlugForAdmin(slug) {
+  return runQuery(
+    `podcast_admin_${slug}`,
+    (supabase) =>
+      supabase
+        .from('podcast_episodes')
+        .select('*')
+        .eq('slug', slug)
+        .limit(1)
+        .maybeSingle(),
+    null
   );
 }
 

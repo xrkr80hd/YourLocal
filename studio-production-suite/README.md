@@ -66,9 +66,13 @@ Default folder presets:
 These are protected by middleware when admin auth env vars are configured:
 
 - `/admin`
-- `/admin/users` (owner-only admin account management)
 - `/admin/bands`
 - `/admin/bands/[slug]/socials`
+- `/admin/podcasts`
+- `/admin/password`
+- `/admin/home` (owner-only)
+- `/admin/tracks` (owner-only)
+- `/admin/users` (owner-only admin account management)
 - `/upload`
 - `/api/upload`
 - `/api/admin/*`

@@ -24,16 +24,29 @@ export default function AdminPage() {
         <h3 className="section-title">Site Admin Actions</h3>
         <div className="actions">
           <Link className="button" href="/admin/bands">
-            Manage Band Socials
+            Band Manager
           </Link>
+          <Link className="button" href="/admin/podcasts">
+            Podcast Manager
+          </Link>
+          <Link className="button" href="/admin/password">
+            My Password
+          </Link>
+          {ownerMode ? (
+            <Link className="button" href="/admin/home">
+              Homepage Controls
+            </Link>
+          ) : null}
+          {ownerMode ? (
+            <Link className="button" href="/admin/tracks">
+              Tracks Manager
+            </Link>
+          ) : null}
           {ownerMode ? (
             <Link className="button" href="/admin/users">
               Manage Admin Users
             </Link>
           ) : null}
-          <Link className="button primary" href="/upload">
-            Upload Media
-          </Link>
           <a className="button" href={links.tableEditor} target="_blank" rel="noreferrer">
             Supabase Table Editor
           </a>
@@ -49,6 +62,7 @@ export default function AdminPage() {
           Note: the old Laravel `/admin/*` controllers were replaced during the Next.js migration. This is the active admin entry for the current app.
         </p>
         <p className="meta">Signed in as: {actingUser || 'unknown'}</p>
+        <p className="meta">Media upload should happen directly inside band/podcast edit forms.</p>
         {ownerMode ? (
           <p className="meta">Owner tools are enabled for this session.</p>
         ) : (

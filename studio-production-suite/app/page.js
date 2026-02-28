@@ -21,8 +21,9 @@ function Headline({ value }) {
   return <h1>{text}</h1>;
 }
 
-const guideCards = [
+const guideCardDefaults = [
   {
+    key: 'hub',
     title: 'XRKR80HDLocal Hub',
     body: 'Your all-in-one control room. Stream tracks, check visuals, watch clips, and catch updates from one page.',
     href: '/hub',
@@ -30,6 +31,7 @@ const guideCards = [
     image: '/assets/cards/hub-card.png',
   },
   {
+    key: 'legends',
     title: 'YourLocal Legends',
     body: 'An archive for influential local bands that are no longer actively writing, releasing, or performing.',
     href: '/local-legends-archive',
@@ -37,6 +39,7 @@ const guideCards = [
     image: '/assets/cards/local-legends-card.png',
   },
   {
+    key: 'scene',
     title: 'YourLocal Scene',
     body: 'The current movement: active bands, fresh releases, and artists still on stages now.',
     href: '/your-local-scene',
@@ -44,6 +47,7 @@ const guideCards = [
     image: '/assets/cards/local-scene-card.png',
   },
   {
+    key: 'podcast',
     title: 'YourLocal Podcast',
     body: 'Conversations and stories from artists, producers, and creators in your local scene.',
     href: '/podcast',
@@ -51,6 +55,7 @@ const guideCards = [
     image: '/assets/cards/local-podcast-card.png',
   },
   {
+    key: 'contact',
     title: 'Contact',
     body: 'Want your band, solo project, or podcast featured? Send your links and profile details here.',
     href: '/contact',
@@ -61,6 +66,18 @@ const guideCards = [
 
 export default async function HomePage() {
   const [profile, homeTracks] = await Promise.all([getSiteProfile(), getHomeTracks(12)]);
+  const guideCards = guideCardDefaults.map((card) => {
+    if (card.key === 'legends' && profile?.home_legends_card_image_url) {
+      return { ...card, image: profile.home_legends_card_image_url };
+    }
+    if (card.key === 'scene' && profile?.home_scene_card_image_url) {
+      return { ...card, image: profile.home_scene_card_image_url };
+    }
+    if (card.key === 'podcast' && profile?.home_podcast_card_image_url) {
+      return { ...card, image: profile.home_podcast_card_image_url };
+    }
+    return card;
+  });
 
   return (
     <>

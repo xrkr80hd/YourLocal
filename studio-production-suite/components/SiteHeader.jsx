@@ -55,10 +55,13 @@ function getAdminNavItems(ownerMode) {
   const items = [
     { href: '/admin', label: 'Dashboard', className: 'nav-admin-link' },
     { href: '/admin/bands', label: 'Band Editor', className: 'nav-admin-link' },
-    { href: '/upload', label: 'Upload', className: 'nav-admin-link' },
+    { href: '/admin/podcasts', label: 'Podcast Editor', className: 'nav-admin-link' },
+    { href: '/admin/password', label: 'My Password', className: 'nav-admin-link' },
   ];
 
   if (ownerMode) {
+    items.push({ href: '/admin/home', label: 'Home Controls', className: 'nav-admin-link' });
+    items.push({ href: '/admin/tracks', label: 'Tracks Manager', className: 'nav-admin-link' });
     items.push({ href: '/admin/users', label: 'Admin Users', className: 'nav-admin-link' });
   }
 
