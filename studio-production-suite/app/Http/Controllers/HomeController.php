@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\SiteProfile;
 use App\Models\Track;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 class HomeController extends Controller
 {
@@ -22,7 +22,7 @@ class HomeController extends Controller
             if (Schema::hasTable('site_profiles')) {
                 $profile = SiteProfile::query()->first();
             }
-        } catch (QueryException) {
+        } catch (Throwable) {
             // Keep default empty state if database schema is not initialized yet.
         }
 
