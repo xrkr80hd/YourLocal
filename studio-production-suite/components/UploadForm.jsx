@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { STORAGE_FOLDER_PRESETS } from '../lib/storage-folders';
 
 export default function UploadForm() {
   const [status, setStatus] = useState('');
   const [url, setUrl] = useState('');
+  const [folder, setFolder] = useState('images/bands');
 
   return (
     <form
@@ -23,6 +25,8 @@ export default function UploadForm() {
 
         setStatus('Uploading...');
         setUrl('');
+
+        formData.set('folder', folder);
 
         const response = await fetch('/api/upload', {
           method: 'POST',
@@ -47,9 +51,16 @@ export default function UploadForm() {
         <input id="upload-file" name="file" type="file" required />
       </div>
       <div className="form-row">
-        <label htmlFor="upload-folder">Folder (optional)</label>
-        <input id="upload-folder" name="folder" type="text" defaultValue="images" />
+        <label htmlFor="upload-folder">Folder</label>
+        <select id="upload-folder" name="folder" value={folder} onChange={(event) => setFolder(event.target.value)}>
+          {STORAGE_FOLDER_PRESETS.map((value) => (
+            <option key={value} value={value}>
+              {value}
+            </option>
+          ))}
+        </select>
       </div>
+      <p className="meta">Current path prefix: {folder}/</p>
       <button className="button primary" type="submit">
         Upload
       </button>

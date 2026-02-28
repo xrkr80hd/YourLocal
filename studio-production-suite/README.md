@@ -39,6 +39,7 @@ Optional:
 
 - `NEXT_PUBLIC_SUPABASE_URL` (falls back to `SUPABASE_URL`)
 - `SUPABASE_STORAGE_BUCKET` (default: `uploads`)
+- `SUPABASE_ALLOWED_FOLDERS` (comma-separated overrides for folder prefixes)
 
 ## Upload Test Route
 
@@ -46,6 +47,15 @@ Optional:
 - `POST /api/upload` accepts multipart form uploads (`file`, optional `folder`)
 
 Uploads are sent to Supabase Storage so files persist outside Docker and deploy environments.
+
+Default folder presets:
+
+- `images/bands`
+- `images/artists`
+- `images/posts`
+- `audio/tracks`
+- `video/clips`
+- `misc`
 
 ## Main Public Routes
 

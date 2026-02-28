@@ -1,16 +1,9 @@
 import { randomUUID } from 'crypto';
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '../../../lib/supabase-admin';
+import { STORAGE_FOLDER_PRESETS, isAllowedFolder, normalizeFolder } from '../../../lib/storage-folders';
 
 export const runtime = 'nodejs';
-
-function cleanSegment(value) {
-  return String(value || '')
-    .trim()
-    .replace(/\.+/g, '.')
-    .replace(/[^a-zA-Z0-9._\/-]/g, '-')
-    .replace(/\/+/g, '/');
-}
 
 function cleanFilename(value) {
   return String(value || 'file')
@@ -34,10 +27,24 @@ export async function POST(request) {
 
   const formData = await request.formData();
   const file = formData.get('file');
-  const folder = cleanSegment(formData.get('folder') || 'images').replace(/^\/+|\/+$/g, '');
+  const allowedFolders = (process.env.SUPABASE_ALLOWED_FOLDERS || '')
+    .split(',')
+    .map((value) => normalizeFolder(value, ''))
+    .filter(Boolean);
+  const activeAllowedFolders = allowedFolders.length ? allowedFolders : STORAGE_FOLDER_PRESETS;
+  const folder = normalizeFolder(formData.get('folder') || 'misc');
 
   if (!(file instanceof File)) {
     return NextResponse.json({ error: 'No file uploaded.' }, { status: 400 });
+  }
+
+  if (!isAllowedFolder(folder, activeAllowedFolders)) {
+    return NextResponse.json(
+      {
+        error: `Folder is not allowed. Use one of: ${activeAllowedFolders.join(', ')}`,
+      },
+      { status: 400 }
+    );
   }
 
   const maxBytes = 50 * 1024 * 1024;

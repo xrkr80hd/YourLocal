@@ -5,7 +5,7 @@ export default function UploadPage() {
     <>
       <section className="card hero">
         <h1>Upload Test</h1>
-        <p>Use this page to test Supabase Storage uploads from your local Docker setup.</p>
+        <p>Use this page to test Supabase Storage uploads with your folder presets.</p>
       </section>
       <UploadForm />
     </>
