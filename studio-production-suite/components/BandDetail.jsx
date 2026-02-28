@@ -2,9 +2,11 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { getEnabledSocialLinks } from '../lib/social-platforms';
 
 export default function BandDetail({ band, backHref, backLabel }) {
-  const members = Array.isArray(band.members_json) ? band.members_json : [];
+  const members = Array.isArray(band.members) ? band.members : [];
+  const socialLinks = getEnabledSocialLinks(band.social_links);
   const primaryPhoto = band.band_photo_url || band.image_url;
   const [modal, setModal] = useState(null);
 
@@ -62,6 +64,19 @@ export default function BandDetail({ band, backHref, backLabel }) {
         <h2 className="section-title">Story</h2>
         <p>{band.story || band.summary}</p>
       </section>
+
+      {socialLinks.length ? (
+        <section className="card section-space">
+          <h2 className="section-title">Social Links</h2>
+          <div className="band-social-grid">
+            {socialLinks.map((item) => (
+              <a key={item.key} className="band-social-link" href={item.url} target="_blank" rel="noreferrer">
+                {item.label}
+              </a>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {members.length ? (
         <section className="card section-space">

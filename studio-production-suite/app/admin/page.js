@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getSupabaseAdminLinks } from '../../lib/admin-links';
+import AdminLogoutButton from '../../components/AdminLogoutButton';
 
 export const metadata = {
   title: 'Admin | xrkr80hd Studio',
@@ -18,6 +19,9 @@ export default function AdminPage() {
       <section className="card section-space">
         <h3 className="section-title">Site Admin Actions</h3>
         <div className="actions">
+          <Link className="button" href="/admin/bands">
+            Manage Band Socials
+          </Link>
           <Link className="button primary" href="/upload">
             Upload Media
           </Link>
@@ -30,6 +34,7 @@ export default function AdminPage() {
           <a className="button" href={links.project} target="_blank" rel="noreferrer">
             Supabase Project
           </a>
+          <AdminLogoutButton />
         </div>
         <p className="meta" style={{ marginTop: '0.8rem' }}>
           Note: the old Laravel `/admin/*` controllers were replaced during the Next.js migration. This is the active admin entry for the current app.

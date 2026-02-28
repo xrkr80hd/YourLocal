@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from './supabase-admin';
+import { parseBandProfilePayload } from './band-profile';
 
 const DEFAULT_GENRES = [
   'metal',
@@ -37,27 +38,6 @@ async function runQuery(label, callback, fallbackValue) {
     console.error(`[content:${label}]`, error);
     return fallbackValue;
   }
-}
-
-function toMembers(value) {
-  if (!value) {
-    return [];
-  }
-
-  if (Array.isArray(value)) {
-    return value;
-  }
-
-  if (typeof value === 'string') {
-    try {
-      const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  }
-
-  return [];
 }
 
 export async function getSiteProfile() {
@@ -131,9 +111,52 @@ export async function getBandBySlug(slug) {
     return null;
   }
 
+  const profile = parseBandProfilePayload(band.members_json);
+
   return {
     ...band,
-    members_json: toMembers(band.members_json),
+    members: profile.members,
+    social_links: profile.social_links,
+  };
+}
+
+export async function getCurrentBandsForAdmin() {
+  return runQuery(
+    'admin_bands_scene',
+    (supabase) =>
+      supabase
+        .from('bands')
+        .select('*')
+        .eq('era', 'scene')
+        .order('sort_order', { ascending: true })
+        .order('name', { ascending: true }),
+    []
+  );
+}
+
+export async function getBandBySlugForAdmin(slug) {
+  const band = await runQuery(
+    `admin_band_${slug}`,
+    (supabase) =>
+      supabase
+        .from('bands')
+        .select('*')
+        .eq('slug', slug)
+        .limit(1)
+        .maybeSingle(),
+    null
+  );
+
+  if (!band) {
+    return null;
+  }
+
+  const profile = parseBandProfilePayload(band.members_json);
+
+  return {
+    ...band,
+    members: profile.members,
+    social_links: profile.social_links,
   };
 }
 

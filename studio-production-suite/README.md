@@ -40,6 +40,9 @@ Optional:
 - `NEXT_PUBLIC_SUPABASE_URL` (falls back to `SUPABASE_URL`)
 - `SUPABASE_STORAGE_BUCKET` (default: `uploads`)
 - `SUPABASE_ALLOWED_FOLDERS` (comma-separated overrides for folder prefixes)
+- `ADMIN_SESSION_TOKEN` (required to protect admin routes)
+- `ADMIN_LOGIN_CREDENTIALS` (comma-separated `username:password` pairs)
+- `ADMIN_LOGIN_USERNAME` + `ADMIN_LOGIN_PASSWORD` (single-account fallback)
 
 ## Upload Test Route
 
@@ -56,6 +59,17 @@ Default folder presets:
 - `audio/tracks`
 - `video/clips`
 - `misc`
+
+## Admin Routes
+
+These are protected by middleware when admin auth env vars are configured:
+
+- `/admin`
+- `/admin/bands`
+- `/admin/bands/[slug]/socials`
+- `/upload`
+- `/api/upload`
+- `/api/admin/*`
 
 ## Main Public Routes
 
