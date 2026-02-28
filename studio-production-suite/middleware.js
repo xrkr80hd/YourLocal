@@ -66,6 +66,7 @@ export function middleware(request) {
         const adminUrl = request.nextUrl.clone();
         adminUrl.pathname = '/admin';
         adminUrl.searchParams.set('error', 'owner');
+        adminUrl.searchParams.set('from', pathname);
         return NextResponse.redirect(adminUrl);
       }
     }

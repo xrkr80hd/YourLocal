@@ -11,12 +11,15 @@ export default function HomeTracksPlayer({ tracks }) {
   }
 
   const current = items[index] || items[0];
+  const trackNumber = String(index + 1).padStart(2, '0');
+  const totalTracks = String(items.length).padStart(2, '0');
 
   return (
     <div className="xrkr-radio-shell">
       <div className="xrkr-radio-skin">
-        <img className="xrkr-radio-skin-image" src="/assets/player/xrkr-radio-skin-desktop.png" alt="XRKR Radio player skin" />
+        <img className="xrkr-radio-skin-image" src="/assets/player/xrkr-radio-skin-desktop-cropped.png" alt="XRKR Radio player skin" />
         <div className="xrkr-radio-display">
+          <p className="xrkr-radio-status">PLAY DISC 01 TRK {trackNumber}/{totalTracks}</p>
           <p className="xrkr-radio-now">
             <strong id="home-current-track">{current.title}</strong>
           </p>

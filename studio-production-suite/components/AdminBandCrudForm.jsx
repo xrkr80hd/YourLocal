@@ -17,13 +17,14 @@ function slugify(value) {
 
 function normalizeMembers(value) {
   if (!Array.isArray(value) || !value.length) {
-    return [{ name: '', role: '', image_url: '' }];
+    return [{ name: '', role: '', image_url: '', status: 'current' }];
   }
 
   return value.map((item) => ({
     name: String(item?.name || ''),
     role: String(item?.role || ''),
     image_url: String(item?.image_url || ''),
+    status: item?.status === 'past' || item?.is_past === true ? 'past' : 'current',
   }));
 }
 
@@ -60,6 +61,8 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
   const setMemberValue = (index, key, value) => {
     setMembers((current) => current.map((member, idx) => (idx === index ? { ...member, [key]: value } : member)));
   };
+
+  const createMember = (status = 'current') => ({ name: '', role: '', image_url: '', status: status === 'past' ? 'past' : 'current' });
 
   return (
     <form
@@ -235,6 +238,7 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
       </AdminAccordionSection>
 
       <AdminAccordionSection title={isSoloArtist ? 'Artist Team' : 'Band Members'} note="Create and manage members." defaultOpen={false}>
+        <p className="meta">Use Lineup = Past for former members. Member image is optional.</p>
         <div className="grid">
           {members.map((member, index) => (
             <article key={`member-${index}`} className="card">
@@ -259,10 +263,17 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
                     placeholder="Vocals / Guitar / Drums"
                   />
                 </div>
+                <div className="form-row">
+                  <label htmlFor={`member-status-${index}`}>Lineup</label>
+                  <select id={`member-status-${index}`} value={member.status || 'current'} onChange={(event) => setMemberValue(index, 'status', event.target.value)}>
+                    <option value="current">Current</option>
+                    <option value="past">Past</option>
+                  </select>
+                </div>
               </div>
               <MediaUrlInput
                 id={`member-image-${index}`}
-                label="Member Image URL"
+                label="Member Image URL (optional)"
                 value={member.image_url}
                 onChange={(nextValue) => setMemberValue(index, 'image_url', nextValue)}
                 folder="images/artists"
@@ -273,8 +284,7 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
                 <button
                   className="button danger"
                   type="button"
-                  onClick={() => setMembers((current) => (current.length > 1 ? current.filter((_, idx) => idx !== index) : current))}
-                  disabled={members.length <= 1}
+                  onClick={() => setMembers((current) => current.filter((_, idx) => idx !== index))}
                 >
                   Remove Member
                 </button>
@@ -286,9 +296,16 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
           <button
             className="button"
             type="button"
-            onClick={() => setMembers((current) => [...current, { name: '', role: '', image_url: '' }])}
+            onClick={() => setMembers((current) => [...current, createMember('current')])}
           >
-            Add Member
+            Add Current Member
+          </button>
+          <button
+            className="button"
+            type="button"
+            onClick={() => setMembers((current) => [...current, createMember('past')])}
+          >
+            Add Past Member
           </button>
         </div>
       </AdminAccordionSection>

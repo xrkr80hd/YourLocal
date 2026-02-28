@@ -64,17 +64,18 @@ const publicNavItems = [
 function getAdminNavItems(ownerMode) {
   const items = [
     { href: '/admin', label: 'Dashboard', className: 'nav-admin-link' },
-    { href: '/admin/blog', label: 'Blog Manager', className: 'nav-admin-link' },
-    { href: '/admin/bands', label: 'Band Editor', className: 'nav-admin-link' },
-    { href: '/admin/podcasts', label: 'Podcast Editor', className: 'nav-admin-link' },
-    { href: '/admin/password', label: 'My Password', className: 'nav-admin-link' },
-    { href: '/', label: 'View Site', className: 'nav-admin-link nav-admin-secondary' },
+    { href: '/admin/guide', label: 'Guide', className: 'nav-admin-link' },
+    { href: '/admin/blog', label: 'Blog', className: 'nav-admin-link' },
+    { href: '/admin/bands', label: 'Bands', className: 'nav-admin-link' },
+    { href: '/admin/podcasts', label: 'Podcasts', className: 'nav-admin-link' },
+    { href: '/admin/password', label: 'Password', className: 'nav-admin-link' },
+    { href: '/', label: 'Site', className: 'nav-admin-link nav-admin-secondary' },
   ];
 
   if (ownerMode) {
-    items.push({ href: '/admin/home', label: 'Home Controls', className: 'nav-admin-link' });
-    items.push({ href: '/admin/tracks', label: 'Tracks Manager', className: 'nav-admin-link' });
-    items.push({ href: '/admin/users', label: 'Admin Users', className: 'nav-admin-link' });
+    items.push({ href: '/admin/home', label: 'Home', className: 'nav-admin-link' });
+    items.push({ href: '/admin/tracks', label: 'Tracks', className: 'nav-admin-link' });
+    items.push({ href: '/admin/users', label: 'Users', className: 'nav-admin-link' });
   }
 
   return items;
@@ -83,6 +84,10 @@ function getAdminNavItems(ownerMode) {
 function isActive(pathname, href) {
   if (href === '/') {
     return pathname === '/';
+  }
+
+  if (href === '/admin') {
+    return pathname === '/admin' || pathname === '/admin/dashboard';
   }
 
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -122,8 +127,9 @@ export default function SiteHeader({ adminMode = false, ownerMode = false, admin
               {item.label}
             </Link>
           ))}
-          {adminMode && adminUser ? <span className="nav-admin-user">Signed in: {adminUser}</span> : null}
+          {adminMode && adminUser ? <span className="nav-admin-user nav-admin-user-mobile">Signed in: {adminUser}</span> : null}
         </nav>
+        {adminMode && adminUser ? <span className="nav-admin-user nav-admin-user-desktop">Signed in: {adminUser}</span> : null}
       </div>
     </header>
   );

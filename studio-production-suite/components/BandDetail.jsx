@@ -4,8 +4,15 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getEnabledSocialLinks } from '../lib/social-platforms';
 
+function isPastMember(member) {
+  const status = String(member?.status || '').trim().toLowerCase();
+  return member?.is_past === true || status === 'past' || status === 'former';
+}
+
 export default function BandDetail({ band, backHref, backLabel }) {
   const members = Array.isArray(band.members) ? band.members : [];
+  const currentMembers = members.filter((member) => !isPastMember(member));
+  const pastMembers = members.filter((member) => isPastMember(member));
   const socialLinks = getEnabledSocialLinks(band.social_links);
   const primaryPhoto = band.band_photo_url || band.image_url;
   const [modal, setModal] = useState(null);
@@ -78,11 +85,11 @@ export default function BandDetail({ band, backHref, backLabel }) {
         </section>
       ) : null}
 
-      {members.length ? (
+      {currentMembers.length ? (
         <section className="card section-space">
           <h2 className="section-title">{band.is_solo_artist ? 'Artist Team' : 'Band Members'}</h2>
           <div className="members-grid">
-            {members.map((member, index) => (
+            {currentMembers.map((member, index) => (
               <article key={`${member.name || 'member'}-${index}`} className="member-card">
                 <div className="member-avatar">
                   {member.image_url ? (
@@ -99,6 +106,34 @@ export default function BandDetail({ band, backHref, backLabel }) {
                   )}
                 </div>
                 <div className="member-name">{member.name || 'Member'}</div>
+                {member.role ? <div className="member-role">{member.role}</div> : null}
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {pastMembers.length ? (
+        <section className="card section-space">
+          <h2 className="section-title">Past Members</h2>
+          <div className="members-grid">
+            {pastMembers.map((member, index) => (
+              <article key={`${member.name || 'past-member'}-${index}`} className="member-card">
+                <div className="member-avatar">
+                  {member.image_url ? (
+                    <button
+                      type="button"
+                      className="member-avatar-trigger"
+                      aria-label={`Expand ${member.name || 'past member'} photo`}
+                      onClick={() => setModal({ src: member.image_url, alt: `${member.name || 'Past Member'} photo` })}
+                    >
+                      <img src={member.image_url} alt={member.name || 'Past Member'} />
+                    </button>
+                  ) : (
+                    <span>{String(member.name || 'M').slice(0, 1).toUpperCase()}</span>
+                  )}
+                </div>
+                <div className="member-name">{member.name || 'Past Member'}</div>
                 {member.role ? <div className="member-role">{member.role}</div> : null}
               </article>
             ))}

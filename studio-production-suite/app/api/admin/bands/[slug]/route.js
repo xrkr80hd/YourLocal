@@ -9,12 +9,19 @@ export const runtime = 'nodejs';
 function normalizeMembers(value) {
   const source = Array.isArray(value) ? value : [];
   return source
-    .map((member) => ({
-      name: clampText(member?.name, 120),
-      role: clampText(member?.role, 120),
-      image_url: String(member?.image_url || '').trim(),
-    }))
-    .filter((member) => member.name !== '' && isValidMediaUrl(member.image_url));
+    .map((member) => {
+      const imageUrl = String(member?.image_url || '').trim();
+      const statusRaw = String(member?.status || '').trim().toLowerCase();
+      const status = member?.is_past === true || statusRaw === 'past' || statusRaw === 'former' ? 'past' : 'current';
+
+      return {
+        name: clampText(member?.name, 120),
+        role: clampText(member?.role, 120),
+        image_url: imageUrl,
+        status,
+      };
+    })
+    .filter((member) => member.name !== '' && (member.image_url === '' || isValidMediaUrl(member.image_url)));
 }
 
 function buildBandPayload(raw, socialLinks) {

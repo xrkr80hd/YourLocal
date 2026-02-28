@@ -2,22 +2,27 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { getSupabaseAdminLinks } from '../../lib/admin-links';
 import AdminLogoutButton from '../../components/AdminLogoutButton';
-import { ADMIN_SESSION_USER_COOKIE, isOwnerUsername } from '../../lib/admin-auth';
+import AdminMediaGuide from '../../components/AdminMediaGuide';
+import { ADMIN_SESSION_USER_COOKIE, getAdminOwnerUsername, isOwnerUsername } from '../../lib/admin-auth';
 
 export const metadata = {
   title: 'Admin | xrkr80hd Studio',
 };
 
-export default function AdminPage() {
+export default function AdminPage({ searchParams }) {
   const links = getSupabaseAdminLinks();
   const actingUser = cookies().get(ADMIN_SESSION_USER_COOKIE)?.value || '';
   const ownerMode = isOwnerUsername(actingUser);
+  const ownerUsername = getAdminOwnerUsername();
+  const error = String(searchParams?.error || '');
+  const deniedPath = String(searchParams?.from || '');
   const ownerActions = [
     { href: '/admin/home', label: 'Homepage Controls', detail: 'Landing profile and Site Guide card photos.' },
     { href: '/admin/tracks', label: 'Tracks Manager', detail: 'Upload audio, sort tracks, choose home player list.' },
     { href: '/admin/users', label: 'Manage Admin Users', detail: 'Create/remove lower-tier admins.' },
   ];
   const commonActions = [
+    { href: '/admin/guide', label: 'Admin Guide', detail: 'Image sizes and media upload standards.' },
     { href: '/admin/blog', label: 'Blog Manager', detail: 'Write and publish blog posts.' },
     { href: '/admin/bands', label: 'Band Manager', detail: 'Create/edit bands, photos, members, socials.' },
     { href: '/admin/podcasts', label: 'Podcast Manager', detail: 'Create podcast profiles and manage episodes.' },
@@ -32,6 +37,12 @@ export default function AdminPage() {
       </section>
 
       <section className="card section-space">
+        {error === 'owner' ? (
+          <p className="alert">
+            Access denied for <strong>{deniedPath || 'that route'}</strong>. Signed in as <strong>{actingUser || 'unknown'}</strong>. Owner-only routes
+            require <strong>{ownerUsername}</strong>.
+          </p>
+        ) : null}
         <h3 className="section-title">Edit Panels</h3>
         <div className="admin-action-grid">
           {commonActions.map((item) => (
@@ -85,6 +96,8 @@ export default function AdminPage() {
           <p className="meta">Standard admin mode: content CRUD + uploads.</p>
         )}
       </section>
+
+      <AdminMediaGuide />
     </>
   );
 }
