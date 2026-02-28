@@ -1077,12 +1077,12 @@ label {
   left: 18.2%;
   right: 18.2%;
   top: 35.2%;
-  bottom: 24.6%;
+  bottom: 25.8%;
   display: grid;
   grid-template-rows: auto auto auto;
   align-content: center;
   gap: 0.12rem;
-  padding: 0.2rem 0.56rem 0.28rem;
+  padding: 0.2rem 0.56rem 0.42rem;
   border: 1px solid rgba(90, 220, 255, 0.24);
   border-radius: 18px;
   background: #000;
@@ -1768,8 +1768,8 @@ label {
     left: 18%;
     right: 18%;
     top: 35%;
-    bottom: 24%;
-    padding: 0.15rem 0.34rem 0.22rem;
+    bottom: 25%;
+    padding: 0.15rem 0.34rem 0.3rem;
     border-radius: 13px;
   }
   .xrkr-radio-status {
