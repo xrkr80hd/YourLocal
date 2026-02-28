@@ -55,14 +55,14 @@ export default function AdminPage({ searchParams }) {
         <h3 className="section-title">Edit Panels</h3>
         <div className="admin-action-grid">
           {commonActions.map((item) => (
-            <Link key={item.href} className="admin-action-tile" href={item.href}>
+            <Link key={item.href} className="admin-action-tile" href={item.href} prefetch={false}>
               <strong>{item.label}</strong>
               <span>{item.detail}</span>
             </Link>
           ))}
           {ownerMode
             ? ownerActions.map((item) => (
-                <Link key={item.href} className="admin-action-tile owner" href={item.href}>
+                <Link key={item.href} className="admin-action-tile owner" href={item.href} prefetch={false}>
                   <strong>{item.label}</strong>
                   <span>{item.detail}</span>
                 </Link>
@@ -99,7 +99,7 @@ export default function AdminPage({ searchParams }) {
         </h3>
         <div className="admin-action-grid compact">
           {publicQaLinks.map((item) => (
-            <Link key={item.href} className="admin-action-tile" href={item.href}>
+            <Link key={item.href} className="admin-action-tile" href={item.href} prefetch={false}>
               <strong>{item.label}</strong>
               <span>{item.detail}</span>
             </Link>

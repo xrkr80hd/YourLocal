@@ -1077,13 +1077,13 @@ label {
   position: absolute;
   left: 18.2%;
   right: 18.2%;
-  top: 31.2%;
+  top: 30.8%;
   bottom: 28.6%;
   display: grid;
   grid-template-rows: auto auto auto;
   align-content: center;
   gap: 0.12rem;
-  padding: 0.08rem 0.56rem 0.62rem;
+  padding: 0.08rem 0.56rem 0.55rem;
   border: 1px solid rgba(104, 230, 255, 0.42);
   border-radius: 18px;
   background: linear-gradient(180deg, #04101a 0%, #000 44%, #01060a 100%);
@@ -1783,9 +1783,9 @@ label {
   .xrkr-radio-display {
     left: 18%;
     right: 18%;
-    top: 31.4%;
+    top: 31%;
     bottom: 27.5%;
-    padding: 0.07rem 0.34rem 0.5rem;
+    padding: 0.07rem 0.34rem 0.44rem;
     border-radius: 13px;
   }
   .xrkr-radio-status {

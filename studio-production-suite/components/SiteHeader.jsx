@@ -103,7 +103,7 @@ export default function SiteHeader({ adminMode = false, ownerMode = false, admin
   return (
     <header className={`nav ${adminMode ? 'admin-mode' : ''}`.trim()}>
       <div className="container nav-inner">
-        <Link href={adminMode ? '/admin' : '/'} className={`brand ${adminMode ? 'admin-brand' : ''}`.trim()} onClick={() => setOpen(false)}>
+        <Link prefetch={false} href={adminMode ? '/admin' : '/'} className={`brand ${adminMode ? 'admin-brand' : ''}`.trim()} onClick={() => setOpen(false)}>
           xrkr80hd.studio
         </Link>
         <button
@@ -123,6 +123,7 @@ export default function SiteHeader({ adminMode = false, ownerMode = false, admin
             <Link
               key={item.href}
               href={item.href}
+              prefetch={false}
               className={`${item.className || ''} ${isActive(pathname, item.href) ? 'active' : ''}`.trim()}
               onClick={() => setOpen(false)}
             >
