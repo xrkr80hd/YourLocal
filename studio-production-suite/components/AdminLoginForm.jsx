@@ -19,6 +19,7 @@ export default function AdminLoginForm() {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState(initialError);
   const [loading, setLoading] = useState(false);
 
@@ -73,12 +74,20 @@ export default function AdminLoginForm() {
         <label htmlFor="admin-password">Password</label>
         <input
           id="admin-password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           autoComplete="current-password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           required
         />
+        <button
+          className="button"
+          type="button"
+          style={{ marginTop: '0.45rem' }}
+          onClick={() => setShowPassword((value) => !value)}
+        >
+          {showPassword ? 'Hide Password' : 'Show Password'}
+        </button>
       </div>
       <button className="button primary" type="submit" disabled={loading}>
         {loading ? 'Signing In...' : 'Sign In'}

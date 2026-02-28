@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { ADMIN_SESSION_USER_COOKIE, isOwnerUsername } from '../../../../../lib/admin-auth';
-import { deleteAdminUser, normalizeAdminUsername } from '../../../../../lib/admin-users';
+import { deleteAdminUser, normalizeAdminUsername, updateAdminUserPassword } from '../../../../../lib/admin-users';
 
 export const runtime = 'nodejs';
 
@@ -29,6 +29,28 @@ export async function DELETE(request, { params }) {
 
   if (!result.ok) {
     return NextResponse.json({ error: result.error || 'Delete failed.' }, { status: 400 });
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
+export async function PATCH(request, { params }) {
+  if (!ownerGuard(request)) {
+    return NextResponse.json({ error: 'Only the owner account can manage admin users.' }, { status: 403 });
+  }
+
+  const username = normalizeAdminUsername(params.username);
+  const body = await request.json().catch(() => ({}));
+  const password = String(body.password || '');
+
+  if (!username) {
+    return NextResponse.json({ error: 'Invalid username.' }, { status: 400 });
+  }
+
+  const result = await updateAdminUserPassword(username, password);
+
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error || 'Password reset failed.' }, { status: 400 });
   }
 
   return NextResponse.json({ ok: true });

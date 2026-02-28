@@ -26,11 +26,9 @@ export default function AdminPage() {
           <Link className="button" href="/admin/bands">
             Manage Band Socials
           </Link>
-          {ownerMode ? (
-            <Link className="button" href="/admin/users">
-              Manage Admin Users
-            </Link>
-          ) : null}
+          <Link className="button" href="/admin/users">
+            Manage Admin Users
+          </Link>
           <Link className="button primary" href="/upload">
             Upload Media
           </Link>
@@ -48,6 +46,7 @@ export default function AdminPage() {
         <p className="meta" style={{ marginTop: '0.8rem' }}>
           Note: the old Laravel `/admin/*` controllers were replaced during the Next.js migration. This is the active admin entry for the current app.
         </p>
+        <p className="meta">Signed in as: {actingUser || 'unknown'}</p>
         {ownerMode ? (
           <p className="meta">Owner tools are enabled for this session.</p>
         ) : (

@@ -151,6 +151,41 @@ export async function deleteAdminUser(username) {
   return { ok: true, missingTable: false, error: null };
 }
 
+export async function updateAdminUserPassword(username, password) {
+  const supabase = adminSupabase();
+
+  if (!supabase) {
+    return { ok: false, missingTable: false, error: 'Missing Supabase server credentials.' };
+  }
+
+  const safeUsername = normalizeAdminUsername(username);
+  const safePassword = String(password || '');
+
+  if (!safeUsername) {
+    return { ok: false, missingTable: false, error: 'Invalid username.' };
+  }
+
+  if (safePassword.length < 10) {
+    return { ok: false, missingTable: false, error: 'Password must be at least 10 characters.' };
+  }
+
+  const passwordHash = hashPassword(safePassword);
+  const result = await supabase
+    .from(TABLE)
+    .update({ password_hash: passwordHash, updated_at: new Date().toISOString() })
+    .eq('username', safeUsername);
+
+  if (result.error) {
+    return {
+      ok: false,
+      missingTable: isMissingTableError(result.error),
+      error: result.error.message,
+    };
+  }
+
+  return { ok: true, missingTable: false, error: null };
+}
+
 export async function verifyDatabaseAdminCredentials(username, password) {
   const lookup = await findAdminUserByUsername(username);
 

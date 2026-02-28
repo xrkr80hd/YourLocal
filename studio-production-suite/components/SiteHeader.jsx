@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
-const navItems = [
+const publicNavItems = [
   { href: '/', label: 'Home', className: 'nav-cool' },
   {
     href: '/hub',
@@ -51,6 +51,13 @@ const navItems = [
   { href: '/contact', label: 'Contact', className: 'nav-cool' },
 ];
 
+const adminNavItems = [
+  { href: '/admin', label: 'Dashboard', className: 'nav-admin-link' },
+  { href: '/admin/bands', label: 'Band Editor', className: 'nav-admin-link' },
+  { href: '/upload', label: 'Upload', className: 'nav-admin-link' },
+  { href: '/admin/users', label: 'Admin Users', className: 'nav-admin-link' },
+];
+
 function isActive(pathname, href) {
   if (href === '/') {
     return pathname === '/';
@@ -59,20 +66,21 @@ function isActive(pathname, href) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export default function SiteHeader() {
+export default function SiteHeader({ adminMode = false, adminUser = '' }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const navItems = adminMode ? [...adminNavItems, ...publicNavItems] : publicNavItems;
 
   return (
-    <header className="nav">
+    <header className={`nav ${adminMode ? 'admin-mode' : ''}`.trim()}>
       <div className="container nav-inner">
-        <Link href="/" className="brand" onClick={() => setOpen(false)}>
+        <Link href={adminMode ? '/admin' : '/'} className={`brand ${adminMode ? 'admin-brand' : ''}`.trim()} onClick={() => setOpen(false)}>
           xrkr80hd.studio
         </Link>
         <button
-          className="nav-toggle"
+          className={`nav-toggle ${adminMode ? 'admin-toggle' : ''}`.trim()}
           type="button"
-          aria-label="Toggle navigation"
+          aria-label={adminMode ? 'Toggle admin navigation' : 'Toggle navigation'}
           aria-expanded={open ? 'true' : 'false'}
           aria-controls="site-nav"
           onClick={() => setOpen((value) => !value)}
@@ -81,6 +89,7 @@ export default function SiteHeader() {
           <span />
           <span />
         </button>
+        {adminMode ? <span className="admin-badge">{adminUser ? `Admin: ${adminUser}` : 'Admin Mode'}</span> : null}
         <nav className={`nav-links ${open ? 'open' : ''}`} id="site-nav">
           {navItems.map((item) => (
             <Link
