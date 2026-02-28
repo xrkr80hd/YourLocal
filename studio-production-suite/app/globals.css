@@ -1076,20 +1076,21 @@ label {
   position: absolute;
   left: 18.2%;
   right: 18.2%;
-  top: 35.2%;
-  bottom: 25.8%;
+  top: 34.9%;
+  bottom: 27.1%;
   display: grid;
   grid-template-rows: auto auto auto;
   align-content: center;
   gap: 0.12rem;
-  padding: 0.2rem 0.56rem 0.42rem;
-  border: 1px solid rgba(90, 220, 255, 0.24);
+  padding: 0.18rem 0.56rem 0.52rem;
+  border: 1px solid rgba(104, 230, 255, 0.42);
   border-radius: 18px;
-  background: #000;
+  background: linear-gradient(180deg, #04101a 0%, #000 44%, #01060a 100%);
   box-shadow:
-    inset 0 0 0 1px rgba(8, 55, 74, 0.9),
-    inset 0 0 22px rgba(16, 102, 141, 0.36);
-  color: #bdefff;
+    inset 0 0 0 1px rgba(0, 154, 220, 0.38),
+    inset 0 0 30px rgba(33, 176, 255, 0.28),
+    0 0 16px rgba(19, 154, 255, 0.18);
+  color: #dcf6ff;
   font-family: "IBM Plex Mono", "Courier Prime", "Courier New", monospace;
   text-transform: uppercase;
   line-height: 1.15;
@@ -1104,22 +1105,23 @@ label {
   pointer-events: none;
   background: repeating-linear-gradient(
     180deg,
-    rgba(167, 232, 255, 0.06) 0 1px,
-    rgba(0, 0, 0, 0.24) 1px 3px
+    rgba(194, 242, 255, 0.08) 0 1px,
+    rgba(0, 0, 0, 0.28) 1px 3px
   );
 }
 
 .xrkr-radio-status {
   margin: 0;
   font-size: clamp(0.57rem, 0.75vw, 0.68rem);
-  letter-spacing: 0.1em;
-  color: rgba(149, 227, 255, 0.78);
+  letter-spacing: 0.12em;
+  color: rgba(153, 229, 255, 0.9);
+  text-shadow: 0 0 10px rgba(81, 216, 255, 0.34);
 }
 
 .xrkr-radio-now {
   margin: 0;
-  color: #d6f6ff;
-  text-shadow: 0 0 10px rgba(69, 200, 255, 0.22);
+  color: #e5fbff;
+  text-shadow: 0 0 12px rgba(90, 222, 255, 0.3);
   font-size: clamp(0.66rem, 1vw, 0.82rem);
   letter-spacing: 0.06em;
   white-space: nowrap;
@@ -1128,8 +1130,20 @@ label {
   line-height: 1.15;
 }
 
-.xrkr-radio-now strong {
+.xrkr-radio-artist {
+  color: #69dfff;
   font-weight: 700;
+  text-shadow: 0 0 10px rgba(52, 214, 255, 0.5);
+}
+
+.xrkr-radio-sep {
+  color: rgba(178, 238, 255, 0.78);
+}
+
+.xrkr-radio-track {
+  color: #ffffff;
+  font-weight: 700;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.22);
 }
 
 .xrkr-radio-controls {
@@ -1137,8 +1151,8 @@ label {
   margin: 0;
   height: 29px;
   color-scheme: dark;
-  filter: saturate(0.1) brightness(0.85) contrast(1.16);
-  opacity: 0.96;
+  filter: saturate(0.18) brightness(0.98) contrast(1.18);
+  opacity: 0.98;
   position: relative;
   z-index: 1;
 }
@@ -1147,7 +1161,8 @@ label {
   margin: 0;
   font-size: clamp(0.55rem, 0.72vw, 0.64rem);
   letter-spacing: 0.05em;
-  color: rgba(158, 229, 255, 0.72);
+  color: rgba(175, 236, 255, 0.86);
+  text-shadow: 0 0 10px rgba(76, 214, 255, 0.24);
   line-height: 1.18;
   position: relative;
   z-index: 1;
@@ -1767,9 +1782,9 @@ label {
   .xrkr-radio-display {
     left: 18%;
     right: 18%;
-    top: 35%;
-    bottom: 25%;
-    padding: 0.15rem 0.34rem 0.3rem;
+    top: 34.8%;
+    bottom: 26.3%;
+    padding: 0.14rem 0.34rem 0.38rem;
     border-radius: 13px;
   }
   .xrkr-radio-status {
