@@ -34,6 +34,7 @@ export default function AdminPage({ searchParams }) {
     { href: '/admin/blog', label: 'Blog Manager', detail: 'Write and publish blog posts.' },
     { href: '/admin/bands', label: 'Band Manager', detail: 'Create/edit bands, photos, members, socials.' },
     { href: '/admin/podcasts', label: 'Podcast Manager', detail: 'Create podcast profiles and manage episodes.' },
+    { href: '/admin/business', label: 'Business Manager', detail: 'Create/edit local business cards with logos and links.' },
     { href: '/admin/password', label: 'My Password', detail: 'Update your own login password.' },
   ];
 

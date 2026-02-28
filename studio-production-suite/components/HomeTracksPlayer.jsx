@@ -1,6 +1,20 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
+function randomIndex(length, exclude = -1) {
+  if (length <= 1) {
+    return 0;
+  }
+
+  let next = Math.floor(Math.random() * length);
+  let guard = 0;
+  while (next === exclude && guard < 12) {
+    next = Math.floor(Math.random() * length);
+    guard += 1;
+  }
+  return next;
+}
 
 export default function HomeTracksPlayer({ tracks }) {
   const items = useMemo(() => tracks || [], [tracks]);
@@ -11,6 +25,20 @@ export default function HomeTracksPlayer({ tracks }) {
   const displayTrack = String(current?.title || '').trim() || 'NO TRACKS UPLOADED';
   const trackNumber = String((hasTracks ? index : 0) + 1).padStart(2, '0');
   const totalTracks = String(hasTracks ? items.length : 0).padStart(2, '0');
+
+  useEffect(() => {
+    if (!items.length) {
+      setIndex(0);
+      return;
+    }
+
+    setIndex((currentIndex) => {
+      if (currentIndex >= 0 && currentIndex < items.length) {
+        return currentIndex;
+      }
+      return randomIndex(items.length);
+    });
+  }, [items.length]);
 
   return (
     <div className="xrkr-radio-shell">
@@ -24,27 +52,26 @@ export default function HomeTracksPlayer({ tracks }) {
             <strong className="xrkr-radio-track" id="home-current-track">{displayTrack}</strong>
           </p>
           {current?.audio_url ? (
-            <audio key={current.audio_url || current.id} id="home-main-player" className="xrkr-radio-controls" controls src={current.audio_url} />
+            <audio
+              key={current.audio_url || current.id}
+              id="home-main-player"
+              className="xrkr-radio-controls"
+              controls
+              autoPlay
+              src={current.audio_url}
+              onEnded={() =>
+                setIndex((currentIndex) => {
+                  if (items.length <= 1) {
+                    return 0;
+                  }
+                  return randomIndex(items.length, currentIndex);
+                })
+              }
+            />
           ) : (
             <p className="xrkr-radio-controls-placeholder">Upload tracks in admin to activate player controls.</p>
           )}
         </div>
-      </div>
-      <div className="xrkr-radio-picker">
-        <label htmlFor="home-track-select" className="meta">
-          Choose track
-        </label>
-        <select id="home-track-select" value={String(hasTracks ? index : 0)} onChange={(event) => setIndex(Number(event.target.value) || 0)} disabled={!hasTracks}>
-          {hasTracks ? (
-            items.map((track, trackIndex) => (
-              <option key={`${track.id || track.title}-${trackIndex}`} value={String(trackIndex)}>
-                {track.title}
-              </option>
-            ))
-          ) : (
-            <option value="0">No tracks uploaded yet</option>
-          )}
-        </select>
       </div>
     </div>
   );

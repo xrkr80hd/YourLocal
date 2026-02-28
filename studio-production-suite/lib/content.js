@@ -353,6 +353,77 @@ export async function getPodcastEpisodesForPodcastAdmin(podcastId) {
   return fetchPodcastEpisodesByPodcastId(podcastId, { publishedOnly: false, limit: null });
 }
 
+async function fetchLocalBusinesses({ publishedOnly = false } = {}) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return [];
+  }
+
+  const run = (includeSortOrder) => {
+    let query = supabase.from('local_businesses').select('*');
+    if (publishedOnly) {
+      query = query.eq('is_published', true);
+    }
+    if (includeSortOrder) {
+      query = query.order('sort_order', { ascending: true });
+    }
+    return query.order('name', { ascending: true });
+  };
+
+  try {
+    const ordered = await run(true);
+    if (!ordered.error) {
+      return ordered.data || [];
+    }
+
+    const message = String(ordered.error.message || '');
+    if (!message.includes('sort_order')) {
+      if (!message.includes('Could not find the table')) {
+        console.error('[content:local_businesses]', message);
+      }
+      return [];
+    }
+
+    const fallback = await run(false);
+    if (fallback.error) {
+      console.error('[content:local_businesses_fallback]', fallback.error.message);
+      return [];
+    }
+
+    return (fallback.data || []).map((item) => ({ ...item, sort_order: 0 }));
+  } catch (error) {
+    console.error('[content:local_businesses_error]', error);
+    return [];
+  }
+}
+
+export async function getPublishedLocalBusinesses() {
+  return fetchLocalBusinesses({ publishedOnly: true });
+}
+
+export async function getLocalBusinessesForAdmin() {
+  return fetchLocalBusinesses({ publishedOnly: false });
+}
+
+export async function getLocalBusinessByIdForAdmin(id) {
+  const safeId = Number.parseInt(String(id || ''), 10);
+  if (!Number.isFinite(safeId) || safeId <= 0) {
+    return null;
+  }
+
+  return runQuery(
+    `local_business_admin_${safeId}`,
+    (supabase) =>
+      supabase
+        .from('local_businesses')
+        .select('*')
+        .eq('id', safeId)
+        .limit(1)
+        .maybeSingle(),
+    null
+  );
+}
+
 export async function getProjects() {
   return runQuery(
     'projects',

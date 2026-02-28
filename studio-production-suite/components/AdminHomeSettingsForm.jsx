@@ -15,6 +15,7 @@ export default function AdminHomeSettingsForm({ initialProfile = null }) {
   const [sceneCardImageUrl, setSceneCardImageUrl] = useState(String(initialProfile?.home_scene_card_image_url || ''));
   const [podcastCardImageUrl, setPodcastCardImageUrl] = useState(String(initialProfile?.home_podcast_card_image_url || ''));
   const [hubCardImageUrl, setHubCardImageUrl] = useState(String(initialProfile?.home_hub_card_image_url || ''));
+  const [businessCardImageUrl, setBusinessCardImageUrl] = useState(String(initialProfile?.home_business_card_image_url || ''));
   const [contactCardImageUrl, setContactCardImageUrl] = useState(String(initialProfile?.home_contact_card_image_url || ''));
   const [status, setStatus] = useState('');
   const [saving, setSaving] = useState(false);
@@ -36,6 +37,7 @@ export default function AdminHomeSettingsForm({ initialProfile = null }) {
           home_scene_card_image_url: sceneCardImageUrl,
           home_podcast_card_image_url: podcastCardImageUrl,
           home_hub_card_image_url: hubCardImageUrl,
+          home_business_card_image_url: businessCardImageUrl,
           home_contact_card_image_url: contactCardImageUrl,
         };
 
@@ -130,6 +132,16 @@ export default function AdminHomeSettingsForm({ initialProfile = null }) {
           label="YourLocal Podcast Card Image URL"
           value={podcastCardImageUrl}
           onChange={setPodcastCardImageUrl}
+          folder="images/posts"
+          accept="image/*"
+          placeholder="https://... or /..."
+        />
+
+        <MediaUrlInput
+          id="home-business-card-image-url"
+          label="YourLocal Business Card Image URL"
+          value={businessCardImageUrl}
+          onChange={setBusinessCardImageUrl}
           folder="images/posts"
           accept="image/*"
           placeholder="https://... or /..."

@@ -87,6 +87,9 @@ export default async function HomePage() {
     if (card.key === 'podcast' && profile?.home_podcast_card_image_url) {
       return { ...card, image: profile.home_podcast_card_image_url };
     }
+    if (card.key === 'business' && profile?.home_business_card_image_url) {
+      return { ...card, image: profile.home_business_card_image_url };
+    }
     if (card.key === 'contact' && profile?.home_contact_card_image_url) {
       return { ...card, image: profile.home_contact_card_image_url };
     }

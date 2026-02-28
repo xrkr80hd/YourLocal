@@ -23,6 +23,7 @@ function buildPayload(raw) {
   const sceneCardImageUrl = String(raw?.home_scene_card_image_url || '').trim();
   const podcastCardImageUrl = String(raw?.home_podcast_card_image_url || '').trim();
   const hubCardImageUrl = String(raw?.home_hub_card_image_url || '').trim();
+  const businessCardImageUrl = String(raw?.home_business_card_image_url || '').trim();
   const contactCardImageUrl = String(raw?.home_contact_card_image_url || '').trim();
 
   if (
@@ -31,6 +32,7 @@ function buildPayload(raw) {
     !isValidMediaUrl(sceneCardImageUrl) ||
     !isValidMediaUrl(podcastCardImageUrl) ||
     !isValidMediaUrl(hubCardImageUrl) ||
+    !isValidMediaUrl(businessCardImageUrl) ||
     !isValidMediaUrl(contactCardImageUrl)
   ) {
     return { ok: false, error: 'Image URLs must start with https:// or /' };
@@ -47,6 +49,7 @@ function buildPayload(raw) {
       home_scene_card_image_url: sceneCardImageUrl || null,
       home_podcast_card_image_url: podcastCardImageUrl || null,
       home_hub_card_image_url: hubCardImageUrl || null,
+      home_business_card_image_url: businessCardImageUrl || null,
       home_contact_card_image_url: contactCardImageUrl || null,
     },
   };
@@ -74,6 +77,7 @@ export async function GET(request) {
       message.includes('home_scene_card_image_url') ||
       message.includes('home_podcast_card_image_url') ||
       message.includes('home_hub_card_image_url') ||
+      message.includes('home_business_card_image_url') ||
       message.includes('home_contact_card_image_url')
     ) {
       return NextResponse.json({ error: `${message} ${missingColumnsHelp()}` }, { status: 500 });
@@ -118,6 +122,7 @@ export async function PUT(request) {
       message.includes('home_scene_card_image_url') ||
       message.includes('home_podcast_card_image_url') ||
       message.includes('home_hub_card_image_url') ||
+      message.includes('home_business_card_image_url') ||
       message.includes('home_contact_card_image_url')
     ) {
       return NextResponse.json({ error: `${message} ${missingColumnsHelp()}` }, { status: 500 });
