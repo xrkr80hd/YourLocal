@@ -1141,6 +1141,16 @@ label {
   z-index: 1;
 }
 
+.xrkr-radio-controls-placeholder {
+  margin: 0;
+  font-size: clamp(0.55rem, 0.72vw, 0.64rem);
+  letter-spacing: 0.05em;
+  color: rgba(214, 255, 178, 0.72);
+  line-height: 1.18;
+  position: relative;
+  z-index: 1;
+}
+
 .xrkr-radio-picker {
   margin-top: 0.55rem;
   display: grid;
