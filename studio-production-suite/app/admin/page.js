@@ -21,6 +21,14 @@ export default function AdminPage({ searchParams }) {
     { href: '/admin/tracks', label: 'Tracks Manager', detail: 'Upload audio, sort tracks, choose home player list.' },
     { href: '/admin/users', label: 'Manage Admin Users', detail: 'Create/remove lower-tier admins.' },
   ];
+  const publicQaLinks = [
+    { href: '/', label: 'Home', detail: 'Confirm hero content, radio, and cards.' },
+    { href: '/local-legends-archive', label: 'Legends', detail: 'Confirm archive band cards and details.' },
+    { href: '/your-local-scene', label: 'Scene', detail: 'Confirm active band listings.' },
+    { href: '/podcast', label: 'Podcast', detail: 'Confirm podcast profile changes and latest episodes.' },
+    { href: '/your-local-business', label: 'Business', detail: 'Confirm public business page content.' },
+    { href: '/contact', label: 'Contact', detail: 'Confirm public contact flow.' },
+  ];
   const commonActions = [
     { href: '/admin/guide', label: 'Admin Guide', detail: 'Image sizes and media upload standards.' },
     { href: '/admin/blog', label: 'Blog Manager', detail: 'Write and publish blog posts.' },
@@ -84,6 +92,17 @@ export default function AdminPage({ searchParams }) {
               <AdminLogoutButton />
             </div>
           </div>
+        </div>
+        <h3 className="section-title" style={{ marginTop: '1rem' }}>
+          Public QA Links
+        </h3>
+        <div className="admin-action-grid compact">
+          {publicQaLinks.map((item) => (
+            <Link key={item.href} className="admin-action-tile" href={item.href}>
+              <strong>{item.label}</strong>
+              <span>{item.detail}</span>
+            </Link>
+          ))}
         </div>
         <p className="meta" style={{ marginTop: '0.8rem' }}>
           Note: the old Laravel `/admin/*` controllers were replaced during the Next.js migration. This is the active admin entry for the current app.

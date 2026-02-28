@@ -69,6 +69,7 @@ function getAdminNavItems(ownerMode) {
     { href: '/admin/bands', label: 'Bands', className: 'nav-admin-link' },
     { href: '/admin/podcasts', label: 'Podcasts', className: 'nav-admin-link' },
     { href: '/admin/password', label: 'Password', className: 'nav-admin-link' },
+    { href: '/hub', label: 'Hub', className: 'nav-admin-link nav-admin-secondary' },
     { href: '/', label: 'Site', className: 'nav-admin-link nav-admin-secondary' },
   ];
 
