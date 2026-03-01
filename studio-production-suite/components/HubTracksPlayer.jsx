@@ -23,6 +23,7 @@ export default function HubTracksPlayer({ tracks }) {
   const [autoPlayOnChange, setAutoPlayOnChange] = useState(false);
   const [volume, setVolume] = useState(82);
   const audioRef = useRef(null);
+  const hasRandomizedOnLoadRef = useRef(false);
   const hasTracks = items.length > 0;
   const activeTrack = hasTracks ? items[index] || items[0] : null;
   const trackNumber = String((hasTracks ? index : 0) + 1).padStart(2, '0');
@@ -32,6 +33,13 @@ export default function HubTracksPlayer({ tracks }) {
     if (!items.length) {
       setIndex(0);
       setIsPlaying(false);
+      hasRandomizedOnLoadRef.current = false;
+      return;
+    }
+
+    if (!hasRandomizedOnLoadRef.current) {
+      hasRandomizedOnLoadRef.current = true;
+      setIndex(randomIndex(items.length));
       return;
     }
 
@@ -126,6 +134,21 @@ export default function HubTracksPlayer({ tracks }) {
     setIsPlaying(false);
   }
 
+  function seekCurrent(deltaSeconds) {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+
+    const nextTime = Math.max(0, (audio.currentTime || 0) + deltaSeconds);
+    if (Number.isFinite(audio.duration) && audio.duration > 0) {
+      audio.currentTime = Math.min(audio.duration, nextTime);
+      return;
+    }
+
+    audio.currentTime = nextTime;
+  }
+
   return (
     <>
       <p className="hub-now-playing">
@@ -144,7 +167,7 @@ export default function HubTracksPlayer({ tracks }) {
         onEnded={() => setTrackIndex((currentIndex) => randomIndex(items.length, currentIndex), { autoplay: true })}
       />
       <div className="hub-icon-controls" role="group" aria-label="Hub track controls">
-        <button type="button" className="icon-control" aria-label="First track" onClick={() => setTrackIndex(0, { autoplay: true })}>
+        <button type="button" className="icon-control" aria-label="Back 10 seconds" onClick={() => seekCurrent(-10)}>
           {'<<'}
         </button>
         <button type="button" className="icon-control" aria-label="Previous track" onClick={() => setTrackIndex((currentIndex) => currentIndex - 1, { autoplay: true })}>
@@ -159,12 +182,7 @@ export default function HubTracksPlayer({ tracks }) {
         <button type="button" className="icon-control" aria-label="Next track" onClick={() => setTrackIndex((currentIndex) => currentIndex + 1, { autoplay: true })}>
           {'>'}
         </button>
-        <button
-          type="button"
-          className={`icon-control ${isPlaying ? 'is-active' : ''}`.trim()}
-          aria-label="Shuffle track"
-          onClick={() => setTrackIndex((currentIndex) => randomIndex(items.length, currentIndex), { autoplay: true })}
-        >
+        <button type="button" className="icon-control" aria-label="Forward 10 seconds" onClick={() => seekCurrent(10)}>
           {'>>'}
         </button>
       </div>

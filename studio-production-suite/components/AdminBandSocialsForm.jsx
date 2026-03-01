@@ -55,33 +55,34 @@ export default function AdminBandSocialsForm({ band }) {
       <h2 className="section-title">Social Links</h2>
       <p className="meta">Toggle each platform on/off, then enter only the suffix (the base URL is prefixed automatically).</p>
 
-      <div className="grid cols-2 section-space">
+      <div className="band-socials-stack section-space">
         {SOCIAL_PLATFORMS.map((platform) => {
           const value = socials[platform.key] || { enabled: false, suffix: '' };
 
           return (
-            <article key={platform.key} className="card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem' }}>
+            <article key={platform.key} className={`band-social-row ${value.enabled ? 'is-enabled' : ''}`.trim()}>
+              <div className="band-social-row-head">
                 <strong>{platform.label}</strong>
-                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                <label className="band-social-row-toggle">
                   <input
                     type="checkbox"
                     checked={Boolean(value.enabled)}
                     onChange={(event) => updateSocial(platform.key, { enabled: event.target.checked })}
                   />
-                  <span className="meta">Enabled</span>
+                  <span className="meta">On</span>
                 </label>
               </div>
-              <p className="meta" style={{ marginTop: '0.45rem' }}>
-                Prefix: <code>{platform.prefix}</code>
-              </p>
-              <div className="form-row" style={{ marginTop: '0.45rem' }}>
-                <label htmlFor={`social-${platform.key}`}>Suffix</label>
+
+              <div className="band-social-row-input">
+                <span className="band-social-prefix" aria-hidden="true">
+                  {platform.prefix}
+                </span>
                 <input
                   id={`social-${platform.key}`}
                   type="text"
                   value={value.suffix || ''}
                   onChange={(event) => updateSocial(platform.key, { suffix: event.target.value })}
+                  aria-label={`${platform.label} suffix`}
                   placeholder="your-handle-or-path"
                 />
               </div>

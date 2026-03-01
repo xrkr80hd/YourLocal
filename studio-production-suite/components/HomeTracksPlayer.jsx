@@ -16,24 +16,46 @@ function randomIndex(length, exclude = -1) {
   return next;
 }
 
+function toFiniteTime(value) {
+  return Number.isFinite(value) && value >= 0 ? value : 0;
+}
+
+function formatClock(value) {
+  const total = Math.max(0, Math.floor(toFiniteTime(value)));
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
 export default function HomeTracksPlayer({ tracks }) {
   const items = useMemo(() => tracks || [], [tracks]);
   const [index, setIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [autoPlayOnChange, setAutoPlayOnChange] = useState(false);
   const [volume, setVolume] = useState(82);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const audioRef = useRef(null);
+  const hasRandomizedOnLoadRef = useRef(false);
   const hasTracks = items.length > 0;
   const current = hasTracks ? items[index] || items[0] : null;
   const displayArtist = String(current?.artist_name || '').trim() || (hasTracks ? 'XRKR80HD' : 'SYSTEM');
   const displayTrack = String(current?.title || '').trim() || 'NO TRACKS UPLOADED';
   const trackNumber = String((hasTracks ? index : 0) + 1).padStart(2, '0');
   const totalTracks = String(hasTracks ? items.length : 0).padStart(2, '0');
+  const progressPercent = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
 
   useEffect(() => {
     if (!items.length) {
       setIndex(0);
       setIsPlaying(false);
+      hasRandomizedOnLoadRef.current = false;
+      return;
+    }
+
+    if (!hasRandomizedOnLoadRef.current) {
+      hasRandomizedOnLoadRef.current = true;
+      setIndex(randomIndex(items.length));
       return;
     }
 
@@ -82,6 +104,11 @@ export default function HomeTracksPlayer({ tracks }) {
     audio.volume = Math.min(1, Math.max(0, volume / 100));
   }, [volume, current?.audio_url]);
 
+  useEffect(() => {
+    setCurrentTime(0);
+    setDuration(0);
+  }, [current?.audio_url]);
+
   function setTrackIndex(nextIndex, { autoplay = false } = {}) {
     if (!hasTracks) {
       return;
@@ -128,6 +155,21 @@ export default function HomeTracksPlayer({ tracks }) {
     setIsPlaying(false);
   }
 
+  function seekCurrent(deltaSeconds) {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+
+    const nextTime = Math.max(0, (audio.currentTime || 0) + deltaSeconds);
+    if (Number.isFinite(audio.duration) && audio.duration > 0) {
+      audio.currentTime = Math.min(audio.duration, nextTime);
+      return;
+    }
+
+    audio.currentTime = nextTime;
+  }
+
   return (
     <div className="xrkr-radio-shell">
       <div className="xrkr-radio-skin">
@@ -139,6 +181,13 @@ export default function HomeTracksPlayer({ tracks }) {
             <span className="xrkr-radio-sep"> - </span>
             <strong className="xrkr-radio-track" id="home-current-track">{displayTrack}</strong>
           </p>
+          <div className="xrkr-radio-progress" aria-label={`Track progress ${formatClock(currentTime)} of ${formatClock(duration)}`}>
+            <span className="xrkr-radio-progress-time">{formatClock(currentTime)}</span>
+            <div className="xrkr-radio-progress-track" aria-hidden="true">
+              <span className="xrkr-radio-progress-fill" style={{ width: `${progressPercent}%` }} />
+            </div>
+            <span className="xrkr-radio-progress-time">{formatClock(duration)}</span>
+          </div>
           {current?.audio_url ? (
             <audio
               ref={audioRef}
@@ -146,6 +195,9 @@ export default function HomeTracksPlayer({ tracks }) {
               id="home-main-player"
               className="xrkr-radio-controls"
               src={current.audio_url}
+              onLoadedMetadata={() => setDuration(toFiniteTime(audioRef.current?.duration))}
+              onDurationChange={() => setDuration(toFiniteTime(audioRef.current?.duration))}
+              onTimeUpdate={() => setCurrentTime(toFiniteTime(audioRef.current?.currentTime))}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
               onEnded={() => setTrackIndex((currentIndex) => randomIndex(items.length, currentIndex), { autoplay: true })}
@@ -158,7 +210,7 @@ export default function HomeTracksPlayer({ tracks }) {
       {hasTracks ? (
         <>
           <div className="xrkr-radio-icon-controls" role="group" aria-label="XRKR Radio controls">
-            <button type="button" className="icon-control" aria-label="First track" onClick={() => setTrackIndex(0, { autoplay: true })}>
+            <button type="button" className="icon-control" aria-label="Back 10 seconds" onClick={() => seekCurrent(-10)}>
               {'<<'}
             </button>
             <button type="button" className="icon-control" aria-label="Previous track" onClick={() => setTrackIndex((currentIndex) => currentIndex - 1, { autoplay: true })}>
@@ -173,12 +225,7 @@ export default function HomeTracksPlayer({ tracks }) {
             <button type="button" className="icon-control" aria-label="Next track" onClick={() => setTrackIndex((currentIndex) => currentIndex + 1, { autoplay: true })}>
               {'>'}
             </button>
-            <button
-              type="button"
-              className={`icon-control ${isPlaying ? 'is-active' : ''}`.trim()}
-              aria-label="Shuffle track"
-              onClick={() => setTrackIndex((currentIndex) => randomIndex(items.length, currentIndex), { autoplay: true })}
-            >
+            <button type="button" className="icon-control" aria-label="Forward 10 seconds" onClick={() => seekCurrent(10)}>
               {'>>'}
             </button>
           </div>

@@ -84,7 +84,7 @@ export default function BandDetail({ band, backHref, backLabel }) {
       {socialLinks.length ? (
         <section className="card section-space">
           <h2 className="section-title">Social Links</h2>
-          <div className="band-social-grid">
+          <div className="band-social-grid band-social-list">
             {socialLinks.map((item) => (
               <a key={item.key} className="band-social-link" href={item.url} target="_blank" rel="noreferrer">
                 {item.label}

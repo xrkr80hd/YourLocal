@@ -139,9 +139,7 @@ export default function MediaUrlInput({
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
         />
-      ) : (
-        compact ? null : <p className="meta">Use upload below. File link is auto-managed after successful upload.</p>
-      )}
+      ) : null}
       {resolvedHelp ? <p className="meta">{resolvedHelp}</p> : null}
       <div className={`upload-widget ${compact ? 'compact' : ''}`.trim()}>
         <input

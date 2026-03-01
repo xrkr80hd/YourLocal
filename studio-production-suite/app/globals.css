@@ -787,6 +787,8 @@ img.cover {
   object-position: center;
   margin: 0.55rem auto 0.9rem;
   background: rgba(6, 11, 19, 0.82);
+  border: 1px solid var(--line);
+  border-radius: 12px;
 }
 
 input, select, textarea {
@@ -1211,6 +1213,12 @@ label {
   gap: 0.55rem;
 }
 
+.band-social-list {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 760px;
+}
+
 .admin-chip-scroll {
   display: flex;
   flex-wrap: nowrap;
@@ -1318,6 +1326,88 @@ label {
   border-color: rgba(127, 216, 255, 0.6);
 }
 
+.band-social-list .band-social-link {
+  width: 100%;
+  justify-content: space-between;
+  padding: 0.5rem 0.78rem;
+  border-radius: 10px;
+  background: linear-gradient(95deg, rgba(11, 18, 31, 0.9), rgba(14, 22, 37, 0.9));
+}
+
+.band-social-list .band-social-link::after {
+  content: '\2197';
+  font-size: 0.9rem;
+  color: #92dbff;
+}
+
+.band-socials-stack {
+  display: grid;
+  gap: 0.58rem;
+}
+
+.band-social-row {
+  border: 1px solid rgba(116, 150, 196, 0.3);
+  border-radius: 10px;
+  background: linear-gradient(160deg, rgba(14, 20, 33, 0.85), rgba(10, 15, 25, 0.9));
+  padding: 0.56rem 0.64rem;
+}
+
+.band-social-row.is-enabled {
+  border-color: rgba(81, 240, 255, 0.5);
+}
+
+.band-social-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 0.42rem;
+}
+
+.band-social-row-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.band-social-row-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.band-social-prefix {
+  flex: 0 0 clamp(120px, 22vw, 280px);
+  max-width: 100%;
+  border: 1px dashed rgba(120, 157, 206, 0.34);
+  border-radius: 8px;
+  background: rgba(10, 16, 28, 0.78);
+  color: #a7bfdd;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  padding: 0.45rem 0.55rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.band-social-row-input input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .band-social-row-input {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .band-social-prefix {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}
+
 .business-logo-wrap {
   margin-bottom: 0.65rem;
 }
@@ -1365,6 +1455,9 @@ label {
   width: min(760px, 100%);
   margin-left: auto;
   margin-right: auto;
+  display: grid;
+  gap: 0.22rem;
+  align-items: start;
 }
 
 .xrkr-radio-skin {
@@ -1387,13 +1480,13 @@ label {
   position: absolute;
   left: 18.2%;
   right: 18.2%;
-  top: 30.8%;
-  bottom: 28.6%;
+  top: 30.5%;
+  bottom: 28%;
   display: grid;
   grid-template-rows: auto auto auto;
   align-content: center;
-  gap: 0.12rem;
-  padding: 0.08rem 0.56rem 0.55rem;
+  gap: 0.14rem;
+  padding: 0.1rem 0.56rem 0.56rem;
   border: 1px solid rgba(104, 230, 255, 0.42);
   border-radius: 18px;
   background: linear-gradient(180deg, #04101a 0%, #000 44%, #01060a 100%);
@@ -1457,6 +1550,38 @@ label {
   text-shadow: 0 0 12px rgba(255, 255, 255, 0.22);
 }
 
+.xrkr-radio-progress {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.36rem;
+}
+
+.xrkr-radio-progress-time {
+  font-size: clamp(0.47rem, 0.65vw, 0.56rem);
+  letter-spacing: 0.08em;
+  color: rgba(158, 233, 255, 0.9);
+  text-shadow: 0 0 8px rgba(61, 205, 255, 0.25);
+}
+
+.xrkr-radio-progress-track {
+  height: 5px;
+  border-radius: 999px;
+  border: 1px solid rgba(95, 225, 255, 0.42);
+  background: rgba(2, 9, 16, 0.9);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(84, 225, 255, 0.1);
+}
+
+.xrkr-radio-progress-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(72, 214, 255, 0.85), rgba(153, 241, 255, 0.95));
+  box-shadow: 0 0 10px rgba(68, 212, 255, 0.35);
+}
+
 .xrkr-radio-controls {
   width: 1px;
   height: 1px;
@@ -1479,7 +1604,7 @@ label {
 }
 
 .xrkr-radio-icon-controls {
-  margin-top: 0.55rem;
+  margin-top: -0.72rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
@@ -1643,6 +1768,11 @@ label {
   margin: 0.5rem auto 0;
   display: grid;
   gap: 0.3rem;
+}
+
+.xrkr-radio-shell .digital-volume-wrap {
+  margin-top: 0.12rem;
+  gap: 0.24rem;
 }
 
 .digital-volume-label {
@@ -2244,9 +2374,9 @@ label {
   .xrkr-radio-display {
     left: 18%;
     right: 18%;
-    top: 31%;
-    bottom: 27.5%;
-    padding: 0.07rem 0.34rem 0.44rem;
+    top: 30.8%;
+    bottom: 27.2%;
+    padding: 0.08rem 0.34rem 0.44rem;
     border-radius: 13px;
   }
   .xrkr-radio-status {
@@ -2254,6 +2384,10 @@ label {
   }
   .xrkr-radio-picker {
     max-width: 100%;
+  }
+
+  .xrkr-radio-icon-controls {
+    margin-top: -0.5rem;
   }
 }
 
