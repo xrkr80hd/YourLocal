@@ -114,14 +114,6 @@ export default async function HomePage() {
             ) : null}
           </div>
         </div>
-        <div className="actions">
-          <Link className="button primary" href="/hub">
-            Open XRKR80HDLocal Hub
-          </Link>
-          <Link className="button" href="/contact">
-            Band Feature Contact
-          </Link>
-        </div>
       </section>
 
       <section className="section-space home-radio home-unboxed">

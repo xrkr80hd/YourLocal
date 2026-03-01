@@ -39,17 +39,21 @@ export default function HomeBioModal({ fullBio = '', avatarUrl = '', headline = 
 
   const title = String(headline || 'XRKR80HD').trim() || 'XRKR80HD';
 
-  const modal = open && mounted
+  const modal = mounted
     ? createPortal(
-        <div className="home-bio-overlay" aria-hidden="false" onMouseDown={(event) => {
-          if (event.target === event.currentTarget) {
-            setOpen(false);
-          }
-        }}>
+        <div
+          className={`home-bio-overlay ${open ? 'open' : ''}`.trim()}
+          aria-hidden={open ? 'false' : 'true'}
+          onMouseDown={(event) => {
+            if (open && event.target === event.currentTarget) {
+              setOpen(false);
+            }
+          }}
+        >
           <div
-            className="home-bio-sheet"
+            className={`home-bio-sheet ${open ? 'open' : ''}`.trim()}
             role="dialog"
-            aria-modal="true"
+            aria-modal={open ? 'true' : 'false'}
             aria-labelledby="home-bio-modal-title"
             aria-describedby="home-bio-modal-text"
           >
