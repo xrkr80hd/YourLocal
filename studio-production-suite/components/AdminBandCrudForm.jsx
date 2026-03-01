@@ -53,6 +53,27 @@ const BAND_ROLE_OPTIONS = [
   'Other',
 ];
 
+function normalizeBandRole(value) {
+  const safe = String(value || '').trim();
+  if (!safe) {
+    return '';
+  }
+
+  if (/^guitar$/i.test(safe)) {
+    return 'Guitars';
+  }
+
+  return safe;
+}
+
+function normalizeBandRoles(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return Array.from(new Set(value.map((item) => normalizeBandRole(item).slice(0, 80)).filter(Boolean)));
+}
+
 function slugify(value) {
   return String(value || '')
     .trim()
@@ -76,7 +97,7 @@ function normalizeMembers(value) {
           .map((part) => String(part || '').trim())
           .filter(Boolean);
 
-    const roles = Array.from(new Set(roleList.map((part) => part.slice(0, 80))));
+    const roles = normalizeBandRoles(roleList);
 
     return {
       name: String(item?.name || ''),
@@ -144,7 +165,7 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
   };
 
   const toggleMemberRole = (index, role, enabled) => {
-    const safeRole = String(role || '').trim();
+    const safeRole = normalizeBandRole(role);
     if (!safeRole) {
       return;
     }
@@ -154,7 +175,7 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
         if (idx !== index) {
           return member;
         }
-        const existing = Array.isArray(member.roles) ? member.roles : [];
+        const existing = normalizeBandRoles(Array.isArray(member.roles) ? member.roles : []);
         const nextRoles = enabled
           ? Array.from(new Set([...existing, safeRole]))
           : existing.filter((item) => item !== safeRole);
@@ -180,7 +201,7 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
 
   return (
     <form
-      className="card section-space"
+      className="card section-space admin-band-form"
       onSubmit={async (event) => {
         event.preventDefault();
         setSaving(true);
@@ -287,18 +308,20 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
           </div>
           <div className="form-row">
             <label>Genres (multi-select)</label>
-            <div className="band-social-grid">
-              {genreDataList.map((item) => (
-                <label key={item} className="band-social-link" style={{ cursor: 'pointer' }}>
+            <div className="admin-chip-scroll" role="group" aria-label="Genre options">
+              {genreDataList.map((item) => {
+                const checked = genres.includes(item);
+                return (
+                <label key={item} className={`admin-chip ${checked ? 'is-selected' : ''}`}>
                   <input
                     type="checkbox"
-                    checked={genres.includes(item)}
+                    checked={checked}
                     onChange={(event) => toggleGenre(item, event.target.checked)}
-                    style={{ marginRight: '0.4rem' }}
                   />
                   <span>{item}</span>
                 </label>
-              ))}
+                );
+              })}
             </div>
             <div className="actions">
               <input
@@ -350,6 +373,7 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
       </AdminAccordionSection>
 
       <AdminAccordionSection title="Band Images" note="Card, banner, and profile photo." defaultOpen={false}>
+        <p className="meta">Quick sizes: Card 1600x1000 (16:10), Banner 2400x800 (3:1), Profile 1200x1600 (3:4).</p>
         <MediaUrlInput
           id="band-image-url"
           label="Card Image URL"
@@ -359,7 +383,8 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
           replaceMode={isEdit}
           replaceKey={isEdit ? `images/bands/${stableSlug}/card` : ''}
           accept="image/*"
-          placeholder="https://... or /..."
+          help="Recommended 16:10 at 1600x1000."
+          compact
         />
 
         <MediaUrlInput
@@ -371,7 +396,8 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
           replaceMode={isEdit}
           replaceKey={isEdit ? `images/bands/${stableSlug}/banner` : ''}
           accept="image/*"
-          placeholder="https://... or /..."
+          help="Recommended 3:1 at 2400x800."
+          compact
         />
 
         <MediaUrlInput
@@ -383,16 +409,19 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
           replaceMode={isEdit}
           replaceKey={isEdit ? `images/bands/${stableSlug}/profile` : ''}
           accept="image/*"
-          placeholder="https://... or /..."
+          help="Recommended 3:4 at 1200x1600."
+          compact
         />
       </AdminAccordionSection>
 
       <AdminAccordionSection title={isSoloArtist ? 'Artist Team' : 'Band Members'} note="Create and manage members." defaultOpen={false}>
         <p className="meta">Use Lineup = Past for former members. Member image is optional.</p>
         <div className="grid">
-          {members.map((member, index) => (
+          {members.map((member, index) => {
+            const selectedRoles = normalizeBandRoles(Array.isArray(member.roles) ? member.roles : []);
+            return (
             <article key={`member-${index}`} className="card">
-              <div className="grid cols-3">
+              <div className="grid cols-2">
                 <div className="form-row">
                   <label htmlFor={`member-name-${index}`}>Name</label>
                   <input
@@ -404,23 +433,6 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
                   />
                 </div>
                 <div className="form-row">
-                  <label>Roles (multi-select)</label>
-                  <div className="band-social-grid">
-                    {BAND_ROLE_OPTIONS.map((role) => (
-                      <label key={`${role}-${index}`} className="band-social-link" style={{ cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={Array.isArray(member.roles) ? member.roles.includes(role) : false}
-                          onChange={(event) => toggleMemberRole(index, role, event.target.checked)}
-                          style={{ marginRight: '0.4rem' }}
-                        />
-                        <span>{role}</span>
-                      </label>
-                    ))}
-                  </div>
-                  <p className="meta">{Array.isArray(member.roles) && member.roles.length ? member.roles.join(' / ') : 'No roles selected yet.'}</p>
-                </div>
-                <div className="form-row">
                   <label htmlFor={`member-status-${index}`}>Lineup</label>
                   <select id={`member-status-${index}`} value={member.status || 'current'} onChange={(event) => setMemberValue(index, 'status', event.target.value)}>
                     <option value="current">Current</option>
@@ -428,6 +440,22 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
                   </select>
                 </div>
               </div>
+              <div className="form-row">
+                  <label>Roles (multi-select)</label>
+                  <div className="admin-chip-scroll" role="group" aria-label={`Role options for ${member.name || `member ${index + 1}`}`}>
+                    {BAND_ROLE_OPTIONS.map((role) => (
+                      <label key={`${role}-${index}`} className={`admin-chip ${selectedRoles.includes(role) ? 'is-selected' : ''}`}>
+                        <input
+                          type="checkbox"
+                          checked={selectedRoles.includes(role)}
+                          onChange={(event) => toggleMemberRole(index, role, event.target.checked)}
+                        />
+                        <span>{role}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="meta">{selectedRoles.length ? selectedRoles.join(' / ') : 'No roles selected yet.'}</p>
+                </div>
               <MediaUrlInput
                 id={`member-image-${index}`}
                 label="Member Image URL (optional)"
@@ -435,7 +463,8 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
                 onChange={(nextValue) => setMemberValue(index, 'image_url', nextValue)}
                 folder="images/artists"
                 accept="image/*"
-                placeholder="https://... or /..."
+                help="Recommended 1:1 at 1000x1000."
+                compact
               />
               <div className="actions">
                 <button
@@ -447,7 +476,8 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
                 </button>
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
         <div className="actions">
           <button

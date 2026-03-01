@@ -25,6 +25,40 @@ function withCacheBust(url) {
   return `${raw}${separator}v=${Date.now()}`;
 }
 
+function cleanFieldLabel(value) {
+  return String(value || '')
+    .replace(/\s+URL\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function inferUploadHint({ id, accept }) {
+  const key = String(id || '').toLowerCase();
+  const acceptValue = String(accept || '').toLowerCase();
+
+  if (acceptValue.includes('video')) {
+    return 'Recommended 16:9 at 1920x1080.';
+  }
+
+  if (!acceptValue.includes('image')) {
+    return '';
+  }
+
+  if (key.includes('band-banner')) return 'Recommended 3:1 at 2400x800.';
+  if (key.includes('band-photo')) return 'Recommended 3:4 at 1200x1600.';
+  if (key.includes('member-image')) return 'Recommended 1:1 at 1000x1000.';
+  if (key.includes('home-profile')) return 'Recommended 4:3 at 1600x1200.';
+  if (key.includes('home-') && key.includes('card-image')) return 'Recommended 4:3 at 1600x1200.';
+  if (key.includes('band-image')) return 'Recommended 16:10 at 1600x1000.';
+  if (key.includes('podcast') && key.includes('cover')) return 'Recommended 16:10 at 1600x1000.';
+  if (key.includes('track-cover')) return 'Recommended 16:9 at 1600x900.';
+  if (key.includes('episode-cover')) return 'Recommended 16:9 at 1600x900.';
+  if (key.includes('blog-cover')) return 'Recommended 16:9 at 1600x900.';
+  if (key.includes('business') && key.includes('image')) return 'Recommended 1:1 at 1200x1200.';
+
+  return 'Use the slot ratio from Admin Media Guide.';
+}
+
 async function createSignedUploadIntent({ file, folder, replaceMode, replaceKey, currentValue }) {
   const response = await fetch('/api/upload/signed', {
     method: 'POST',
@@ -86,14 +120,17 @@ export default function MediaUrlInput({
   accept = '*/*',
   placeholder = '',
   help = '',
-  showUrlInput = true,
+  showUrlInput = false,
+  compact = false,
 }) {
   const [status, setStatus] = useState('');
   const [uploading, setUploading] = useState(false);
+  const fieldLabel = cleanFieldLabel(label);
+  const resolvedHelp = String(help || '').trim() || inferUploadHint({ id, accept });
 
   return (
-    <div className="form-row">
-      <label htmlFor={id}>{label}</label>
+    <div className={`form-row media-url-input ${compact ? 'compact' : ''}`.trim()}>
+      <label htmlFor={showUrlInput ? id : `${id}-file`}>{fieldLabel || label}</label>
       {showUrlInput ? (
         <input
           id={id}
@@ -103,10 +140,10 @@ export default function MediaUrlInput({
           placeholder={placeholder}
         />
       ) : (
-        <p className="meta">Use upload below. URL is auto-set after successful upload.</p>
+        compact ? null : <p className="meta">Use upload below. File link is auto-managed after successful upload.</p>
       )}
-      {help ? <p className="meta">{help}</p> : null}
-      <div className="upload-widget">
+      {resolvedHelp ? <p className="meta">{resolvedHelp}</p> : null}
+      <div className={`upload-widget ${compact ? 'compact' : ''}`.trim()}>
         <input
           id={`${id}-file`}
           type="file"
@@ -176,7 +213,7 @@ export default function MediaUrlInput({
               if (nextUrl) {
                 onChange(cacheBustedUrl);
               }
-              setStatus(nextUrl ? (replaceMode ? 'Uploaded and replaced.' : 'Uploaded and URL set.') : 'Upload complete.');
+              setStatus(nextUrl ? (replaceMode ? 'Uploaded and replaced.' : 'Uploaded and linked.') : 'Upload complete.');
               setUploading(false);
             } catch (error) {
               setStatus(error instanceof Error ? error.message : 'Upload failed due to network error.');
@@ -184,9 +221,14 @@ export default function MediaUrlInput({
             }
           }}
         />
+        {compact && value ? (
+          <a className="button media-open-inline" href={value} target="_blank" rel="noreferrer">
+            Open
+          </a>
+        ) : null}
         {status ? <span className="upload-status">{status}</span> : null}
       </div>
-      {value ? (
+      {!compact && value ? (
         <p style={{ marginTop: '0.45rem' }}>
           <a className="button" href={value} target="_blank" rel="noreferrer">
             Open File
