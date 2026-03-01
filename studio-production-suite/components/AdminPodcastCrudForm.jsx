@@ -105,7 +105,11 @@ export default function AdminPodcastCrudForm({ mode = 'create', initialPodcast =
       }}
     >
       <h2 className="section-title">{isEdit ? 'Edit Local Podcast' : 'Create Local Podcast'}</h2>
-      <p className="meta">Create the podcast profile first, then add 1-2 episodes from its edit page.</p>
+      <p className="meta" style={{ marginBottom: '0.6rem' }}>
+        {isEdit
+          ? 'Update this podcast profile. Episodes are managed separately below.'
+          : 'Create the podcast profile first, then add 1–2 episodes from its edit page.'}
+      </p>
 
       <AdminAccordionSection title="Podcast Basics" note="Name, slug, hosts, topic and ordering." defaultOpen>
         <div className="grid cols-3">

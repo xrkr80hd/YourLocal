@@ -1,35 +1,15 @@
 import { NextResponse } from 'next/server';
-import { ADMIN_SESSION_USER_COOKIE, isOwnerUsername } from '../../../../../lib/admin-auth';
-import { clampText, toBoolean, toInteger, isValidMediaUrl } from '../../../../../lib/admin-crud-utils';
-import { getSupabaseAdmin } from '../../../../../lib/supabase-admin';
+import { clampText, toBoolean, toInteger, isValidMediaUrl } from '../../../../../../../lib/admin-crud-utils';
+import { getSupabaseAdmin } from '../../../../../../../lib/supabase-admin';
 
 export const runtime = 'nodejs';
 
-function ownerGuard(request) {
-  const actingUser = request.cookies.get(ADMIN_SESSION_USER_COOKIE)?.value || '';
-  return isOwnerUsername(actingUser);
+function parseBandSlug(raw) {
+  return String(raw || '').trim();
 }
 
-function sortColumnHelp() {
-  return 'Apply the latest Supabase schema SQL for this project to add tracks.sort_order.';
-}
-
-function formatDateForDb(value) {
-  const raw = String(value || '').trim();
-  if (!raw) {
-    return null;
-  }
-
-  const date = new Date(raw);
-  if (Number.isNaN(date.getTime())) {
-    return null;
-  }
-
-  return date.toISOString().slice(0, 10);
-}
-
-function parseTrackId(rawId) {
-  const id = Number.parseInt(String(rawId || ''), 10);
+function parseTrackId(raw) {
+  const id = Number.parseInt(String(raw || ''), 10);
   if (!Number.isFinite(id) || id <= 0) {
     return null;
   }
@@ -65,27 +45,22 @@ function getStorageKeyFromPublicUrl(value, bucket) {
   }
 }
 
-function buildTrackPayload(raw) {
+function buildBandTrackPayload(raw) {
   const title = clampText(raw?.title, 255);
-  const artistName = clampText(raw?.artist_name || 'xrkr80hd', 255);
-  const genre = clampText(raw?.genre, 80);
   const description = String(raw?.description || '').trim();
   const audioUrl = String(raw?.audio_url || '').trim();
   const coverImageUrl = String(raw?.cover_image_url || '').trim();
-  const externalUrl = String(raw?.external_url || '').trim();
-  const releaseDate = formatDateForDb(raw?.release_date);
   const sortOrder = toInteger(raw?.sort_order, 0, 0, 9999);
-  const isFeatured = toBoolean(raw?.is_featured);
+  const isPublished = raw?.is_published === undefined ? true : toBoolean(raw?.is_published);
+  const includeInRadio = raw?.include_in_radio === undefined ? true : toBoolean(raw?.include_in_radio);
 
   if (!title) {
     return { ok: false, error: 'Track title is required.' };
   }
-
   if (!audioUrl) {
     return { ok: false, error: 'Audio URL is required.' };
   }
-
-  if (!isValidMediaUrl(audioUrl) || !isValidMediaUrl(coverImageUrl) || !isValidMediaUrl(externalUrl)) {
+  if (!isValidMediaUrl(audioUrl) || !isValidMediaUrl(coverImageUrl)) {
     return { ok: false, error: 'Media URLs must start with https:// or /' };
   }
 
@@ -93,85 +68,98 @@ function buildTrackPayload(raw) {
     ok: true,
     payload: {
       title,
-      artist_name: artistName || 'xrkr80hd',
-      genre: genre || null,
       description: description || null,
       audio_url: audioUrl,
       cover_image_url: coverImageUrl || null,
-      external_url: externalUrl || null,
-      release_date: releaseDate,
       sort_order: sortOrder,
-      is_featured: isFeatured,
+      is_published: isPublished,
+      include_in_radio: includeInRadio,
     },
   };
 }
 
-async function findTrackById(supabase, id) {
-  return supabase.from('tracks').select('*').eq('id', id).limit(1).maybeSingle();
+async function findBandBySlug(supabase, slug) {
+  return supabase.from('bands').select('id, slug').eq('slug', slug).limit(1).maybeSingle();
+}
+
+async function findBandTrackById(supabase, trackId) {
+  return supabase.from('band_tracks').select('*').eq('id', trackId).limit(1).maybeSingle();
 }
 
 export async function PUT(request, { params }) {
-  if (!ownerGuard(request)) {
-    return NextResponse.json({ error: 'Only the owner account can manage tracks.' }, { status: 403 });
-  }
-
-  const id = parseTrackId(params.id);
-  if (!id) {
-    return NextResponse.json({ error: 'Invalid track id.' }, { status: 400 });
-  }
-
   const supabase = getSupabaseAdmin();
   if (!supabase) {
     return NextResponse.json({ error: 'Missing Supabase server credentials.' }, { status: 500 });
   }
 
-  const existing = await findTrackById(supabase, id);
+  const slug = parseBandSlug(params.slug);
+  if (!slug) {
+    return NextResponse.json({ error: 'Band slug is required.' }, { status: 400 });
+  }
+  const trackId = parseTrackId(params.trackId);
+  if (!trackId) {
+    return NextResponse.json({ error: 'Invalid track id.' }, { status: 400 });
+  }
+
+  const band = await findBandBySlug(supabase, slug);
+  if (band.error) {
+    return NextResponse.json({ error: band.error.message }, { status: 500 });
+  }
+  if (!band.data) {
+    return NextResponse.json({ error: 'Band not found.' }, { status: 404 });
+  }
+
+  const existing = await findBandTrackById(supabase, trackId);
   if (existing.error) {
     return NextResponse.json({ error: existing.error.message }, { status: 500 });
   }
-  if (!existing.data) {
-    return NextResponse.json({ error: 'Track not found.' }, { status: 404 });
+  if (!existing.data || Number(existing.data.band_id) !== Number(band.data.id)) {
+    return NextResponse.json({ error: 'Track not found for this band.' }, { status: 404 });
   }
 
   const body = await request.json().catch(() => ({}));
-  const parsed = buildTrackPayload(body);
+  const parsed = buildBandTrackPayload(body);
   if (!parsed.ok) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
 
-  const update = await supabase.from('tracks').update(parsed.payload).eq('id', id).select('*').limit(1).maybeSingle();
+  const update = await supabase.from('band_tracks').update(parsed.payload).eq('id', trackId).select('*').limit(1).maybeSingle();
   if (update.error) {
-    const message = String(update.error.message || '');
-    if (message.includes('sort_order')) {
-      return NextResponse.json({ error: `${message} ${sortColumnHelp()}` }, { status: 500 });
-    }
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: update.error.message }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, item: update.data || null });
 }
 
 export async function DELETE(request, { params }) {
-  if (!ownerGuard(request)) {
-    return NextResponse.json({ error: 'Only the owner account can manage tracks.' }, { status: 403 });
-  }
-
-  const id = parseTrackId(params.id);
-  if (!id) {
-    return NextResponse.json({ error: 'Invalid track id.' }, { status: 400 });
-  }
-
   const supabase = getSupabaseAdmin();
   if (!supabase) {
     return NextResponse.json({ error: 'Missing Supabase server credentials.' }, { status: 500 });
   }
 
-  const existing = await findTrackById(supabase, id);
+  const slug = parseBandSlug(params.slug);
+  if (!slug) {
+    return NextResponse.json({ error: 'Band slug is required.' }, { status: 400 });
+  }
+  const trackId = parseTrackId(params.trackId);
+  if (!trackId) {
+    return NextResponse.json({ error: 'Invalid track id.' }, { status: 400 });
+  }
+
+  const band = await findBandBySlug(supabase, slug);
+  if (band.error) {
+    return NextResponse.json({ error: band.error.message }, { status: 500 });
+  }
+  if (!band.data) {
+    return NextResponse.json({ error: 'Band not found.' }, { status: 404 });
+  }
+
+  const existing = await findBandTrackById(supabase, trackId);
   if (existing.error) {
     return NextResponse.json({ error: existing.error.message }, { status: 500 });
   }
-  if (!existing.data) {
-    return NextResponse.json({ error: 'Track not found.' }, { status: 404 });
+  if (!existing.data || Number(existing.data.band_id) !== Number(band.data.id)) {
+    return NextResponse.json({ error: 'Track not found for this band.' }, { status: 404 });
   }
 
   const bucket = process.env.SUPABASE_STORAGE_BUCKET || 'uploads';
@@ -179,7 +167,7 @@ export async function DELETE(request, { params }) {
   const coverKey = getStorageKeyFromPublicUrl(existing.data.cover_image_url, bucket);
   const keysToDelete = Array.from(new Set([audioKey, coverKey].filter(Boolean)));
 
-  const deleted = await supabase.from('tracks').delete().eq('id', id);
+  const deleted = await supabase.from('band_tracks').delete().eq('id', trackId);
   if (deleted.error) {
     return NextResponse.json({ error: deleted.error.message }, { status: 500 });
   }

@@ -4,8 +4,10 @@ import { getSupabaseAdmin } from '../../../../../../lib/supabase-admin';
 
 export const runtime = 'nodejs';
 
+const OPTIONAL_EPISODE_COLUMNS = ['guest_names', 'episode_number', 'show_notes', 'is_explicit', 'include_in_radio'];
+
 function episodesPatchHelp() {
-  return 'Run the SQL patch in SUPABASE_ADMIN_SCHEMA_PATCH.md to add podcast_episodes.podcast_id and podcast_episodes.sort_order.';
+  return 'Apply the latest Supabase schema SQL for this project to add podcast_episodes.podcast_id and podcast_episodes.sort_order.';
 }
 
 function formatDateTimeForDb(value) {
@@ -25,13 +27,19 @@ function formatDateTimeForDb(value) {
 function buildEpisodePayload(raw) {
   const title = clampText(raw?.title, 255);
   const slugInput = clampText(raw?.slug, 255);
+  const guestNames = clampText(raw?.guest_names, 255);
+  const episodeNumberRaw = String(raw?.episode_number ?? '').trim();
+  const episodeNumber = episodeNumberRaw === '' ? null : toInteger(episodeNumberRaw, 0, 0, 99999);
   const summary = clampText(raw?.summary, 320);
   const description = String(raw?.description || '').trim();
+  const showNotes = String(raw?.show_notes || '').trim();
   const audioUrl = String(raw?.audio_url || '').trim();
   const coverImageUrl = String(raw?.cover_image_url || '').trim();
   const publishedAt = formatDateTimeForDb(raw?.published_at);
   const sortOrder = toInteger(raw?.sort_order, 0, 0, 9999);
   const isPublished = raw?.is_published === undefined ? true : toBoolean(raw?.is_published);
+  const isExplicit = raw?.is_explicit === undefined ? false : toBoolean(raw?.is_explicit);
+  const includeInRadio = raw?.include_in_radio === undefined ? true : toBoolean(raw?.include_in_radio);
 
   if (!title) {
     return { ok: false, error: 'Episode title is required.' };
@@ -53,13 +61,18 @@ function buildEpisodePayload(raw) {
     slug: generatedSlug,
     payload: {
       title,
+      guest_names: guestNames || null,
+      episode_number: episodeNumber,
       summary: summary || null,
       description: description || null,
+      show_notes: showNotes || null,
       audio_url: audioUrl,
       cover_image_url: coverImageUrl || null,
       published_at: publishedAt,
       sort_order: sortOrder,
       is_published: isPublished,
+      is_explicit: isExplicit,
+      include_in_radio: includeInRadio,
     },
   };
 }
@@ -173,16 +186,34 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: slugResult.error }, { status: 500 });
   }
 
-  const insert = await supabase
+  const baseInsertPayload = {
+    ...parsed.payload,
+    podcast_id: podcast.data.id,
+    slug: slugResult.slug,
+  };
+
+  let insert = await supabase
     .from('podcast_episodes')
-    .insert({
-      ...parsed.payload,
-      podcast_id: podcast.data.id,
-      slug: slugResult.slug,
-    })
+    .insert(baseInsertPayload)
     .select('id, slug')
     .limit(1)
     .maybeSingle();
+
+  if (insert.error) {
+    const message = String(insert.error.message || '');
+    const retryPayload = { ...baseInsertPayload };
+    let strippedAny = false;
+    for (const column of OPTIONAL_EPISODE_COLUMNS) {
+      if (message.includes(column)) {
+        delete retryPayload[column];
+        strippedAny = true;
+      }
+    }
+
+    if (strippedAny) {
+      insert = await supabase.from('podcast_episodes').insert(retryPayload).select('id, slug').limit(1).maybeSingle();
+    }
+  }
 
   if (insert.error) {
     const message = String(insert.error.message || '');

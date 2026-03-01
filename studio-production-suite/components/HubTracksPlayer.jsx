@@ -21,6 +21,7 @@ export default function HubTracksPlayer({ tracks }) {
   const [index, setIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [autoPlayOnChange, setAutoPlayOnChange] = useState(false);
+  const [volume, setVolume] = useState(82);
   const audioRef = useRef(null);
   const hasTracks = items.length > 0;
   const activeTrack = hasTracks ? items[index] || items[0] : null;
@@ -70,6 +71,14 @@ export default function HubTracksPlayer({ tracks }) {
     setIsPlaying(true);
     setAutoPlayOnChange(false);
   }, [autoPlayOnChange, activeTrack?.audio_url]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+    audio.volume = Math.min(1, Math.max(0, volume / 100));
+  }, [volume, activeTrack?.audio_url]);
 
   if (!hasTracks) {
     return <p className="meta">No tracks yet.</p>;
@@ -158,6 +167,27 @@ export default function HubTracksPlayer({ tracks }) {
         >
           {'>>'}
         </button>
+      </div>
+      <div className="digital-volume-wrap">
+        <span className="digital-volume-label">VOL {String(volume).padStart(2, '0')}</span>
+        <div className="digital-volume-meter" aria-hidden="true">
+          <span className="digital-volume-fill" style={{ width: `${volume}%` }} />
+        </div>
+        <input
+          type="range"
+          className="digital-volume-input"
+          min="0"
+          max="100"
+          step="1"
+          value={volume}
+          aria-label="Volume"
+          onChange={(event) => {
+            const next = Number.parseInt(event.target.value, 10);
+            if (Number.isFinite(next)) {
+              setVolume(Math.min(100, Math.max(0, next)));
+            }
+          }}
+        />
       </div>
     </>
   );

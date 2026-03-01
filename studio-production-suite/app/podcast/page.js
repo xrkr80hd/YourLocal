@@ -30,7 +30,10 @@ export default async function PodcastPage() {
             YourLocal Scene
           </Link>
           <Link className="button primary" href="/podcast">
-            YourLocal Podcasts
+            YourLocal Podcast
+          </Link>
+          <Link className="button" href="/your-local-business">
+            YourLocal Business
           </Link>
         </div>
       </section>

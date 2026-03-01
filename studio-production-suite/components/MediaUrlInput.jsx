@@ -76,6 +76,7 @@ export default function MediaUrlInput({
   accept = '*/*',
   placeholder = '',
   help = '',
+  showUrlInput = true,
 }) {
   const [status, setStatus] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -83,13 +84,17 @@ export default function MediaUrlInput({
   return (
     <div className="form-row">
       <label htmlFor={id}>{label}</label>
-      <input
-        id={id}
-        type="text"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-      />
+      {showUrlInput ? (
+        <input
+          id={id}
+          type="text"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+        />
+      ) : (
+        <p className="meta">Use upload below. URL is auto-set after successful upload.</p>
+      )}
       {help ? <p className="meta">{help}</p> : null}
       <div className="upload-widget">
         <input

@@ -23,10 +23,10 @@ export default async function HubPage() {
 
       <section className="card section-space hub-player">
         <div className="hub-player-head">
-          <h3 className="section-title">Tracks</h3>
+          <h3 className="section-title">XRKR80HD Tracks</h3>
           <span className="meta">{counts.tracks} total</span>
           <Link className="button" href="/admin/tracks" prefetch={false}>
-            Upload Music
+            Upload XRKR Music
           </Link>
         </div>
         <HubTracksPlayer tracks={tracks} />

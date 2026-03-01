@@ -18,7 +18,7 @@ export default function AdminPage({ searchParams }) {
   const deniedPath = String(searchParams?.from || '');
   const ownerActions = [
     { href: '/admin/home', label: 'Homepage Controls', detail: 'Landing profile and Site Guide card photos.' },
-    { href: '/admin/tracks', label: 'Tracks Manager', detail: 'Upload audio, sort tracks, choose home player list.' },
+    { href: '/admin/tracks', label: 'XRKR Hub Tracks', detail: 'Upload and manage owner-only tracks for the Hub player.' },
     { href: '/admin/users', label: 'Manage Admin Users', detail: 'Create/remove lower-tier admins.' },
   ];
   const publicQaLinks = [
@@ -32,8 +32,8 @@ export default function AdminPage({ searchParams }) {
   const commonActions = [
     { href: '/admin/guide', label: 'Admin Guide', detail: 'Image sizes and media upload standards.' },
     { href: '/admin/blog', label: 'Blog Manager', detail: 'Write and publish blog posts.' },
-    { href: '/admin/bands', label: 'Band Manager', detail: 'Create/edit bands, photos, members, socials.' },
-    { href: '/admin/podcasts', label: 'Podcast Manager', detail: 'Create podcast profiles and manage episodes.' },
+    { href: '/admin/bands', label: 'Band Manager', detail: 'Create/edit bands, members, and each band track library.' },
+    { href: '/admin/podcasts', label: 'Podcast Manager', detail: 'Create podcast profiles and manage parent-owned episodes.' },
     { href: '/admin/business', label: 'Business Manager', detail: 'Create/edit local business cards with logos and links.' },
     { href: '/admin/password', label: 'My Password', detail: 'Update your own login password.' },
   ];
@@ -105,16 +105,11 @@ export default function AdminPage({ searchParams }) {
             </Link>
           ))}
         </div>
-        <p className="meta" style={{ marginTop: '0.8rem' }}>
-          Note: the old Laravel `/admin/*` controllers were replaced during the Next.js migration. This is the active admin entry for the current app.
+        <p className="meta" style={{ marginTop: '0.8rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(138, 164, 196, 0.12)' }}>
+          Signed in as: <strong>{actingUser || 'unknown'}</strong>
+          {ownerMode ? ' · Owner tools enabled' : ' · Standard admin mode'}
         </p>
-        <p className="meta">Signed in as: {actingUser || 'unknown'}</p>
         <p className="meta">Media upload should happen directly inside band/podcast edit forms.</p>
-        {ownerMode ? (
-          <p className="meta">Owner tools are enabled for this session.</p>
-        ) : (
-          <p className="meta">Standard admin mode: content CRUD + uploads.</p>
-        )}
       </section>
 
       <AdminMediaGuide />

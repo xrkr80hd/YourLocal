@@ -5,6 +5,54 @@ import { useRouter } from 'next/navigation';
 import MediaUrlInput from './MediaUrlInput';
 import AdminAccordionSection from './AdminAccordionSection';
 
+const DEFAULT_GENRE_OPTIONS = [
+  'Metal',
+  'Metalcore',
+  'Djent',
+  'Deathcore',
+  'Hardcore',
+  'Rock',
+  'Alternative Rock',
+  'Indie',
+  'Punk',
+  'Pop',
+  'Hip-Hop',
+  'Phonk',
+  'EDM',
+  'Dubstep',
+  'Electronic',
+  'Orchestral',
+  'Soundtrack',
+  'Cinematic',
+  'Ambient',
+  'Acoustic',
+  'Christian',
+  'Worship',
+  'Gospel',
+  'Singer-Songwriter',
+  'Country',
+  'Blues',
+  'R&B',
+  'Jazz',
+  'Instrumental',
+  'Podcast / Talk',
+];
+
+const BAND_ROLE_OPTIONS = [
+  'Lead Vocals',
+  'Vocals',
+  'Lead Guitar',
+  'Rhythm Guitar',
+  'Guitars',
+  'Bass',
+  'Drums',
+  'Percussion',
+  'DJ',
+  'Keys',
+  'Synth',
+  'Other',
+];
+
 function slugify(value) {
   return String(value || '')
     .trim()
@@ -17,15 +65,27 @@ function slugify(value) {
 
 function normalizeMembers(value) {
   if (!Array.isArray(value) || !value.length) {
-    return [{ name: '', role: '', image_url: '', status: 'current' }];
+    return [{ name: '', role: '', roles: [], image_url: '', status: 'current' }];
   }
 
-  return value.map((item) => ({
-    name: String(item?.name || ''),
-    role: String(item?.role || ''),
-    image_url: String(item?.image_url || ''),
-    status: item?.status === 'past' || item?.is_past === true ? 'past' : 'current',
-  }));
+  return value.map((item) => {
+    const roleList = Array.isArray(item?.roles)
+      ? item.roles
+      : String(item?.role || '')
+          .split(/[\/,]/)
+          .map((part) => String(part || '').trim())
+          .filter(Boolean);
+
+    const roles = Array.from(new Set(roleList.map((part) => part.slice(0, 80))));
+
+    return {
+      name: String(item?.name || ''),
+      role: roles.join(' / '),
+      roles,
+      image_url: String(item?.image_url || ''),
+      status: item?.status === 'past' || item?.is_past === true ? 'past' : 'current',
+    };
+  });
 }
 
 export default function AdminBandCrudForm({ mode = 'create', initialBand = null, genreOptions = [], initialEra = 'archive' }) {
@@ -37,7 +97,13 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
   const [slugTouched, setSlugTouched] = useState(Boolean(initialBand?.slug));
   const [era, setEra] = useState(initialBand?.era === 'scene' ? 'scene' : initialEra === 'scene' ? 'scene' : 'archive');
   const [yearsActive, setYearsActive] = useState(String(initialBand?.years_active || ''));
-  const [genre, setGenre] = useState(String(initialBand?.genre || ''));
+  const [genres, setGenres] = useState(() => {
+    const fromBand = Array.isArray(initialBand?.genres) ? initialBand.genres : [];
+    const fromJson = Array.isArray(initialBand?.genres_json) ? initialBand.genres_json : [];
+    const fallback = String(initialBand?.genre || '').trim();
+    return Array.from(new Set([...fromBand, ...fromJson, ...(fallback ? [fallback] : [])].map((item) => String(item || '').trim()).filter(Boolean))).slice(0, 12);
+  });
+  const [customGenre, setCustomGenre] = useState('');
   const [tagline, setTagline] = useState(String(initialBand?.tagline || ''));
   const [summary, setSummary] = useState(String(initialBand?.summary || ''));
   const [story, setStory] = useState(String(initialBand?.story || ''));
@@ -52,9 +118,11 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
   const [saving, setSaving] = useState(false);
 
   const genreDataList = useMemo(() => {
-    const merged = Array.from(new Set(genreOptions.map((value) => String(value || '').trim()).filter(Boolean)));
+    const merged = Array.from(
+      new Set([...DEFAULT_GENRE_OPTIONS, ...genreOptions, ...genres].map((value) => String(value || '').trim()).filter(Boolean))
+    );
     return merged.sort((a, b) => a.localeCompare(b));
-  }, [genreOptions]);
+  }, [genreOptions, genres]);
   const workingSlug = slugify(slug || name) || slugify(initialBand?.slug || '') || 'band';
   const stableSlug = isEdit ? slugify(initialBand?.slug || '') || workingSlug : workingSlug;
 
@@ -62,7 +130,44 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
     setMembers((current) => current.map((member, idx) => (idx === index ? { ...member, [key]: value } : member)));
   };
 
-  const createMember = (status = 'current') => ({ name: '', role: '', image_url: '', status: status === 'past' ? 'past' : 'current' });
+  const toggleGenre = (value, enabled) => {
+    const safe = String(value || '').trim();
+    if (!safe) {
+      return;
+    }
+    setGenres((current) => {
+      if (enabled) {
+        return Array.from(new Set([...current, safe])).slice(0, 12);
+      }
+      return current.filter((item) => item !== safe);
+    });
+  };
+
+  const toggleMemberRole = (index, role, enabled) => {
+    const safeRole = String(role || '').trim();
+    if (!safeRole) {
+      return;
+    }
+
+    setMembers((current) =>
+      current.map((member, idx) => {
+        if (idx !== index) {
+          return member;
+        }
+        const existing = Array.isArray(member.roles) ? member.roles : [];
+        const nextRoles = enabled
+          ? Array.from(new Set([...existing, safeRole]))
+          : existing.filter((item) => item !== safeRole);
+        return {
+          ...member,
+          roles: nextRoles,
+          role: nextRoles.join(' / '),
+        };
+      })
+    );
+  };
+
+  const createMember = (status = 'current') => ({ name: '', role: '', roles: [], image_url: '', status: status === 'past' ? 'past' : 'current' });
   const goToBandManager = () => {
     const next = `/admin/bands?refresh=${Date.now()}`;
     if (typeof window !== 'undefined') {
@@ -82,12 +187,14 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
         setStatus(isEdit ? 'Saving band...' : 'Creating band...');
 
         const resolvedSlug = slugify(slug || name);
+        const resolvedGenres = Array.from(new Set(genres.map((item) => String(item || '').trim()).filter(Boolean))).slice(0, 12);
         const payload = {
           name,
           slug: resolvedSlug,
           era,
           years_active: yearsActive,
-          genre,
+          genre: resolvedGenres[0] || '',
+          genres: resolvedGenres,
           tagline,
           summary,
           story,
@@ -127,7 +234,11 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
       }}
     >
       <h2 className="section-title">{isEdit ? 'Edit Band' : 'Create Band'}</h2>
-      <p className="meta">Create the band and members in one save. This only appears in admin backend.</p>
+      <p className="meta" style={{ marginBottom: '0.6rem' }}>
+        {isEdit
+          ? 'Update this band\'s info, images, and members. Changes save instantly.'
+          : 'Fill in the basics, add images and members, then save. You can edit later.'}
+      </p>
 
       <AdminAccordionSection title="Band Basics" note="Name, slug, page, genre and ordering." defaultOpen>
         <div className="grid cols-3">
@@ -175,13 +286,44 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
             <input id="band-years-active" type="text" value={yearsActive} onChange={(event) => setYearsActive(event.target.value)} placeholder="2008 - 2013" />
           </div>
           <div className="form-row">
-            <label htmlFor="band-genre">Genre (create new by typing)</label>
-            <input id="band-genre" list="band-genre-options" type="text" value={genre} onChange={(event) => setGenre(event.target.value)} placeholder="metalcore" />
-            <datalist id="band-genre-options">
+            <label>Genres (multi-select)</label>
+            <div className="band-social-grid">
               {genreDataList.map((item) => (
-                <option key={item} value={item} />
+                <label key={item} className="band-social-link" style={{ cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={genres.includes(item)}
+                    onChange={(event) => toggleGenre(item, event.target.checked)}
+                    style={{ marginRight: '0.4rem' }}
+                  />
+                  <span>{item}</span>
+                </label>
               ))}
-            </datalist>
+            </div>
+            <div className="actions">
+              <input
+                id="band-custom-genre"
+                type="text"
+                value={customGenre}
+                onChange={(event) => setCustomGenre(event.target.value)}
+                placeholder="Add custom genre"
+              />
+              <button
+                className="button"
+                type="button"
+                onClick={() => {
+                  const safe = String(customGenre || '').trim();
+                  if (!safe) {
+                    return;
+                  }
+                  toggleGenre(safe, true);
+                  setCustomGenre('');
+                }}
+              >
+                Add Genre
+              </button>
+            </div>
+            <p className="meta">Primary genre: {genres[0] || 'None selected yet.'}</p>
           </div>
           <div className="form-row">
             <label htmlFor="band-sort-order">Sort Order</label>
@@ -262,14 +404,21 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
                   />
                 </div>
                 <div className="form-row">
-                  <label htmlFor={`member-role-${index}`}>Role</label>
-                  <input
-                    id={`member-role-${index}`}
-                    type="text"
-                    value={member.role}
-                    onChange={(event) => setMemberValue(index, 'role', event.target.value)}
-                    placeholder="Vocals / Guitar / Drums"
-                  />
+                  <label>Roles (multi-select)</label>
+                  <div className="band-social-grid">
+                    {BAND_ROLE_OPTIONS.map((role) => (
+                      <label key={`${role}-${index}`} className="band-social-link" style={{ cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={Array.isArray(member.roles) ? member.roles.includes(role) : false}
+                          onChange={(event) => toggleMemberRole(index, role, event.target.checked)}
+                          style={{ marginRight: '0.4rem' }}
+                        />
+                        <span>{role}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="meta">{Array.isArray(member.roles) && member.roles.length ? member.roles.join(' / ') : 'No roles selected yet.'}</p>
                 </div>
                 <div className="form-row">
                   <label htmlFor={`member-status-${index}`}>Lineup</label>

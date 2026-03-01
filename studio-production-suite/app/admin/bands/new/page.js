@@ -7,7 +7,18 @@ export const metadata = {
 
 export default async function AdminNewBandPage({ searchParams }) {
   const allBands = await getBandsForAdmin();
-  const genreOptions = Array.from(new Set(allBands.map((band) => String(band.genre || '').trim()).filter(Boolean)));
+  const genreOptions = Array.from(
+    new Set(
+      allBands
+        .flatMap((band) => {
+          const list = Array.isArray(band.genres_json) ? band.genres_json : [];
+          const base = String(band.genre || '').trim();
+          return [...list, ...(base ? [base] : [])];
+        })
+        .map((item) => String(item || '').trim())
+        .filter(Boolean)
+    )
+  );
   const initialEra = searchParams?.era === 'scene' ? 'scene' : 'archive';
 
   return (

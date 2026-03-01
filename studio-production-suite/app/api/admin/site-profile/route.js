@@ -11,7 +11,7 @@ function ownerGuard(request) {
 }
 
 function missingColumnsHelp() {
-  return 'Run the SQL patch in SUPABASE_ADMIN_SCHEMA_PATCH.md to add homepage image columns.';
+  return 'Apply the latest Supabase schema SQL for this project to add homepage image columns.';
 }
 
 function buildPayload(raw) {

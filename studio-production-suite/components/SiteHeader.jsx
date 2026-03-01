@@ -76,7 +76,7 @@ function getAdminNavItems(ownerMode) {
 
   if (ownerMode) {
     items.push({ href: '/admin/home', label: 'Home', className: 'nav-admin-link' });
-    items.push({ href: '/admin/tracks', label: 'Tracks', className: 'nav-admin-link' });
+    items.push({ href: '/admin/tracks', label: 'Hub Tracks', className: 'nav-admin-link' });
     items.push({ href: '/admin/users', label: 'Users', className: 'nav-admin-link' });
   }
 

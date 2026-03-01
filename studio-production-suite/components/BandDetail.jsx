@@ -9,10 +9,19 @@ function isPastMember(member) {
   return member?.is_past === true || status === 'past' || status === 'former';
 }
 
+function memberRoleText(member) {
+  const roles = Array.isArray(member?.roles) ? member.roles.map((item) => String(item || '').trim()).filter(Boolean) : [];
+  if (roles.length) {
+    return roles.join(' / ');
+  }
+  return String(member?.role || '').trim();
+}
+
 export default function BandDetail({ band, backHref, backLabel }) {
   const members = Array.isArray(band.members) ? band.members : [];
   const currentMembers = members.filter((member) => !isPastMember(member));
   const pastMembers = members.filter((member) => isPastMember(member));
+  const tracks = Array.isArray(band.tracks) ? band.tracks.filter((track) => track?.audio_url) : [];
   const socialLinks = getEnabledSocialLinks(band.social_links);
   const primaryPhoto = band.band_photo_url || band.image_url;
   const [modal, setModal] = useState(null);
@@ -85,6 +94,21 @@ export default function BandDetail({ band, backHref, backLabel }) {
         </section>
       ) : null}
 
+      {tracks.length ? (
+        <section className="card section-space">
+          <h2 className="section-title">Tracks</h2>
+          <div className="grid">
+            {tracks.map((track) => (
+              <article key={track.id} className="card">
+                <h4>{track.title || 'Track'}</h4>
+                {track.description ? <p>{track.description}</p> : null}
+                <audio controls src={track.audio_url} style={{ width: '100%' }} />
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       {currentMembers.length ? (
         <section className="card section-space">
           <h2 className="section-title">{band.is_solo_artist ? 'Artist Team' : 'Band Members'}</h2>
@@ -106,7 +130,7 @@ export default function BandDetail({ band, backHref, backLabel }) {
                   )}
                 </div>
                 <div className="member-name">{member.name || 'Member'}</div>
-                {member.role ? <div className="member-role">{member.role}</div> : null}
+                {memberRoleText(member) ? <div className="member-role">{memberRoleText(member)}</div> : null}
               </article>
             ))}
           </div>
@@ -134,7 +158,7 @@ export default function BandDetail({ band, backHref, backLabel }) {
                   )}
                 </div>
                 <div className="member-name">{member.name || 'Past Member'}</div>
-                {member.role ? <div className="member-role">{member.role}</div> : null}
+                {memberRoleText(member) ? <div className="member-role">{memberRoleText(member)}</div> : null}
               </article>
             ))}
           </div>

@@ -5,7 +5,7 @@ import { getSupabaseAdmin } from '../../../../../lib/supabase-admin';
 export const runtime = 'nodejs';
 
 function podcastsTableHelp() {
-  return 'Run the SQL patch in SUPABASE_ADMIN_SCHEMA_PATCH.md to create public.podcasts.';
+  return 'Apply the latest Supabase schema SQL for this project to create public.podcasts.';
 }
 
 function buildPodcastPayload(raw) {

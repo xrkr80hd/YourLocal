@@ -98,12 +98,156 @@ async function fetchTracksOrdered({ featuredOnly = false, limit = null } = {}) {
 }
 
 export async function getHomeTracks(limit = 12) {
-  const featured = await fetchTracksOrdered({ featuredOnly: true, limit });
-  if (featured.length) {
-    return featured;
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return [];
   }
 
-  return fetchTracksOrdered({ featuredOnly: false, limit });
+  const safeLimit = Number.isInteger(limit) ? limit : null;
+
+  try {
+    const bandTracks = await supabase
+      .from('band_tracks')
+      .select('id, band_id, title, description, audio_url, cover_image_url, sort_order, created_at, is_published, include_in_radio')
+      .eq('is_published', true)
+      .eq('include_in_radio', true)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false });
+
+    const bandItems = bandTracks.error ? [] : bandTracks.data || [];
+    if (bandTracks.error && !String(bandTracks.error.message || '').includes('Could not find the table')) {
+      console.error('[content:band_radio_tracks]', bandTracks.error.message);
+    }
+
+    let bandMap = new Map();
+    if (bandItems.length) {
+      const ids = Array.from(new Set(bandItems.map((item) => Number(item.band_id)).filter((id) => Number.isFinite(id))));
+      if (ids.length) {
+        const bands = await supabase.from('bands').select('id, name, slug, is_published').in('id', ids);
+        if (bands.error) {
+          console.error('[content:band_radio_band_lookup]', bands.error.message);
+        } else {
+          bandMap = new Map((bands.data || []).map((item) => [Number(item.id), item]));
+        }
+      }
+    }
+
+    const mappedBandTracks = bandItems
+      .map((item) => {
+        const band = bandMap.get(Number(item.band_id));
+        if (!band || band.is_published === false) {
+          return null;
+        }
+        return {
+          id: `band-${item.id}`,
+          title: item.title,
+          artist_name: band.name || 'Local Band',
+          description: item.description || null,
+          audio_url: item.audio_url,
+          cover_image_url: item.cover_image_url || null,
+          release_date: item.created_at || null,
+          sort_order: Number.isFinite(Number(item.sort_order)) ? Number(item.sort_order) : 0,
+          source_type: 'band',
+          source_slug: band.slug || null,
+        };
+      })
+      .filter(Boolean);
+
+    let mappedPodcastTracks = [];
+    const episodes = await supabase
+      .from('podcast_episodes')
+      .select('id, podcast_id, title, summary, description, audio_url, cover_image_url, published_at, sort_order, is_published, include_in_radio')
+      .eq('is_published', true)
+      .eq('include_in_radio', true)
+      .order('sort_order', { ascending: true })
+      .order('published_at', { ascending: false, nullsFirst: false });
+
+    let episodeItems = [];
+    if (!episodes.error) {
+      episodeItems = episodes.data || [];
+    } else {
+      const message = String(episodes.error.message || '');
+      if (message.includes('include_in_radio')) {
+        const fallbackEpisodes = await supabase
+          .from('podcast_episodes')
+          .select('id, podcast_id, title, summary, description, audio_url, cover_image_url, published_at, sort_order, is_published')
+          .eq('is_published', true)
+          .order('sort_order', { ascending: true })
+          .order('published_at', { ascending: false, nullsFirst: false });
+
+        if (fallbackEpisodes.error) {
+          console.error('[content:podcast_radio_tracks_fallback]', fallbackEpisodes.error.message);
+        } else {
+          episodeItems = fallbackEpisodes.data || [];
+        }
+      } else if (!message.includes('Could not find the table')) {
+        console.error('[content:podcast_radio_tracks]', message);
+      }
+    }
+
+    if (episodeItems.length) {
+      const ids = Array.from(new Set(episodeItems.map((item) => Number(item.podcast_id)).filter((id) => Number.isFinite(id))));
+      let podcastMap = new Map();
+      if (ids.length) {
+        const podcasts = await supabase.from('podcasts').select('id, title, slug, is_published').in('id', ids);
+        if (podcasts.error) {
+          console.error('[content:podcast_radio_lookup]', podcasts.error.message);
+        } else {
+          podcastMap = new Map((podcasts.data || []).map((item) => [Number(item.id), item]));
+        }
+      }
+
+      mappedPodcastTracks = episodeItems
+        .map((item) => {
+          const podcast = podcastMap.get(Number(item.podcast_id));
+          if (!podcast || podcast.is_published === false) {
+            return null;
+          }
+          return {
+            id: `podcast-${item.id}`,
+            title: item.title,
+            artist_name: podcast.title || 'Podcast',
+            description: item.summary || item.description || null,
+            audio_url: item.audio_url,
+            cover_image_url: item.cover_image_url || null,
+            release_date: item.published_at || null,
+            sort_order: Number.isFinite(Number(item.sort_order)) ? Number(item.sort_order) : 0,
+            source_type: 'podcast',
+            source_slug: podcast.slug || null,
+          };
+        })
+        .filter(Boolean);
+    }
+
+    const combined = [...mappedBandTracks, ...mappedPodcastTracks];
+    combined.sort((a, b) => {
+      const orderA = Number.isFinite(Number(a.sort_order)) ? Number(a.sort_order) : 0;
+      const orderB = Number.isFinite(Number(b.sort_order)) ? Number(b.sort_order) : 0;
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+      const dateA = String(a.release_date || '');
+      const dateB = String(b.release_date || '');
+      return dateB.localeCompare(dateA);
+    });
+
+    if (!combined.length) {
+      const legacy = await fetchTracksOrdered({ featuredOnly: true, limit: safeLimit });
+      return legacy.map((item) => ({
+        ...item,
+        source_type: 'legacy',
+      }));
+    }
+
+    if (safeLimit === null) {
+      return combined;
+    }
+
+    return combined.slice(0, Math.max(0, safeLimit));
+  } catch (error) {
+    console.error('[content:radio_pool]', error);
+    return [];
+  }
 }
 
 export async function getTracks(limit = null) {
@@ -148,11 +292,20 @@ export async function getBandBySlug(slug) {
   }
 
   const profile = parseBandProfilePayload(band.members_json);
+  const tracks = await fetchBandTracksByBandId(band.id, { publishedOnly: true });
+  const genres = Array.isArray(band.genres_json)
+    ? band.genres_json.map((item) => String(item || '').trim()).filter(Boolean)
+    : String(band.genre || '')
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean);
 
   return {
     ...band,
+    genres,
     members: profile.members,
     social_links: profile.social_links,
+    tracks,
   };
 }
 
@@ -206,12 +359,70 @@ export async function getBandBySlugForAdmin(slug) {
   }
 
   const profile = parseBandProfilePayload(band.members_json);
+  const tracks = await fetchBandTracksByBandId(band.id, { publishedOnly: false });
+  const genres = Array.isArray(band.genres_json)
+    ? band.genres_json.map((item) => String(item || '').trim()).filter(Boolean)
+    : String(band.genre || '')
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean);
 
   return {
     ...band,
+    genres,
     members: profile.members,
     social_links: profile.social_links,
+    tracks,
   };
+}
+
+async function fetchBandTracksByBandId(bandId, { publishedOnly = false } = {}) {
+  const safeBandId = Number.parseInt(String(bandId || ''), 10);
+  if (!Number.isFinite(safeBandId) || safeBandId <= 0) {
+    return [];
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return [];
+  }
+
+  const run = (includeSortOrder) => {
+    let query = supabase.from('band_tracks').select('*').eq('band_id', safeBandId);
+    if (publishedOnly) {
+      query = query.eq('is_published', true);
+    }
+    if (includeSortOrder) {
+      query = query.order('sort_order', { ascending: true });
+    }
+    return query.order('created_at', { ascending: false });
+  };
+
+  try {
+    const ordered = await run(true);
+    if (!ordered.error) {
+      return ordered.data || [];
+    }
+
+    const message = String(ordered.error.message || '');
+    if (!message.includes('sort_order')) {
+      if (!message.includes('Could not find the table')) {
+        console.error('[content:band_tracks]', message);
+      }
+      return [];
+    }
+
+    const fallback = await run(false);
+    if (fallback.error) {
+      console.error('[content:band_tracks_fallback]', fallback.error.message);
+      return [];
+    }
+
+    return (fallback.data || []).map((item) => ({ ...item, sort_order: 0 }));
+  } catch (error) {
+    console.error('[content:band_tracks_error]', error);
+    return [];
+  }
 }
 
 async function fetchPodcasts({ publishedOnly = false } = {}) {

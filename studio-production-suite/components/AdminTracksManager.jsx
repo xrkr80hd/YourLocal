@@ -136,7 +136,11 @@ export default function AdminTracksManager({ initialTracks = [] }) {
         }}
       >
         <h2 className="section-title">{form.id ? 'Edit Track' : 'Add Track'}</h2>
-        <p className="meta">Owner-only tracks panel. Set order and choose what appears in the home player.</p>
+        <p className="meta" style={{ marginBottom: '0.6rem' }}>
+          {form.id
+            ? 'Editing existing track. Update fields and save, or cancel to return to create mode.'
+            : 'Owner-only. Add XRKR tracks with audio, set order, and choose if they appear in the Hub player.'}
+        </p>
 
         <AdminAccordionSection title="Track Basics" note="Name, artist, genre and description." defaultOpen>
           <div className="grid cols-3">
@@ -184,14 +188,15 @@ export default function AdminTracksManager({ initialTracks = [] }) {
         <AdminAccordionSection title="Track Media" note="Upload audio and cover art." defaultOpen>
           <MediaUrlInput
             id="track-audio-url"
-            label="Audio URL"
+            label="Audio Upload"
             value={form.audio_url}
             onChange={(value) => setForm((current) => ({ ...current, audio_url: value }))}
             folder="audio/tracks"
             replaceMode={Boolean(form.id)}
             replaceKey={form.id ? `audio/tracks/${String(form.id)}/main` : ''}
             accept="audio/*"
-            placeholder="https://... or /..."
+            showUrlInput={false}
+            placeholder="Upload audio"
             help="Upload directly here. In edit mode, upload replaces this track's current audio file."
           />
 
@@ -210,7 +215,7 @@ export default function AdminTracksManager({ initialTracks = [] }) {
           <p className="meta">If upload fails: verify bucket MIME/file-size settings and `UPLOAD_MAX_BYTES` on the server.</p>
         </AdminAccordionSection>
 
-        <AdminAccordionSection title="Release and Visibility" note="Sort, date and home player toggle." defaultOpen={false}>
+        <AdminAccordionSection title="Release and Visibility" note="Sort, date and Hub player toggle." defaultOpen={false}>
           <div className="grid cols-3">
             <div className="form-row">
               <label htmlFor="track-external-url">External Link (optional)</label>
@@ -250,7 +255,7 @@ export default function AdminTracksManager({ initialTracks = [] }) {
                 checked={form.is_featured}
                 onChange={(event) => setForm((current) => ({ ...current, is_featured: event.target.checked }))}
               />
-              <span className="meta">Show on home player</span>
+              <span className="meta">Show in XRKR Hub player</span>
             </label>
           </div>
         </AdminAccordionSection>
@@ -284,7 +289,7 @@ export default function AdminTracksManager({ initialTracks = [] }) {
                   <p className="meta">
                     {track.artist_name || 'xrkr80hd'} | {track.genre || 'other'} | {formatReleaseDate(track.release_date)} | sort {track.sort_order}
                   </p>
-                  <p className="meta">Home player: {track.is_featured ? 'on' : 'off'}</p>
+                  <p className="meta">Hub player: {track.is_featured ? 'on' : 'off'}</p>
                   {track.audio_url ? <audio controls src={track.audio_url} style={{ width: '100%' }} /> : null}
                   <div className="actions">
                     <button className="button primary" type="button" onClick={() => startEdit(track)}>

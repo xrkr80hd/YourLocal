@@ -33,13 +33,18 @@ function emptyEpisode() {
     id: null,
     title: '',
     slug: '',
+    guest_names: '',
+    episode_number: '',
     summary: '',
     description: '',
+    show_notes: '',
     audio_url: '',
     cover_image_url: '',
     published_at: '',
     sort_order: 0,
+    is_explicit: false,
     is_published: true,
+    include_in_radio: true,
   };
 }
 
@@ -49,7 +54,10 @@ function normalizeEpisode(item) {
     ...item,
     published_at: toDateTimeLocal(item?.published_at),
     sort_order: Number.isFinite(Number(item?.sort_order)) ? Number(item.sort_order) : 0,
+    episode_number: item?.episode_number === null || item?.episode_number === undefined ? '' : String(item.episode_number),
+    is_explicit: Boolean(item?.is_explicit),
     is_published: item?.is_published === undefined ? true : Boolean(item.is_published),
+    include_in_radio: item?.include_in_radio === undefined ? true : Boolean(item.include_in_radio),
   };
 }
 
@@ -98,13 +106,18 @@ export default function AdminPodcastEpisodesManager({ podcastSlug, initialEpisod
           const payload = {
             title: form.title,
             slug: slugify(form.slug || form.title),
+            guest_names: form.guest_names,
+            episode_number: form.episode_number,
             summary: form.summary,
             description: form.description,
+            show_notes: form.show_notes,
             audio_url: form.audio_url,
             cover_image_url: form.cover_image_url,
             published_at: form.published_at,
             sort_order: form.sort_order,
+            is_explicit: form.is_explicit,
             is_published: form.is_published,
+            include_in_radio: form.include_in_radio,
           };
 
           try {
@@ -137,9 +150,13 @@ export default function AdminPodcastEpisodesManager({ podcastSlug, initialEpisod
         }}
       >
         <h2 className="section-title">Episodes</h2>
-        <p className="meta">Add 1-2 current episodes for this podcast profile.</p>
+        <p className="meta" style={{ marginBottom: '0.6rem' }}>
+          {form.id
+            ? 'Editing an existing episode. Update and save, or cancel to switch to add mode.'
+            : 'Add 1–2 current episodes for this podcast profile.'}
+        </p>
 
-        <AdminAccordionSection title="Episode Basics" note="Title, slug, summary and description." defaultOpen>
+        <AdminAccordionSection title="Episode Basics" note="Title, topic metadata, slug, and ordering." defaultOpen>
           <div className="grid cols-3">
             <div className="form-row">
               <label htmlFor="episode-title">Episode Title</label>
@@ -155,6 +172,30 @@ export default function AdminPodcastEpisodesManager({ podcastSlug, initialEpisod
             </div>
           </div>
 
+          <div className="grid cols-3">
+            <div className="form-row">
+              <label htmlFor="episode-guest-names">Guest Name(s) (optional)</label>
+              <input
+                id="episode-guest-names"
+                type="text"
+                value={form.guest_names}
+                onChange={(event) => setForm((current) => ({ ...current, guest_names: event.target.value }))}
+                placeholder="Guest A, Guest B"
+              />
+            </div>
+            <div className="form-row">
+              <label htmlFor="episode-number">Episode Number (optional)</label>
+              <input
+                id="episode-number"
+                type="number"
+                min="0"
+                value={form.episode_number}
+                onChange={(event) => setForm((current) => ({ ...current, episode_number: event.target.value }))}
+                placeholder="12"
+              />
+            </div>
+          </div>
+
           <div className="form-row">
             <label htmlFor="episode-summary">Summary</label>
             <textarea id="episode-summary" value={form.summary} onChange={(event) => setForm((current) => ({ ...current, summary: event.target.value }))} />
@@ -164,17 +205,23 @@ export default function AdminPodcastEpisodesManager({ podcastSlug, initialEpisod
             <label htmlFor="episode-description">Description</label>
             <textarea id="episode-description" value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} />
           </div>
+
+          <div className="form-row">
+            <label htmlFor="episode-show-notes">Show Notes (optional)</label>
+            <textarea id="episode-show-notes" value={form.show_notes} onChange={(event) => setForm((current) => ({ ...current, show_notes: event.target.value }))} />
+          </div>
         </AdminAccordionSection>
 
         <AdminAccordionSection title="Episode Media" note="Audio and optional cover image." defaultOpen>
           <MediaUrlInput
             id="episode-audio-url"
-            label="Audio URL"
+            label="Episode Audio Upload"
             value={form.audio_url}
             onChange={(value) => setForm((current) => ({ ...current, audio_url: value }))}
             folder="audio/tracks"
             accept="audio/*"
-            placeholder="https://... or /..."
+            showUrlInput={false}
+            placeholder="Upload episode audio"
           />
 
           <MediaUrlInput
@@ -203,8 +250,20 @@ export default function AdminPodcastEpisodesManager({ podcastSlug, initialEpisod
 
           <div className="actions">
             <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+              <input type="checkbox" checked={form.is_explicit} onChange={(event) => setForm((current) => ({ ...current, is_explicit: event.target.checked }))} />
+              <span className="meta">Explicit</span>
+            </label>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
               <input type="checkbox" checked={form.is_published} onChange={(event) => setForm((current) => ({ ...current, is_published: event.target.checked }))} />
               <span className="meta">Published</span>
+            </label>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+              <input
+                type="checkbox"
+                checked={form.include_in_radio}
+                onChange={(event) => setForm((current) => ({ ...current, include_in_radio: event.target.checked }))}
+              />
+              <span className="meta">Include in XRKR Radio</span>
             </label>
           </div>
 
@@ -230,7 +289,8 @@ export default function AdminPodcastEpisodesManager({ podcastSlug, initialEpisod
                 <article key={episode.id} className="card">
                   <h4>{episode.title}</h4>
                   <p className="meta">
-                    sort {episode.sort_order} | {episode.published_at ? episode.published_at.replace('T', ' ') : 'Draft'} | {episode.is_published ? 'published' : 'draft'}
+                    sort {episode.sort_order} | {episode.published_at ? episode.published_at.replace('T', ' ') : 'Draft'} | {episode.is_published ? 'published' : 'draft'} | radio{' '}
+                    {episode.include_in_radio ? 'on' : 'off'}
                   </p>
                   {episode.summary ? <p>{episode.summary}</p> : null}
                   {episode.audio_url ? <audio controls src={episode.audio_url} style={{ width: '100%' }} /> : null}

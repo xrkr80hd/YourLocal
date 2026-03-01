@@ -11,7 +11,7 @@ function ownerGuard(request) {
 }
 
 function sortColumnHelp() {
-  return 'Run the SQL patch in SUPABASE_ADMIN_SCHEMA_PATCH.md to add tracks.sort_order.';
+  return 'Apply the latest Supabase schema SQL for this project to add tracks.sort_order.';
 }
 
 function formatDateForDb(value) {

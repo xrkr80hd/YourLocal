@@ -122,7 +122,7 @@ export default async function HomePage() {
       <section className="section-space home-radio home-unboxed">
         <div className="home-player-head">
           <h3 className="section-title">XRKR Radio</h3>
-          <span className="meta">Bands, artists, and XRKR80HD tracks</span>
+          <span className="meta">Derived shuffle pool from published band + podcast audio</span>
         </div>
         <HomeTracksPlayer tracks={homeTracks} />
       </section>

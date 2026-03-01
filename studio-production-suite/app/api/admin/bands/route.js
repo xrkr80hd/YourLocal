@@ -6,6 +6,31 @@ import { getSupabaseAdmin } from '../../../../lib/supabase-admin';
 
 export const runtime = 'nodejs';
 
+function normalizeGenreList(value) {
+  const source = Array.isArray(value) ? value : String(value || '').split(',');
+  const cleaned = Array.from(
+    new Set(
+      source
+        .map((item) => clampText(item, 80))
+        .map((item) => item.trim())
+        .filter(Boolean)
+    )
+  );
+  return cleaned.slice(0, 12);
+}
+
+function normalizeMemberRoles(value) {
+  const source = Array.isArray(value) ? value : String(value || '').split(/[\/,]/);
+  return Array.from(
+    new Set(
+      source
+        .map((item) => clampText(item, 80))
+        .map((item) => item.trim())
+        .filter(Boolean)
+    )
+  ).slice(0, 8);
+}
+
 function normalizeMembers(value) {
   const source = Array.isArray(value) ? value : [];
   const next = source
@@ -13,10 +38,13 @@ function normalizeMembers(value) {
       const imageUrl = String(member?.image_url || '').trim();
       const statusRaw = String(member?.status || '').trim().toLowerCase();
       const status = member?.is_past === true || statusRaw === 'past' || statusRaw === 'former' ? 'past' : 'current';
+      const roles = normalizeMemberRoles(member?.roles || member?.role);
+      const role = roles.join(' / ');
 
       return {
         name: clampText(member?.name, 120),
-        role: clampText(member?.role, 120),
+        role: role || null,
+        roles,
         image_url: imageUrl,
         status,
       };
@@ -31,7 +59,8 @@ function buildBandPayload(raw, socialLinks) {
   const slugInput = clampText(raw?.slug, 255);
   const era = raw?.era === 'scene' ? 'scene' : 'archive';
   const yearsActive = clampText(raw?.years_active, 60);
-  const genre = clampText(raw?.genre, 80);
+  const genres = normalizeGenreList(raw?.genres || raw?.genre);
+  const genre = clampText(genres[0] || raw?.genre, 80);
   const tagline = clampText(raw?.tagline, 180);
   const summary = clampText(raw?.summary, 320);
   const story = String(raw?.story || '').trim();
@@ -68,6 +97,7 @@ function buildBandPayload(raw, socialLinks) {
       era,
       years_active: yearsActive || null,
       genre: genre || null,
+      genres_json: genres,
       tagline: tagline || null,
       summary,
       story: story || null,
@@ -158,6 +188,25 @@ export async function POST(request) {
     .maybeSingle();
 
   if (insert.error) {
+    const message = String(insert.error.message || '');
+    if (message.includes('genres_json')) {
+      const fallbackInsert = await supabase
+        .from('bands')
+        .insert({
+          ...parsed.payload,
+          genres_json: undefined,
+          slug: slugResult.slug,
+        })
+        .select('id, slug')
+        .limit(1)
+        .maybeSingle();
+
+      if (!fallbackInsert.error) {
+        return NextResponse.json({ ok: true, item: fallbackInsert.data });
+      }
+      return NextResponse.json({ error: fallbackInsert.error.message }, { status: 500 });
+    }
+
     return NextResponse.json({ error: insert.error.message }, { status: 500 });
   }
 

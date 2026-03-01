@@ -21,6 +21,7 @@ export default function HomeTracksPlayer({ tracks }) {
   const [index, setIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [autoPlayOnChange, setAutoPlayOnChange] = useState(false);
+  const [volume, setVolume] = useState(82);
   const audioRef = useRef(null);
   const hasTracks = items.length > 0;
   const current = hasTracks ? items[index] || items[0] : null;
@@ -72,6 +73,14 @@ export default function HomeTracksPlayer({ tracks }) {
     setIsPlaying(true);
     setAutoPlayOnChange(false);
   }, [autoPlayOnChange, current?.audio_url]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+    audio.volume = Math.min(1, Math.max(0, volume / 100));
+  }, [volume, current?.audio_url]);
 
   function setTrackIndex(nextIndex, { autoplay = false } = {}) {
     if (!hasTracks) {
@@ -142,36 +151,59 @@ export default function HomeTracksPlayer({ tracks }) {
               onEnded={() => setTrackIndex((currentIndex) => randomIndex(items.length, currentIndex), { autoplay: true })}
             />
           ) : (
-            <p className="xrkr-radio-controls-placeholder">Upload tracks in admin to activate player controls.</p>
+            <p className="xrkr-radio-controls-placeholder">Publish band tracks or podcast episodes in admin to activate XRKR Radio.</p>
           )}
         </div>
       </div>
       {hasTracks ? (
-        <div className="xrkr-radio-icon-controls" role="group" aria-label="XRKR Radio controls">
-          <button type="button" className="icon-control" aria-label="First track" onClick={() => setTrackIndex(0, { autoplay: true })}>
-            {'<<'}
-          </button>
-          <button type="button" className="icon-control" aria-label="Previous track" onClick={() => setTrackIndex((currentIndex) => currentIndex - 1, { autoplay: true })}>
-            {'<'}
-          </button>
-          <button type="button" className="icon-control" aria-label="Play" onClick={playCurrent}>
-            {'\u25B6'}
-          </button>
-          <button type="button" className="icon-control" aria-label="Stop" onClick={stopCurrent}>
-            {'\u25A0'}
-          </button>
-          <button type="button" className="icon-control" aria-label="Next track" onClick={() => setTrackIndex((currentIndex) => currentIndex + 1, { autoplay: true })}>
-            {'>'}
-          </button>
-          <button
-            type="button"
-            className={`icon-control ${isPlaying ? 'is-active' : ''}`.trim()}
-            aria-label="Shuffle track"
-            onClick={() => setTrackIndex((currentIndex) => randomIndex(items.length, currentIndex), { autoplay: true })}
-          >
-            {'>>'}
-          </button>
-        </div>
+        <>
+          <div className="xrkr-radio-icon-controls" role="group" aria-label="XRKR Radio controls">
+            <button type="button" className="icon-control" aria-label="First track" onClick={() => setTrackIndex(0, { autoplay: true })}>
+              {'<<'}
+            </button>
+            <button type="button" className="icon-control" aria-label="Previous track" onClick={() => setTrackIndex((currentIndex) => currentIndex - 1, { autoplay: true })}>
+              {'<'}
+            </button>
+            <button type="button" className="icon-control" aria-label="Play" onClick={playCurrent}>
+              {'\u25B6'}
+            </button>
+            <button type="button" className="icon-control" aria-label="Stop" onClick={stopCurrent}>
+              {'\u25A0'}
+            </button>
+            <button type="button" className="icon-control" aria-label="Next track" onClick={() => setTrackIndex((currentIndex) => currentIndex + 1, { autoplay: true })}>
+              {'>'}
+            </button>
+            <button
+              type="button"
+              className={`icon-control ${isPlaying ? 'is-active' : ''}`.trim()}
+              aria-label="Shuffle track"
+              onClick={() => setTrackIndex((currentIndex) => randomIndex(items.length, currentIndex), { autoplay: true })}
+            >
+              {'>>'}
+            </button>
+          </div>
+          <div className="digital-volume-wrap">
+            <span className="digital-volume-label">VOL {String(volume).padStart(2, '0')}</span>
+            <div className="digital-volume-meter" aria-hidden="true">
+              <span className="digital-volume-fill" style={{ width: `${volume}%` }} />
+            </div>
+            <input
+              type="range"
+              className="digital-volume-input"
+              min="0"
+              max="100"
+              step="1"
+              value={volume}
+              aria-label="Volume"
+              onChange={(event) => {
+                const next = Number.parseInt(event.target.value, 10);
+                if (Number.isFinite(next)) {
+                  setVolume(Math.min(100, Math.max(0, next)));
+                }
+              }}
+            />
+          </div>
+        </>
       ) : null}
     </div>
   );

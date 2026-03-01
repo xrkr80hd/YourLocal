@@ -5,7 +5,7 @@ import { ADMIN_SESSION_USER_COOKIE, isOwnerUsername } from '../../../lib/admin-a
 import { getTracksForAdmin } from '../../../lib/content';
 
 export const metadata = {
-  title: 'Tracks Manager | xrkr80hd Studio',
+  title: 'XRKR Hub Tracks | xrkr80hd Studio',
 };
 
 export default async function AdminTracksPage() {
@@ -19,8 +19,8 @@ export default async function AdminTracksPage() {
   return (
     <>
       <section className="card hero">
-        <h1>Tracks Manager</h1>
-        <p>Owner-only track CRUD: upload, order, and choose what appears in your home page player.</p>
+        <h1>XRKR Hub Tracks</h1>
+        <p>Owner-only music library for your personal XRKR80HD Hub player.</p>
       </section>
       <AdminTracksManager initialTracks={tracks} />
     </>

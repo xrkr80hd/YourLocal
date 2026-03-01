@@ -26,11 +26,14 @@ export default async function YourLocalBusinessPage() {
         </h1>
         <p>Local businesses we support across services, production, food, and the community.</p>
         <div className="actions">
+          <Link className="button" href="/local-legends-archive">
+            YourLocal Legends
+          </Link>
           <Link className="button" href="/your-local-scene">
             YourLocal Scene
           </Link>
-          <Link className="button" href="/local-legends-archive">
-            YourLocal Legends
+          <Link className="button" href="/podcast">
+            YourLocal Podcast
           </Link>
           <Link className="button primary" href="/your-local-business">
             YourLocal Business
