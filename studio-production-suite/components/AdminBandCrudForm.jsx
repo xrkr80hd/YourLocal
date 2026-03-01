@@ -63,6 +63,15 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
   };
 
   const createMember = (status = 'current') => ({ name: '', role: '', image_url: '', status: status === 'past' ? 'past' : 'current' });
+  const goToBandManager = () => {
+    const next = `/admin/bands?refresh=${Date.now()}`;
+    if (typeof window !== 'undefined') {
+      window.location.assign(next);
+      return;
+    }
+    router.replace(next);
+    router.refresh();
+  };
 
   return (
     <form
@@ -110,8 +119,7 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
 
           setStatus(isEdit ? 'Band updated.' : 'Band created.');
           setSaving(false);
-          router.push('/admin/bands');
-          router.refresh();
+          goToBandManager();
         } catch {
           setStatus('Save failed due to network error.');
           setSaving(false);
@@ -343,8 +351,7 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
                   return;
                 }
 
-                router.push('/admin/bands');
-                router.refresh();
+                goToBandManager();
               }}
             >
               Delete Band

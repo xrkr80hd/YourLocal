@@ -27,6 +27,15 @@ function normalizeWebsiteUrl(value) {
 export default function AdminBusinessCrudForm({ mode = 'create', initialBusiness = null, categoryOptions = [] }) {
   const router = useRouter();
   const isEdit = mode === 'edit';
+  const goToBusinessManager = () => {
+    const next = `/admin/business?refresh=${Date.now()}`;
+    if (typeof window !== 'undefined') {
+      window.location.assign(next);
+      return;
+    }
+    router.replace(next);
+    router.refresh();
+  };
 
   const [name, setName] = useState(String(initialBusiness?.name || ''));
   const [category, setCategory] = useState(String(initialBusiness?.category || ''));
@@ -90,8 +99,7 @@ export default function AdminBusinessCrudForm({ mode = 'create', initialBusiness
 
           setStatus(isEdit ? 'Business updated.' : 'Business created.');
           setSaving(false);
-          router.push('/admin/business');
-          router.refresh();
+          goToBusinessManager();
         } catch {
           setStatus('Save failed due to network error.');
           setSaving(false);
@@ -194,8 +202,7 @@ export default function AdminBusinessCrudForm({ mode = 'create', initialBusiness
                   return;
                 }
 
-                router.push('/admin/business');
-                router.refresh();
+                goToBusinessManager();
               }}
             >
               Delete Business

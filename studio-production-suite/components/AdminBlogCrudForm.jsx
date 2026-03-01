@@ -32,6 +32,15 @@ function toDateTimeLocal(value) {
 export default function AdminBlogCrudForm({ mode = 'create', initialPost = null }) {
   const router = useRouter();
   const isEdit = mode === 'edit';
+  const goToBlogManager = () => {
+    const next = `/admin/blog?refresh=${Date.now()}`;
+    if (typeof window !== 'undefined') {
+      window.location.assign(next);
+      return;
+    }
+    router.replace(next);
+    router.refresh();
+  };
 
   const [title, setTitle] = useState(String(initialPost?.title || ''));
   const [slug, setSlug] = useState(String(initialPost?.slug || ''));
@@ -81,8 +90,7 @@ export default function AdminBlogCrudForm({ mode = 'create', initialPost = null 
 
           setStatus(isEdit ? 'Post updated.' : 'Post created.');
           setSaving(false);
-          router.push('/admin/blog');
-          router.refresh();
+          goToBlogManager();
         } catch {
           setStatus('Save failed due to network error.');
           setSaving(false);
@@ -183,8 +191,7 @@ export default function AdminBlogCrudForm({ mode = 'create', initialPost = null 
                 return;
               }
 
-              router.push('/admin/blog');
-              router.refresh();
+              goToBlogManager();
             }}
           >
             Delete Post

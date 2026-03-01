@@ -5,6 +5,7 @@ import { getPostsForAdmin } from '../../../lib/content';
 export const metadata = {
   title: 'Blog Manager | Admin',
 };
+export const dynamic = 'force-dynamic';
 
 export default async function AdminBlogPage() {
   const posts = await getPostsForAdmin();
@@ -15,10 +16,10 @@ export default async function AdminBlogPage() {
         <h1>Blog Manager</h1>
         <p>Write, edit, and publish posts for xrkr80hd.studio from admin.</p>
         <div className="actions">
-          <Link className="button primary" href="/admin/blog/new">
+          <Link className="button primary" href="/admin/blog/new" prefetch={false}>
             New Blog Post
           </Link>
-          <Link className="button" href="/blog">
+          <Link className="button" href="/blog" prefetch={false}>
             View Public Blog
           </Link>
         </div>
@@ -35,10 +36,10 @@ export default async function AdminBlogPage() {
                 </p>
                 {post.excerpt ? <p>{post.excerpt}</p> : null}
                 <div className="actions">
-                  <Link className="button primary" href={`/admin/blog/${post.slug}/edit`}>
+                  <Link className="button primary" href={`/admin/blog/${post.slug}/edit`} prefetch={false}>
                     Edit Post
                   </Link>
-                  <Link className="button" href={`/blog/${post.slug}`}>
+                  <Link className="button" href={`/blog/${post.slug}`} prefetch={false}>
                     View Post
                   </Link>
                 </div>

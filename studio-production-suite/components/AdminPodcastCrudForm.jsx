@@ -18,6 +18,15 @@ function slugify(value) {
 export default function AdminPodcastCrudForm({ mode = 'create', initialPodcast = null, topicOptions = [] }) {
   const router = useRouter();
   const isEdit = mode === 'edit';
+  const goToPodcastsManager = () => {
+    const next = `/admin/podcasts?refresh=${Date.now()}`;
+    if (typeof window !== 'undefined') {
+      window.location.assign(next);
+      return;
+    }
+    router.replace(next);
+    router.refresh();
+  };
 
   const [title, setTitle] = useState(String(initialPodcast?.title || ''));
   const [slug, setSlug] = useState(String(initialPodcast?.slug || ''));
@@ -82,8 +91,13 @@ export default function AdminPodcastCrudForm({ mode = 'create', initialPodcast =
           }
 
           const nextSlug = body?.item?.slug || payload.slug;
-          router.push(`/admin/podcasts/${encodeURIComponent(nextSlug)}/edit`);
-          router.refresh();
+          const next = `/admin/podcasts/${encodeURIComponent(nextSlug)}/edit?refresh=${Date.now()}`;
+          if (typeof window !== 'undefined') {
+            window.location.assign(next);
+          } else {
+            router.replace(next);
+            router.refresh();
+          }
         } catch {
           setStatus('Save failed due to network error.');
           setSaving(false);
@@ -200,8 +214,7 @@ export default function AdminPodcastCrudForm({ mode = 'create', initialPodcast =
                   return;
                 }
 
-                router.push('/admin/podcasts');
-                router.refresh();
+                goToPodcastsManager();
               }}
             >
               Delete Podcast

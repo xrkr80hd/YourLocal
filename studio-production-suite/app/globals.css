@@ -1045,6 +1045,8 @@ label {
 
 .home-radio {
   max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .home-player audio,
@@ -1055,6 +1057,8 @@ label {
 
 .xrkr-radio-shell {
   width: min(760px, 100%);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .xrkr-radio-skin {

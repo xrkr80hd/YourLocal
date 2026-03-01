@@ -4,6 +4,7 @@ import { getLocalBusinessesForAdmin } from '../../../lib/content';
 export const metadata = {
   title: 'Business Manager | Admin',
 };
+export const dynamic = 'force-dynamic';
 
 function initials(value) {
   const parts = String(value || '')
@@ -27,10 +28,10 @@ export default async function AdminBusinessPage() {
         <h1>YourLocal Business Manager</h1>
         <p>Create, edit, and remove business cards for the public YourLocal Business page.</p>
         <div className="actions">
-          <Link className="button primary" href="/admin/business/new">
+          <Link className="button primary" href="/admin/business/new" prefetch={false}>
             New Business Card
           </Link>
-          <Link className="button" href="/your-local-business">
+          <Link className="button" href="/your-local-business" prefetch={false}>
             View Public Page
           </Link>
         </div>
@@ -56,7 +57,7 @@ export default async function AdminBusinessPage() {
                   {item.description ? <p className="meta">{item.description}</p> : null}
                   <p className="meta">Published: {item.is_published ? 'yes' : 'no'}</p>
                   <div className="actions">
-                    <Link className="button primary" href={`/admin/business/${item.id}/edit`}>
+                    <Link className="button primary" href={`/admin/business/${item.id}/edit`} prefetch={false}>
                       Edit Business
                     </Link>
                     {item.website_url ? (

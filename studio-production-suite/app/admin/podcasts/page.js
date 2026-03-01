@@ -4,6 +4,7 @@ import { getPodcastsForAdmin } from '../../../lib/content';
 export const metadata = {
   title: 'Admin Podcasts | xrkr80hd Studio',
 };
+export const dynamic = 'force-dynamic';
 
 function groupByTopic(items) {
   const map = new Map();
@@ -29,10 +30,10 @@ export default async function AdminPodcastsPage() {
         <h1>Podcast Manager</h1>
         <p>Manage local podcast profiles by topic. Open each profile to CRUD its episodes.</p>
         <div className="actions">
-          <Link className="button primary" href="/admin/podcasts/new">
+          <Link className="button primary" href="/admin/podcasts/new" prefetch={false}>
             New Podcast
           </Link>
-          <Link className="button" href="/admin/bands">
+          <Link className="button" href="/admin/bands" prefetch={false}>
             Band Manager
           </Link>
         </div>
@@ -52,10 +53,10 @@ export default async function AdminPodcastsPage() {
                       <span className="band-card-genre">{podcast.topic || 'uncategorized'}</span>
                       <p className="band-card-desc">{podcast.summary || podcast.description || 'No summary yet.'}</p>
                       <div className="actions">
-                        <Link className="button primary" href={`/admin/podcasts/${podcast.slug}/edit`}>
+                        <Link className="button primary" href={`/admin/podcasts/${podcast.slug}/edit`} prefetch={false}>
                           Edit Podcast
                         </Link>
-                        <Link className="button" href={`/podcast/${podcast.slug}`}>
+                        <Link className="button" href={`/podcast/${podcast.slug}`} prefetch={false}>
                           View Podcast Page
                         </Link>
                       </div>

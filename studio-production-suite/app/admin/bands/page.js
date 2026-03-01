@@ -4,6 +4,7 @@ import { getBandsForAdmin } from '../../../lib/content';
 export const metadata = {
   title: 'Admin Bands | xrkr80hd Studio',
 };
+export const dynamic = 'force-dynamic';
 
 function groupByGenre(items) {
   const map = new Map();
@@ -36,13 +37,13 @@ export default async function AdminBandsPage() {
         <h1>Band Manager</h1>
         <p>Create/edit bands for each page and keep members organized by genre. Backend only.</p>
         <div className="actions">
-          <Link className="button primary" href="/admin/bands/new?era=archive">
+          <Link className="button primary" href="/admin/bands/new?era=archive" prefetch={false}>
             New Legends Band
           </Link>
-          <Link className="button primary" href="/admin/bands/new?era=scene">
+          <Link className="button primary" href="/admin/bands/new?era=scene" prefetch={false}>
             New Scene Band
           </Link>
-          <Link className="button" href="/admin/podcasts">
+          <Link className="button" href="/admin/podcasts" prefetch={false}>
             Podcast Manager
           </Link>
         </div>
@@ -64,13 +65,13 @@ export default async function AdminBandsPage() {
                         <span className="band-card-genre">{band.genre || 'Local Band'}</span>
                         <p className="band-card-desc">{band.summary || 'No summary yet.'}</p>
                         <div className="actions">
-                          <Link className="button primary" href={`/admin/bands/${band.slug}/edit`}>
+                          <Link className="button primary" href={`/admin/bands/${band.slug}/edit`} prefetch={false}>
                             Edit Band
                           </Link>
-                          <Link className="button" href={`/admin/bands/${band.slug}/socials`}>
+                          <Link className="button" href={`/admin/bands/${band.slug}/socials`} prefetch={false}>
                             Social Links
                           </Link>
-                          <Link className="button" href={`/bands/${band.slug}`}>
+                          <Link className="button" href={`/bands/${band.slug}`} prefetch={false}>
                             View Page
                           </Link>
                         </div>
@@ -100,13 +101,13 @@ export default async function AdminBandsPage() {
                         <span className="band-card-genre">{band.genre || 'Local Band'}</span>
                         <p className="band-card-desc">{band.summary || 'No summary yet.'}</p>
                         <div className="actions">
-                          <Link className="button primary" href={`/admin/bands/${band.slug}/edit`}>
+                          <Link className="button primary" href={`/admin/bands/${band.slug}/edit`} prefetch={false}>
                             Edit Band
                           </Link>
-                          <Link className="button" href={`/admin/bands/${band.slug}/socials`}>
+                          <Link className="button" href={`/admin/bands/${band.slug}/socials`} prefetch={false}>
                             Social Links
                           </Link>
-                          <Link className="button" href={`/bands/${band.slug}`}>
+                          <Link className="button" href={`/bands/${band.slug}`} prefetch={false}>
                             View Page
                           </Link>
                         </div>
