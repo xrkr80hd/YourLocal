@@ -51,7 +51,7 @@ export default function AdminBandTracksManager({ bandSlug, bandName = '', initia
   const resetForm = () => setForm(emptyTrack());
 
   const reload = async () => {
-    const response = await fetch(`/api/admin/bands/${encodeURIComponent(bandSlug)}/tracks`);
+    const response = await fetch(`/api/admin/bands/${encodeURIComponent(bandSlug)}/tracks`, { cache: 'no-store' });
     const body = await response.json().catch(() => ({}));
     if (!response.ok) {
       throw new Error(body.error || 'Failed to refresh band tracks.');

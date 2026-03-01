@@ -86,7 +86,7 @@ export default function AdminPodcastEpisodesManager({ podcastSlug, initialEpisod
   const resetForm = () => setForm(emptyEpisode());
 
   const reload = async () => {
-    const response = await fetch(`/api/admin/podcasts/${encodeURIComponent(podcastSlug)}/episodes`);
+    const response = await fetch(`/api/admin/podcasts/${encodeURIComponent(podcastSlug)}/episodes`, { cache: 'no-store' });
     const body = await response.json().catch(() => ({}));
     if (!response.ok) {
       throw new Error(body.error || 'Failed to refresh episodes.');

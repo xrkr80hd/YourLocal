@@ -15,6 +15,16 @@ function isAudioFile(file) {
   );
 }
 
+function withCacheBust(url) {
+  const raw = String(url || '').trim();
+  if (!raw) {
+    return '';
+  }
+
+  const separator = raw.includes('?') ? '&' : '?';
+  return `${raw}${separator}v=${Date.now()}`;
+}
+
 async function createSignedUploadIntent({ file, folder, replaceMode, replaceKey, currentValue }) {
   const response = await fetch('/api/upload/signed', {
     method: 'POST',
@@ -162,8 +172,9 @@ export default function MediaUrlInput({
               }
 
               const nextUrl = String(payload.url || payload.canonical_url || '');
+              const cacheBustedUrl = withCacheBust(nextUrl);
               if (nextUrl) {
-                onChange(nextUrl);
+                onChange(cacheBustedUrl);
               }
               setStatus(nextUrl ? (replaceMode ? 'Uploaded and replaced.' : 'Uploaded and URL set.') : 'Upload complete.');
               setUploading(false);

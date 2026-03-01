@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from './supabase-admin';
 import { parseBandProfilePayload } from './band-profile';
+import { unstable_noStore as noStore } from 'next/cache';
 
 const DEFAULT_GENRES = [
   'metal',
@@ -16,6 +17,7 @@ const DEFAULT_GENRES = [
 ];
 
 async function runQuery(label, callback, fallbackValue) {
+  noStore();
   const supabase = getSupabaseAdmin();
 
   if (!supabase) {
@@ -51,6 +53,7 @@ export async function getSiteProfile() {
 }
 
 async function fetchTracksOrdered({ featuredOnly = false, limit = null } = {}) {
+  noStore();
   const supabase = getSupabaseAdmin();
   if (!supabase) {
     return [];
@@ -98,6 +101,7 @@ async function fetchTracksOrdered({ featuredOnly = false, limit = null } = {}) {
 }
 
 export async function getHomeTracks(limit = 12) {
+  noStore();
   const supabase = getSupabaseAdmin();
   if (!supabase) {
     return [];
@@ -377,6 +381,7 @@ export async function getBandBySlugForAdmin(slug) {
 }
 
 async function fetchBandTracksByBandId(bandId, { publishedOnly = false } = {}) {
+  noStore();
   const safeBandId = Number.parseInt(String(bandId || ''), 10);
   if (!Number.isFinite(safeBandId) || safeBandId <= 0) {
     return [];
@@ -426,6 +431,7 @@ async function fetchBandTracksByBandId(bandId, { publishedOnly = false } = {}) {
 }
 
 async function fetchPodcasts({ publishedOnly = false } = {}) {
+  noStore();
   const supabase = getSupabaseAdmin();
   if (!supabase) {
     return [];
@@ -470,6 +476,7 @@ async function fetchPodcasts({ publishedOnly = false } = {}) {
 }
 
 async function fetchPodcastEpisodesByPodcastId(podcastId, { publishedOnly = false, limit = null } = {}) {
+  noStore();
   const safeId = Number.parseInt(String(podcastId || ''), 10);
   if (!Number.isFinite(safeId) || safeId <= 0) {
     return [];
@@ -565,6 +572,7 @@ export async function getPodcastEpisodesForPodcastAdmin(podcastId) {
 }
 
 async function fetchLocalBusinesses({ publishedOnly = false } = {}) {
+  noStore();
   const supabase = getSupabaseAdmin();
   if (!supabase) {
     return [];

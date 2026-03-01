@@ -73,7 +73,7 @@ export default function AdminTracksManager({ initialTracks = [] }) {
   const resetForm = () => setForm(emptyTrack());
 
   const reloadTracks = async () => {
-    const response = await fetch('/api/admin/tracks');
+    const response = await fetch('/api/admin/tracks', { cache: 'no-store' });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
       throw new Error(payload.error || 'Failed to refresh tracks.');
