@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import MediaUrlInput from './MediaUrlInput';
 import AdminAccordionSection from './AdminAccordionSection';
 
+const SHORT_BIO_MAX = 300;
+
 export default function AdminHomeSettingsForm({ initialProfile = null }) {
   const router = useRouter();
   const [headline, setHeadline] = useState(String(initialProfile?.headline || ''));
@@ -19,6 +21,7 @@ export default function AdminHomeSettingsForm({ initialProfile = null }) {
   const [contactCardImageUrl, setContactCardImageUrl] = useState(String(initialProfile?.home_contact_card_image_url || ''));
   const [status, setStatus] = useState('');
   const [saving, setSaving] = useState(false);
+  const shortBioCount = shortBio.length;
 
   return (
     <form
@@ -75,7 +78,15 @@ export default function AdminHomeSettingsForm({ initialProfile = null }) {
 
         <div className="form-row">
           <label htmlFor="home-short-bio">Short Bio</label>
-          <textarea id="home-short-bio" value={shortBio} onChange={(event) => setShortBio(event.target.value)} />
+          <textarea
+            id="home-short-bio"
+            value={shortBio}
+            maxLength={SHORT_BIO_MAX}
+            onChange={(event) => setShortBio(event.target.value)}
+          />
+          <p className="meta">
+            {shortBioCount}/{SHORT_BIO_MAX} characters (max {SHORT_BIO_MAX})
+          </p>
         </div>
 
         <div className="form-row">

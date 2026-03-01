@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import HomeTracksPlayer from '../components/HomeTracksPlayer';
+import HomeBioModal from '../components/HomeBioModal';
 import { getHomeTracks, getSiteProfile } from '../lib/content';
 
 function Headline({ value }) {
@@ -106,7 +107,11 @@ export default async function HomePage() {
           <div>
             <Headline value={profile?.headline} />
             {profile?.short_bio ? <p>{profile.short_bio}</p> : null}
-            {profile?.full_bio ? <p>{profile.full_bio}</p> : null}
+            {profile?.full_bio ? (
+              <div className="actions home-bio-actions">
+                <HomeBioModal fullBio={profile.full_bio} avatarUrl={profile?.avatar_url} headline={profile?.headline} />
+              </div>
+            ) : null}
           </div>
         </div>
         <div className="actions">
