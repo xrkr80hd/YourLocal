@@ -212,16 +212,16 @@ export default function AdminPodcastEpisodesManager({ podcastSlug, initialEpisod
           </div>
         </AdminAccordionSection>
 
-        <AdminAccordionSection title="Episode Media" note="Audio and optional cover image." defaultOpen>
+        <AdminAccordionSection title="Episode Media" note="Upload audio or switch to URL mode; cover image is optional." defaultOpen>
           <MediaUrlInput
             id="episode-audio-url"
-            label="Episode Audio Upload"
+            label="Episode Audio Source"
             value={form.audio_url}
             onChange={(value) => setForm((current) => ({ ...current, audio_url: value }))}
             folder="audio/tracks"
             accept="audio/*"
             showUrlInput={false}
-            placeholder="Upload episode audio"
+            placeholder="https://... or /..."
           />
 
           <MediaUrlInput

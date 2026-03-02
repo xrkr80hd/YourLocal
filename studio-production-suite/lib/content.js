@@ -664,6 +664,22 @@ export async function getPublishedPosts() {
   );
 }
 
+export async function getLatestPublishedPost() {
+  return runQuery(
+    'blog_posts_latest',
+    (supabase) =>
+      supabase
+        .from('blog_posts')
+        .select('id, slug, title, published_at, created_at')
+        .eq('is_published', true)
+        .order('published_at', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    null
+  );
+}
+
 export async function getPostBySlug(slug) {
   return runQuery(
     `post_${slug}`,

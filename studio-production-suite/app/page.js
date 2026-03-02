@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import HomeTracksPlayer from '../components/HomeTracksPlayer';
 import HomeBioModal from '../components/HomeBioModal';
-import { getHomeTracks, getSiteProfile } from '../lib/content';
+import HomeBlogNotice from '../components/HomeBlogNotice';
+import { getHomeTracks, getLatestPublishedPost, getSiteProfile } from '../lib/content';
 
 function Headline({ value }) {
   const text = String(value || 'XRKR80HD');
@@ -74,7 +75,8 @@ const guideCardDefaults = [
 ];
 
 export default async function HomePage() {
-  const [profile, homeTracks] = await Promise.all([getSiteProfile(), getHomeTracks(12)]);
+  const [profile, homeTracks, latestPost] = await Promise.all([getSiteProfile(), getHomeTracks(12), getLatestPublishedPost()]);
+  const welcomeMessage = String(profile?.welcome_message || 'Welcome to XRKR80HD Studio.').trim();
   const guideCards = guideCardDefaults.map((card) => {
     if (card.key === 'hub' && profile?.home_hub_card_image_url) {
       return { ...card, image: profile.home_hub_card_image_url };
@@ -99,12 +101,15 @@ export default async function HomePage() {
 
   return (
     <>
+      <HomeBlogNotice latestPost={latestPost} message={profile?.blog_notice_message} />
+
       <section className="hero home-hero home-unboxed">
         <div className="home-hero-profile">
           <div className="home-hero-avatar">
             {profile?.avatar_url ? <img src={profile.avatar_url} alt="XRKR80HD avatar" /> : <span>XR</span>}
           </div>
           <div>
+            {welcomeMessage ? <p className="home-welcome-message">{welcomeMessage}</p> : null}
             <Headline value={profile?.headline} />
             {profile?.short_bio ? <p>{profile.short_bio}</p> : null}
             {profile?.full_bio ? (

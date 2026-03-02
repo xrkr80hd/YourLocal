@@ -163,6 +163,8 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
       return current.filter((item) => item !== safe);
     });
   };
+  const addGenre = (value) => toggleGenre(value, true);
+  const removeGenre = (value) => toggleGenre(value, false);
 
   const toggleMemberRole = (index, role, enabled) => {
     const safeRole = normalizeBandRole(role);
@@ -307,21 +309,44 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
             <input id="band-years-active" type="text" value={yearsActive} onChange={(event) => setYearsActive(event.target.value)} placeholder="2008 - 2013" />
           </div>
           <div className="form-row">
-            <label>Genres (multi-select)</label>
-            <div className="admin-chip-scroll" role="group" aria-label="Genre options">
-              {genreDataList.map((item) => {
-                const checked = genres.includes(item);
-                return (
-                <label key={item} className={`admin-chip ${checked ? 'is-selected' : ''}`}>
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={(event) => toggleGenre(item, event.target.checked)}
-                  />
-                  <span>{item}</span>
-                </label>
-                );
-              })}
+            <label htmlFor="band-genres-select">Genres (multi-select)</label>
+            <select
+              id="band-genres-select"
+              value=""
+              onChange={(event) => {
+                const selected = String(event.target.value || '').trim();
+                if (selected) {
+                  addGenre(selected);
+                }
+              }}
+            >
+              <option value="">Select genre to add...</option>
+              {genreDataList
+                .filter((item) => !genres.includes(item))
+                .map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+            </select>
+            <div className="admin-selected-list" role="list" aria-label="Selected genres">
+              {genres.length ? (
+                genres.map((item) => (
+                  <span key={item} className="admin-selected-pill" role="listitem">
+                    <span>{item}</span>
+                    <button
+                      type="button"
+                      className="admin-selected-pill-remove"
+                      aria-label={`Remove ${item}`}
+                      onClick={() => removeGenre(item)}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))
+              ) : (
+                <p className="meta">No genres selected yet.</p>
+              )}
             </div>
             <div className="actions">
               <input
@@ -339,7 +364,7 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
                   if (!safe) {
                     return;
                   }
-                  toggleGenre(safe, true);
+                  addGenre(safe);
                   setCustomGenre('');
                 }}
               >
@@ -441,18 +466,42 @@ export default function AdminBandCrudForm({ mode = 'create', initialBand = null,
                 </div>
               </div>
               <div className="form-row">
-                  <label>Roles (multi-select)</label>
-                  <div className="admin-chip-scroll" role="group" aria-label={`Role options for ${member.name || `member ${index + 1}`}`}>
-                    {BAND_ROLE_OPTIONS.map((role) => (
-                      <label key={`${role}-${index}`} className={`admin-chip ${selectedRoles.includes(role) ? 'is-selected' : ''}`}>
-                        <input
-                          type="checkbox"
-                          checked={selectedRoles.includes(role)}
-                          onChange={(event) => toggleMemberRole(index, role, event.target.checked)}
-                        />
-                        <span>{role}</span>
-                      </label>
+                  <label htmlFor={`member-role-select-${index}`}>Roles (multi-select)</label>
+                  <select
+                    id={`member-role-select-${index}`}
+                    value=""
+                    onChange={(event) => {
+                      const selected = String(event.target.value || '').trim();
+                      if (selected) {
+                        toggleMemberRole(index, selected, true);
+                      }
+                    }}
+                  >
+                    <option value="">Select role to add...</option>
+                    {BAND_ROLE_OPTIONS.filter((role) => !selectedRoles.includes(role)).map((role) => (
+                      <option key={`${role}-${index}`} value={role}>
+                        {role}
+                      </option>
                     ))}
+                  </select>
+                  <div className="admin-selected-list" role="list" aria-label={`Selected roles for ${member.name || `member ${index + 1}`}`}>
+                    {selectedRoles.length ? (
+                      selectedRoles.map((role) => (
+                        <span key={`${role}-${index}`} className="admin-selected-pill" role="listitem">
+                          <span>{role}</span>
+                          <button
+                            type="button"
+                            className="admin-selected-pill-remove"
+                            aria-label={`Remove ${role}`}
+                            onClick={() => toggleMemberRole(index, role, false)}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))
+                    ) : (
+                      <p className="meta">No roles selected yet.</p>
+                    )}
                   </div>
                   <p className="meta">{selectedRoles.length ? selectedRoles.join(' / ') : 'No roles selected yet.'}</p>
                 </div>

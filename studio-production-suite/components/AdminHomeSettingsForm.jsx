@@ -6,10 +6,14 @@ import MediaUrlInput from './MediaUrlInput';
 import AdminAccordionSection from './AdminAccordionSection';
 
 const SHORT_BIO_MAX = 300;
+const WELCOME_MESSAGE_MAX = 220;
+const BLOG_NOTICE_MESSAGE_MAX = 180;
 
 export default function AdminHomeSettingsForm({ initialProfile = null }) {
   const router = useRouter();
   const [headline, setHeadline] = useState(String(initialProfile?.headline || ''));
+  const [welcomeMessage, setWelcomeMessage] = useState(String(initialProfile?.welcome_message || ''));
+  const [blogNoticeMessage, setBlogNoticeMessage] = useState(String(initialProfile?.blog_notice_message || ''));
   const [shortBio, setShortBio] = useState(String(initialProfile?.short_bio || ''));
   const [fullBio, setFullBio] = useState(String(initialProfile?.full_bio || ''));
   const [avatarUrl, setAvatarUrl] = useState(String(initialProfile?.avatar_url || ''));
@@ -21,6 +25,8 @@ export default function AdminHomeSettingsForm({ initialProfile = null }) {
   const [contactCardImageUrl, setContactCardImageUrl] = useState(String(initialProfile?.home_contact_card_image_url || ''));
   const [status, setStatus] = useState('');
   const [saving, setSaving] = useState(false);
+  const welcomeMessageCount = welcomeMessage.length;
+  const blogNoticeMessageCount = blogNoticeMessage.length;
   const shortBioCount = shortBio.length;
 
   return (
@@ -33,6 +39,8 @@ export default function AdminHomeSettingsForm({ initialProfile = null }) {
 
         const payload = {
           headline,
+          welcome_message: welcomeMessage,
+          blog_notice_message: blogNoticeMessage,
           short_bio: shortBio,
           full_bio: fullBio,
           avatar_url: avatarUrl,
@@ -68,12 +76,40 @@ export default function AdminHomeSettingsForm({ initialProfile = null }) {
       }}
     >
       <h2 className="section-title">Homepage Controls (Owner)</h2>
-      <p className="meta">Change your landing profile image and front-page card images from here.</p>
+      <p className="meta">Change homepage messaging, landing profile image, and front-page card images from here.</p>
 
       <AdminAccordionSection title="Profile Copy" note="Headline and bio text." defaultOpen>
         <div className="form-row">
           <label htmlFor="home-headline">Headline</label>
           <input id="home-headline" type="text" value={headline} onChange={(event) => setHeadline(event.target.value)} />
+        </div>
+
+        <div className="form-row">
+          <label htmlFor="home-welcome-message">Welcome Message</label>
+          <textarea
+            id="home-welcome-message"
+            value={welcomeMessage}
+            maxLength={WELCOME_MESSAGE_MAX}
+            onChange={(event) => setWelcomeMessage(event.target.value)}
+            placeholder="Welcome to the site..."
+          />
+          <p className="meta">
+            {welcomeMessageCount}/{WELCOME_MESSAGE_MAX} characters (max {WELCOME_MESSAGE_MAX})
+          </p>
+        </div>
+
+        <div className="form-row">
+          <label htmlFor="home-blog-notice-message">Blog Notification Message</label>
+          <textarea
+            id="home-blog-notice-message"
+            value={blogNoticeMessage}
+            maxLength={BLOG_NOTICE_MESSAGE_MAX}
+            onChange={(event) => setBlogNoticeMessage(event.target.value)}
+            placeholder="New blog post is live."
+          />
+          <p className="meta">
+            {blogNoticeMessageCount}/{BLOG_NOTICE_MESSAGE_MAX} characters (max {BLOG_NOTICE_MESSAGE_MAX})
+          </p>
         </div>
 
         <div className="form-row">

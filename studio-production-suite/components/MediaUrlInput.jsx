@@ -125,19 +125,22 @@ export default function MediaUrlInput({
 }) {
   const [status, setStatus] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [manualUrlMode, setManualUrlMode] = useState(Boolean(showUrlInput));
   const fieldLabel = cleanFieldLabel(label);
   const resolvedHelp = String(help || '').trim() || inferUploadHint({ id, accept });
+  const showInlineUrlInput = showUrlInput || manualUrlMode;
+  const urlPlaceholder = String(placeholder || '').trim() || 'https://... or /...';
 
   return (
     <div className={`form-row media-url-input ${compact ? 'compact' : ''}`.trim()}>
-      <label htmlFor={showUrlInput ? id : `${id}-file`}>{fieldLabel || label}</label>
-      {showUrlInput ? (
+      <label htmlFor={showInlineUrlInput ? id : `${id}-file`}>{fieldLabel || label}</label>
+      {showInlineUrlInput ? (
         <input
           id={id}
           type="text"
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          placeholder={placeholder}
+          placeholder={urlPlaceholder}
         />
       ) : null}
       {resolvedHelp ? <p className="meta">{resolvedHelp}</p> : null}
@@ -219,6 +222,11 @@ export default function MediaUrlInput({
             }
           }}
         />
+        {!showUrlInput ? (
+          <button className="button" type="button" onClick={() => setManualUrlMode((current) => !current)}>
+            {showInlineUrlInput ? 'Hide URL Field' : 'Use URL Instead'}
+          </button>
+        ) : null}
         {compact && value ? (
           <a className="button media-open-inline" href={value} target="_blank" rel="noreferrer">
             Open

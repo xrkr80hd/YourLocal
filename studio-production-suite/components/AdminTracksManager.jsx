@@ -185,10 +185,10 @@ export default function AdminTracksManager({ initialTracks = [] }) {
           </div>
         </AdminAccordionSection>
 
-        <AdminAccordionSection title="Track Media" note="Upload audio and cover art." defaultOpen>
+        <AdminAccordionSection title="Track Media" note="Upload files or switch to URL mode for hosted tracks." defaultOpen>
           <MediaUrlInput
             id="track-audio-url"
-            label="Audio Upload"
+            label="Audio Source"
             value={form.audio_url}
             onChange={(value) => setForm((current) => ({ ...current, audio_url: value }))}
             folder="audio/tracks"
@@ -196,8 +196,8 @@ export default function AdminTracksManager({ initialTracks = [] }) {
             replaceKey={form.id ? `audio/tracks/${String(form.id)}/main` : ''}
             accept="audio/*"
             showUrlInput={false}
-            placeholder="Upload audio"
-            help="Upload directly here. In edit mode, upload replaces this track's current audio file."
+            placeholder="https://... or /..."
+            help="Upload directly here, or click 'Use URL Instead' to paste a hosted audio URL."
           />
 
           <MediaUrlInput
@@ -224,7 +224,7 @@ export default function AdminTracksManager({ initialTracks = [] }) {
                 type="text"
                 value={form.external_url}
                 onChange={(event) => setForm((current) => ({ ...current, external_url: event.target.value }))}
-                placeholder="https://spotify.com/..."
+                placeholder="https://spotify.com/... or https://bandcamp.com/..."
               />
             </div>
             <div className="form-row">

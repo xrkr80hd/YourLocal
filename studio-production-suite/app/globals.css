@@ -400,6 +400,23 @@ main > .container > *:nth-child(4) { animation-delay: 170ms; }
   overflow: visible;
 }
 
+.home-blog-notice {
+  margin-bottom: 0.85rem;
+  border-color: rgba(255, 167, 104, 0.45);
+  background:
+    linear-gradient(160deg, rgba(31, 20, 14, 0.88), rgba(15, 20, 33, 0.92)),
+    linear-gradient(90deg, rgba(255, 122, 60, 0.12), rgba(81, 240, 255, 0.06));
+}
+
+.home-blog-notice-kicker {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffd2b8;
+}
+
 .home-unboxed {
   border: 0;
   border-radius: 0;
@@ -442,6 +459,19 @@ main > .container > *:nth-child(4) { animation-delay: 170ms; }
   height: 100%;
   object-fit: cover;
   object-position: center;
+}
+
+.home-welcome-message {
+  display: inline-flex;
+  margin: 0 0 0.44rem;
+  padding: 0.24rem 0.62rem;
+  border: 1px solid rgba(255, 173, 121, 0.44);
+  border-radius: 8px;
+  background: linear-gradient(120deg, rgba(255, 122, 60, 0.16), rgba(255, 122, 60, 0.06));
+  color: #ffe0c6;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
 .home-bio-actions {
@@ -1273,6 +1303,60 @@ label {
   border-color: rgba(96, 224, 255, 0.66);
   background: linear-gradient(145deg, rgba(25, 67, 93, 0.66), rgba(16, 26, 42, 0.82));
   color: #f2fbff;
+}
+
+.admin-selected-list {
+  margin-top: 0.52rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.44rem;
+  min-height: 1.95rem;
+  align-items: center;
+}
+
+.admin-selected-list .meta {
+  margin: 0;
+}
+
+.admin-selected-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  max-width: 100%;
+  border: 1px solid rgba(96, 224, 255, 0.5);
+  border-radius: 999px;
+  background: linear-gradient(150deg, rgba(23, 55, 81, 0.76), rgba(11, 19, 32, 0.92));
+  color: #edfaff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.22rem 0.26rem 0.22rem 0.58rem;
+}
+
+.admin-selected-pill > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-selected-pill-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(108, 185, 227, 0.55);
+  border-radius: 999px;
+  background: rgba(6, 12, 21, 0.9);
+  color: #f3fbff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.admin-selected-pill-remove:hover {
+  border-color: rgba(96, 224, 255, 0.78);
+  background: rgba(10, 20, 35, 0.96);
 }
 
 .band-genre-scroll {
@@ -2370,6 +2454,11 @@ label {
 
   .admin-action-tile {
     min-height: 0;
+  }
+  .upload-widget.compact input[type="file"] {
+    min-width: 0;
+    width: 100%;
+    flex: 1 1 100%;
   }
   .xrkr-radio-display {
     left: 18%;

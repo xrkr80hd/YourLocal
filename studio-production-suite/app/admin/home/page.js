@@ -20,7 +20,7 @@ export default async function AdminHomeSettingsPage() {
     <>
       <section className="card hero">
         <h1>Homepage Controls</h1>
-        <p>Owner-only controls for your landing profile section and front-page card images.</p>
+        <p>Owner-only controls for homepage messaging, landing profile, and front-page card images.</p>
       </section>
       <AdminHomeSettingsForm initialProfile={profile} />
     </>

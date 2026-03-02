@@ -145,10 +145,10 @@ export default function AdminBandTracksManager({ bandSlug, bandName = '', initia
           </div>
         </AdminAccordionSection>
 
-        <AdminAccordionSection title="Audio Upload" note="Upload audio and optional cover image." defaultOpen>
+        <AdminAccordionSection title="Audio Source" note="Upload audio or switch to URL mode; cover image is optional." defaultOpen>
           <MediaUrlInput
             id="band-track-audio-url"
-            label="Audio Upload"
+            label="Audio Source"
             value={form.audio_url}
             onChange={(value) => setForm((current) => ({ ...current, audio_url: value }))}
             folder={`audio/tracks/bands/${String(bandSlug || '').trim() || 'band'}`}
@@ -156,7 +156,7 @@ export default function AdminBandTracksManager({ bandSlug, bandName = '', initia
             replaceKey={form.id ? `audio/tracks/bands/${String(bandSlug || '').trim() || 'band'}/${String(form.id)}/main` : ''}
             accept="audio/*"
             showUrlInput={false}
-            placeholder="Upload .mp3/.wav/.m4a"
+            placeholder="https://... or /..."
           />
 
           <MediaUrlInput
