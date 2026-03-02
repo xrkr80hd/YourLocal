@@ -49,7 +49,7 @@ export default function AdminBlogCrudForm({ mode = 'create', initialPost = null 
   const [content, setContent] = useState(String(initialPost?.content || ''));
   const [coverImageUrl, setCoverImageUrl] = useState(String(initialPost?.cover_image_url || ''));
   const [publishedAt, setPublishedAt] = useState(toDateTimeLocal(initialPost?.published_at));
-  const [isPublished, setIsPublished] = useState(Boolean(initialPost?.is_published));
+  const [isPublished, setIsPublished] = useState(isEdit ? Boolean(initialPost?.is_published) : true);
   const [status, setStatus] = useState('');
   const [saving, setSaving] = useState(false);
 

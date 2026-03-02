@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
 const SEEN_POST_STORAGE_KEY = 'xrkr80hd_seen_blog_post';
+const NEW_POST_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 function toPostVersion(post) {
   const slug = String(post?.slug || '').trim();
@@ -33,10 +34,31 @@ function formatPublishedDate(value) {
   });
 }
 
+function getPostTimestamp(post) {
+  const raw = String(post?.published_at || post?.created_at || '').trim();
+  if (!raw) {
+    return null;
+  }
+
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date.getTime();
+}
+
 export default function HomeBlogNotice({ latestPost = null, message = '' }) {
   const [visible, setVisible] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const postVersion = useMemo(() => toPostVersion(latestPost), [latestPost]);
+  const postTimestamp = useMemo(() => getPostTimestamp(latestPost), [latestPost]);
+  const isWithinNewWindow = useMemo(() => {
+    if (!postTimestamp) {
+      return false;
+    }
+    return Date.now() - postTimestamp <= NEW_POST_WINDOW_MS;
+  }, [postTimestamp]);
 
   useEffect(() => {
     setHydrated(true);
@@ -46,13 +68,18 @@ export default function HomeBlogNotice({ latestPost = null, message = '' }) {
       return;
     }
 
+    if (!isWithinNewWindow) {
+      setVisible(true);
+      return;
+    }
+
     try {
       const seen = window.localStorage.getItem(SEEN_POST_STORAGE_KEY);
       setVisible(seen !== postVersion);
     } catch {
       setVisible(true);
     }
-  }, [postVersion]);
+  }, [isWithinNewWindow, postVersion]);
 
   const dismiss = () => {
     if (!postVersion) {
@@ -60,10 +87,12 @@ export default function HomeBlogNotice({ latestPost = null, message = '' }) {
       return;
     }
 
-    try {
-      window.localStorage.setItem(SEEN_POST_STORAGE_KEY, postVersion);
-    } catch {
-      // Ignore storage write failures and just hide this session.
+    if (isWithinNewWindow) {
+      try {
+        window.localStorage.setItem(SEEN_POST_STORAGE_KEY, postVersion);
+      } catch {
+        // Ignore storage write failures and just hide this session.
+      }
     }
 
     setVisible(false);
@@ -73,7 +102,9 @@ export default function HomeBlogNotice({ latestPost = null, message = '' }) {
     return null;
   }
 
-  const safeMessage = String(message || '').trim() || 'New blog post available.';
+  const safeMessage = isWithinNewWindow
+    ? String(message || '').trim() || 'New blog post available.'
+    : 'Latest blog post available.';
   const published = formatPublishedDate(latestPost?.published_at || latestPost?.created_at);
 
   return (

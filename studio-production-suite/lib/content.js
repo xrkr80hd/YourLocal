@@ -672,8 +672,8 @@ export async function getLatestPublishedPost() {
         .from('blog_posts')
         .select('id, slug, title, published_at, created_at')
         .eq('is_published', true)
-        .order('published_at', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false })
+        .order('published_at', { ascending: false, nullsFirst: false })
         .limit(1)
         .maybeSingle(),
     null
