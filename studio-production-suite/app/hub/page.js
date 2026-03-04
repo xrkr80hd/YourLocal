@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import HubMediaGallery from '../../components/HubMediaGallery';
 import HubTracksPlayer from '../../components/HubTracksPlayer';
-import SharePostLinkButton from '../../components/SharePostLinkButton';
 import { getHubData } from '../../lib/content';
 import { formatDate, stripHtml, truncate } from '../../lib/format';
 
@@ -48,12 +47,9 @@ export default async function HubPage() {
                     <h4>{post.title}</h4>
                     <p className="meta">{formatDate(post.published_at)}</p>
                     <p>{preview || 'No preview text available yet.'}</p>
-                    <div className="actions">
-                      <Link className="hub-blog-read" href={`/blog/${post.slug}`}>
-                        Read full post
-                      </Link>
-                      <SharePostLinkButton path={`/blog/${post.slug}`} title={post.title} />
-                    </div>
+                    <Link className="hub-blog-read" href={`/blog/${post.slug}`}>
+                      Read full post
+                    </Link>
                   </article>
                 );
               })

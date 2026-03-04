@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import SharePostLinkButton from '../../components/SharePostLinkButton';
 import { getPublishedPosts } from '../../lib/content';
 import { formatDate } from '../../lib/format';
 
@@ -22,12 +21,6 @@ export default async function BlogPage() {
               </h3>
               <p className="meta">{formatDate(post.published_at)}</p>
               {post.excerpt ? <p>{post.excerpt}</p> : null}
-              <div className="actions">
-                <Link className="button" href={`/blog/${post.slug}`}>
-                  Read Post
-                </Link>
-                <SharePostLinkButton path={`/blog/${post.slug}`} title={post.title} />
-              </div>
             </article>
           ))
         ) : (

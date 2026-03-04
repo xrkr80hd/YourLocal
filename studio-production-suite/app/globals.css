@@ -662,17 +662,6 @@ main > .container > *:nth-child(4) { animation-delay: 170ms; }
   gap: 0.55rem;
 }
 
-.share-link-wrap {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.42rem;
-}
-
-.share-link-status {
-  font-size: 0.8rem;
-  color: #a7bfdc;
-}
-
 .admin-action-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
