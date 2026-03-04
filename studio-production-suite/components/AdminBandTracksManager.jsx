@@ -154,7 +154,7 @@ export default function AdminBandTracksManager({ bandSlug, bandName = '', initia
             folder={`audio/tracks/bands/${String(bandSlug || '').trim() || 'band'}`}
             replaceMode={Boolean(form.id)}
             replaceKey={form.id ? `audio/tracks/bands/${String(bandSlug || '').trim() || 'band'}/${String(form.id)}/main` : ''}
-            accept="audio/*"
+            accept="audio/*,.mp3,.wav,.ogg,.m4a,.flac,.aac,.webm"
             showUrlInput={false}
             placeholder="https://... or /..."
           />

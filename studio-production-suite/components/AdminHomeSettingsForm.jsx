@@ -23,6 +23,7 @@ export default function AdminHomeSettingsForm({ initialProfile = null }) {
   const [hubCardImageUrl, setHubCardImageUrl] = useState(String(initialProfile?.home_hub_card_image_url || ''));
   const [businessCardImageUrl, setBusinessCardImageUrl] = useState(String(initialProfile?.home_business_card_image_url || ''));
   const [contactCardImageUrl, setContactCardImageUrl] = useState(String(initialProfile?.home_contact_card_image_url || ''));
+  const [homeNewTracksAlertEnabled, setHomeNewTracksAlertEnabled] = useState(Boolean(initialProfile?.home_new_tracks_alert_enabled));
   const [status, setStatus] = useState('');
   const [saving, setSaving] = useState(false);
   const welcomeMessageCount = welcomeMessage.length;
@@ -50,6 +51,7 @@ export default function AdminHomeSettingsForm({ initialProfile = null }) {
           home_hub_card_image_url: hubCardImageUrl,
           home_business_card_image_url: businessCardImageUrl,
           home_contact_card_image_url: contactCardImageUrl,
+          home_new_tracks_alert_enabled: homeNewTracksAlertEnabled,
         };
 
         try {
@@ -203,6 +205,20 @@ export default function AdminHomeSettingsForm({ initialProfile = null }) {
           accept="image/*"
           placeholder="https://... or /..."
         />
+      </AdminAccordionSection>
+
+      <AdminAccordionSection title="Track Alert Badge" note="Toggle blinking homepage callout for new tracks." defaultOpen={false}>
+        <div className="actions">
+          <button
+            className={`button ${homeNewTracksAlertEnabled ? 'primary' : ''}`.trim()}
+            type="button"
+            onClick={() => setHomeNewTracksAlertEnabled((current) => !current)}
+          >
+            {homeNewTracksAlertEnabled ? 'Turn Off Badge' : 'Turn On Badge'}
+          </button>
+          <span className="meta">Status: {homeNewTracksAlertEnabled ? 'ON' : 'OFF'}</span>
+        </div>
+        <p className="meta">Homepage text: &quot;New tracks uploaded!&quot;</p>
       </AdminAccordionSection>
 
       <AdminAccordionSection title="Save Homepage Settings" note="Apply all changes." defaultOpen>

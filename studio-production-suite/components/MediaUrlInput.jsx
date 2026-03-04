@@ -8,10 +8,12 @@ function isAudioFile(file) {
   return (
     type.startsWith('audio/') ||
     name.endsWith('.mp3') ||
+    name.endsWith('.aac') ||
     name.endsWith('.wav') ||
     name.endsWith('.ogg') ||
     name.endsWith('.m4a') ||
-    name.endsWith('.flac')
+    name.endsWith('.flac') ||
+    name.endsWith('.webm')
   );
 }
 

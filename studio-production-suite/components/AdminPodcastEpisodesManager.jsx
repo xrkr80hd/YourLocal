@@ -219,7 +219,7 @@ export default function AdminPodcastEpisodesManager({ podcastSlug, initialEpisod
             value={form.audio_url}
             onChange={(value) => setForm((current) => ({ ...current, audio_url: value }))}
             folder="audio/tracks"
-            accept="audio/*"
+            accept="audio/*,.mp3,.wav,.ogg,.m4a,.flac,.aac,.webm"
             showUrlInput={false}
             placeholder="https://... or /..."
           />

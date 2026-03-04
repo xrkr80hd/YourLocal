@@ -151,11 +151,24 @@ export default function HubTracksPlayer({ tracks }) {
 
   return (
     <>
-      <p className="hub-now-playing">
-        <strong id="hub-current-track">{activeTrack?.title || 'No track loaded'}</strong>{' '}
-        <span className="meta">{activeTrack?.artist_name}</span>
-        <span className="meta">{`  TRK ${trackNumber}/${totalTracks}`}</span>
-      </p>
+      <div className="hub-now-playing-shell">
+        <div className={`hub-now-playing-cover ${isPlaying ? 'is-playing' : ''}`.trim()}>
+          {activeTrack?.cover_image_url ? (
+            <img src={activeTrack.cover_image_url} alt={`${activeTrack?.title || 'Track'} cover art`} />
+          ) : (
+            <div className="hub-now-playing-fallback" aria-hidden="true">
+              <strong>XRKR</strong>
+              <span>NO COVER ART</span>
+            </div>
+          )}
+          <span className="hub-now-playing-badge">{isPlaying ? 'Now Playing' : 'Track Ready'}</span>
+        </div>
+        <p className="hub-now-playing">
+          <strong id="hub-current-track">{activeTrack?.title || 'No track loaded'}</strong>{' '}
+          <span className="meta">{activeTrack?.artist_name}</span>
+          <span className="meta">{`  TRK ${trackNumber}/${totalTracks}`}</span>
+        </p>
+      </div>
       <audio
         ref={audioRef}
         key={activeTrack?.audio_url || activeTrack?.id}

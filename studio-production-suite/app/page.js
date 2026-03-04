@@ -77,6 +77,7 @@ const guideCardDefaults = [
 export default async function HomePage() {
   const [profile, homeTracks, latestPost] = await Promise.all([getSiteProfile(), getHomeTracks(12), getLatestPublishedPost()]);
   const welcomeMessage = String(profile?.welcome_message || 'Welcome to XRKR80HD Studio.').trim();
+  const showNewTracksAlert = Boolean(profile?.home_new_tracks_alert_enabled);
   const guideCards = guideCardDefaults.map((card) => {
     if (card.key === 'hub' && profile?.home_hub_card_image_url) {
       return { ...card, image: profile.home_hub_card_image_url };
@@ -110,6 +111,12 @@ export default async function HomePage() {
           </div>
           <div>
             {welcomeMessage ? <p className="home-welcome-message">{welcomeMessage}</p> : null}
+            {showNewTracksAlert ? (
+              <a className="home-track-alert-badge" href="#home-radio">
+                <span className="home-track-alert-dot" aria-hidden="true" />
+                New tracks uploaded!
+              </a>
+            ) : null}
             <Headline value={profile?.headline} />
             {profile?.short_bio ? <p>{profile.short_bio}</p> : null}
             {profile?.full_bio ? (
@@ -121,7 +128,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section-space home-radio home-unboxed">
+      <section id="home-radio" className="section-space home-radio home-unboxed">
         <div className="home-player-head">
           <h3 className="section-title">XRKR Radio</h3>
           <span className="meta">Derived shuffle pool from published band + podcast audio</span>

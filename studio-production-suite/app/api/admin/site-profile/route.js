@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { ADMIN_SESSION_USER_COOKIE, isOwnerUsername } from '../../../../lib/admin-auth';
-import { clampText, isValidMediaUrl } from '../../../../lib/admin-crud-utils';
+import { clampText, isValidMediaUrl, toBoolean } from '../../../../lib/admin-crud-utils';
 import { getSupabaseAdmin } from '../../../../lib/supabase-admin';
 
 export const runtime = 'nodejs';
@@ -23,7 +23,8 @@ function hasMissingColumnsMessage(message) {
     message.includes('home_podcast_card_image_url') ||
     message.includes('home_hub_card_image_url') ||
     message.includes('home_business_card_image_url') ||
-    message.includes('home_contact_card_image_url')
+    message.includes('home_contact_card_image_url') ||
+    message.includes('home_new_tracks_alert_enabled')
   );
 }
 
@@ -40,6 +41,7 @@ function buildPayload(raw) {
   const hubCardImageUrl = String(raw?.home_hub_card_image_url || '').trim();
   const businessCardImageUrl = String(raw?.home_business_card_image_url || '').trim();
   const contactCardImageUrl = String(raw?.home_contact_card_image_url || '').trim();
+  const homeNewTracksAlertEnabled = toBoolean(raw?.home_new_tracks_alert_enabled);
 
   if (
     !isValidMediaUrl(avatarUrl) ||
@@ -68,6 +70,7 @@ function buildPayload(raw) {
       home_hub_card_image_url: hubCardImageUrl || null,
       home_business_card_image_url: businessCardImageUrl || null,
       home_contact_card_image_url: contactCardImageUrl || null,
+      home_new_tracks_alert_enabled: homeNewTracksAlertEnabled,
     },
   };
 }

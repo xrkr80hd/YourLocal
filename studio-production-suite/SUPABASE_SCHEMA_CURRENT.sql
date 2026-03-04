@@ -33,6 +33,7 @@ create table if not exists public.site_profiles (
   home_podcast_card_image_url text,
   home_business_card_image_url text,
   home_contact_card_image_url text,
+  home_new_tracks_alert_enabled boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -49,6 +50,7 @@ alter table public.site_profiles add column if not exists home_scene_card_image_
 alter table public.site_profiles add column if not exists home_podcast_card_image_url text;
 alter table public.site_profiles add column if not exists home_business_card_image_url text;
 alter table public.site_profiles add column if not exists home_contact_card_image_url text;
+alter table public.site_profiles add column if not exists home_new_tracks_alert_enabled boolean not null default false;
 alter table public.site_profiles add column if not exists created_at timestamptz not null default now();
 alter table public.site_profiles add column if not exists updated_at timestamptz not null default now();
 
