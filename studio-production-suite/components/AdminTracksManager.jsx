@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import MediaUrlInput from './MediaUrlInput';
 import AdminAccordionSection from './AdminAccordionSection';
 
@@ -43,12 +42,158 @@ function formatReleaseDate(value) {
   return raw.slice(0, 10);
 }
 
+function buildTrackPayload(form) {
+  return {
+    title: form.title,
+    artist_name: form.artist_name,
+    genre: form.genre,
+    description: form.description,
+    audio_url: form.audio_url,
+    cover_image_url: form.cover_image_url,
+    external_url: form.external_url,
+    release_date: form.release_date,
+    sort_order: form.sort_order,
+    is_featured: form.is_featured,
+  };
+}
+
+function TrackEditorSections({ form, setForm, idPrefix, isEdit }) {
+  const fieldId = (name) => `${idPrefix}-${name}`;
+  const replaceAudioKey = isEdit && form.id ? `audio/tracks/${String(form.id)}/main` : '';
+  const replaceCoverKey = isEdit && form.id ? `images/posts/tracks/${String(form.id)}/cover` : '';
+
+  return (
+    <>
+      <AdminAccordionSection title="Track Basics" note="Name, artist, genre and description." defaultOpen>
+        <div className="grid cols-3">
+          <div className="form-row">
+            <label htmlFor={fieldId('title')}>Title</label>
+            <input
+              id={fieldId('title')}
+              type="text"
+              value={form.title}
+              onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
+              required
+            />
+          </div>
+          <div className="form-row">
+            <label htmlFor={fieldId('artist')}>Artist Name</label>
+            <input
+              id={fieldId('artist')}
+              type="text"
+              value={form.artist_name}
+              onChange={(event) => setForm((current) => ({ ...current, artist_name: event.target.value }))}
+            />
+          </div>
+          <div className="form-row">
+            <label htmlFor={fieldId('genre')}>Genre</label>
+            <input
+              id={fieldId('genre')}
+              type="text"
+              value={form.genre}
+              onChange={(event) => setForm((current) => ({ ...current, genre: event.target.value }))}
+              placeholder="metalcore"
+            />
+          </div>
+        </div>
+
+        <div className="form-row">
+          <label htmlFor={fieldId('description')}>Description</label>
+          <textarea
+            id={fieldId('description')}
+            value={form.description}
+            onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+          />
+        </div>
+      </AdminAccordionSection>
+
+      <AdminAccordionSection title="Track Media" note="Upload files or switch to URL mode for hosted tracks." defaultOpen>
+        <MediaUrlInput
+          id={fieldId('audio-url')}
+          label="Audio Source"
+          value={form.audio_url}
+          onChange={(value) => setForm((current) => ({ ...current, audio_url: value }))}
+          folder="audio/tracks"
+          replaceMode={isEdit}
+          replaceKey={replaceAudioKey}
+          accept="audio/*,.mp3,.wav,.ogg,.m4a,.flac,.aac,.webm"
+          showUrlInput={false}
+          placeholder="https://... or /..."
+          help="Upload directly here, or click 'Use URL Instead' to paste a hosted audio URL."
+        />
+
+        <MediaUrlInput
+          id={fieldId('cover-image-url')}
+          label="Cover Image URL"
+          value={form.cover_image_url}
+          onChange={(value) => setForm((current) => ({ ...current, cover_image_url: value }))}
+          folder="images/posts"
+          replaceMode={isEdit}
+          replaceKey={replaceCoverKey}
+          accept="image/*"
+          placeholder="https://... or /..."
+          help="Recommended 1:1 (1400x1400) for Hub art. Keep key subject centered for list crops."
+        />
+      </AdminAccordionSection>
+
+      <AdminAccordionSection title="Release and Visibility" note="Sort, date and Hub player toggle." defaultOpen={false}>
+        <div className="grid cols-3">
+          <div className="form-row">
+            <label htmlFor={fieldId('external-url')}>External Link (optional)</label>
+            <input
+              id={fieldId('external-url')}
+              type="text"
+              value={form.external_url}
+              onChange={(event) => setForm((current) => ({ ...current, external_url: event.target.value }))}
+              placeholder="https://spotify.com/... or https://bandcamp.com/..."
+            />
+          </div>
+          <div className="form-row">
+            <label htmlFor={fieldId('release-date')}>Release Date</label>
+            <input
+              id={fieldId('release-date')}
+              type="date"
+              value={form.release_date}
+              onChange={(event) => setForm((current) => ({ ...current, release_date: event.target.value }))}
+            />
+          </div>
+          <div className="form-row">
+            <label htmlFor={fieldId('sort-order')}>Sort Order</label>
+            <input
+              id={fieldId('sort-order')}
+              type="number"
+              min="0"
+              value={form.sort_order}
+              onChange={(event) => setForm((current) => ({ ...current, sort_order: event.target.value }))}
+            />
+          </div>
+        </div>
+
+        <div className="actions">
+          <label htmlFor={fieldId('featured')} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+            <input
+              id={fieldId('featured')}
+              type="checkbox"
+              checked={form.is_featured}
+              onChange={(event) => setForm((current) => ({ ...current, is_featured: event.target.checked }))}
+            />
+            <span className="meta">Show in XRKR Hub player</span>
+          </label>
+        </div>
+      </AdminAccordionSection>
+    </>
+  );
+}
+
 export default function AdminTracksManager({ initialTracks = [] }) {
-  const router = useRouter();
   const [tracks, setTracks] = useState(initialTracks.map((track) => normalizeTrack(track)));
-  const [form, setForm] = useState(emptyTrack());
-  const [status, setStatus] = useState('');
-  const [saving, setSaving] = useState(false);
+  const [createForm, setCreateForm] = useState(emptyTrack());
+  const [createStatus, setCreateStatus] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [editingTrackId, setEditingTrackId] = useState(null);
+  const [editForm, setEditForm] = useState(emptyTrack());
+  const [editStatus, setEditStatus] = useState('');
+  const [updating, setUpdating] = useState(false);
 
   const sortedTracks = useMemo(() => {
     const items = [...tracks];
@@ -70,7 +215,21 @@ export default function AdminTracksManager({ initialTracks = [] }) {
     return items;
   }, [tracks]);
 
-  const resetForm = () => setForm(emptyTrack());
+  const resetCreateForm = () => setCreateForm(emptyTrack());
+
+  const upsertTrack = (item) => {
+    const normalized = normalizeTrack(item);
+    setTracks((current) => {
+      const existingIndex = current.findIndex((track) => Number(track.id) === Number(normalized.id));
+      if (existingIndex < 0) {
+        return [normalized, ...current];
+      }
+
+      const next = [...current];
+      next[existingIndex] = normalized;
+      return next;
+    });
+  };
 
   const reloadTracks = async () => {
     const response = await fetch('/api/admin/tracks', { cache: 'no-store' });
@@ -82,8 +241,16 @@ export default function AdminTracksManager({ initialTracks = [] }) {
   };
 
   const startEdit = (track) => {
-    setForm(normalizeTrack(track));
-    setStatus(`Editing track: ${track.title}`);
+    const normalized = normalizeTrack(track);
+    setEditingTrackId(normalized.id);
+    setEditForm(normalized);
+    setEditStatus(`Editing track: ${normalized.title}`);
+  };
+
+  const cancelEdit = () => {
+    setEditingTrackId(null);
+    setEditForm(emptyTrack());
+    setEditStatus('');
   };
 
   return (
@@ -92,186 +259,52 @@ export default function AdminTracksManager({ initialTracks = [] }) {
         className="card section-space"
         onSubmit={async (event) => {
           event.preventDefault();
-          setSaving(true);
-          setStatus(form.id ? 'Updating track...' : 'Creating track...');
-
-          const payload = {
-            title: form.title,
-            artist_name: form.artist_name,
-            genre: form.genre,
-            description: form.description,
-            audio_url: form.audio_url,
-            cover_image_url: form.cover_image_url,
-            external_url: form.external_url,
-            release_date: form.release_date,
-            sort_order: form.sort_order,
-            is_featured: form.is_featured,
-          };
+          setCreating(true);
+          setCreateStatus('Creating track...');
 
           try {
-            const endpoint = form.id ? `/api/admin/tracks/${encodeURIComponent(form.id)}` : '/api/admin/tracks';
-            const method = form.id ? 'PUT' : 'POST';
-            const response = await fetch(endpoint, {
-              method,
+            const response = await fetch('/api/admin/tracks', {
+              method: 'POST',
               headers: { 'content-type': 'application/json' },
-              body: JSON.stringify(payload),
+              body: JSON.stringify(buildTrackPayload(createForm)),
             });
             const body = await response.json().catch(() => ({}));
 
             if (!response.ok) {
-              setStatus(body.error || 'Save failed.');
-              setSaving(false);
+              setCreateStatus(body.error || 'Save failed.');
+              setCreating(false);
               return;
             }
 
-            await reloadTracks();
-            setStatus(form.id ? 'Track updated.' : 'Track created.');
-            setSaving(false);
-            resetForm();
-            router.refresh();
+            if (body?.item) {
+              upsertTrack(body.item);
+            } else {
+              await reloadTracks();
+            }
+
+            setCreateStatus('Track created.');
+            setCreating(false);
+            resetCreateForm();
           } catch (error) {
-            setStatus(error instanceof Error ? error.message : 'Save failed due to network error.');
-            setSaving(false);
+            setCreateStatus(error instanceof Error ? error.message : 'Save failed due to network error.');
+            setCreating(false);
           }
         }}
       >
-        <h2 className="section-title">{form.id ? 'Edit Track' : 'Add Track'}</h2>
+        <h2 className="section-title">Add Track</h2>
         <p className="meta" style={{ marginBottom: '0.6rem' }}>
-          {form.id
-            ? 'Editing existing track. Update fields and save, or cancel to return to create mode.'
-            : 'Owner-only. Add XRKR tracks with audio, set order, and choose if they appear in the Hub player.'}
+          Owner-only. Add XRKR tracks with audio, set order, and choose if they appear in the Hub player.
         </p>
 
-        <AdminAccordionSection title="Track Basics" note="Name, artist, genre and description." defaultOpen>
-          <div className="grid cols-3">
-            <div className="form-row">
-              <label htmlFor="track-title">Title</label>
-              <input
-                id="track-title"
-                type="text"
-                value={form.title}
-                onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
-                required
-              />
-            </div>
-            <div className="form-row">
-              <label htmlFor="track-artist">Artist Name</label>
-              <input
-                id="track-artist"
-                type="text"
-                value={form.artist_name}
-                onChange={(event) => setForm((current) => ({ ...current, artist_name: event.target.value }))}
-              />
-            </div>
-            <div className="form-row">
-              <label htmlFor="track-genre">Genre</label>
-              <input
-                id="track-genre"
-                type="text"
-                value={form.genre}
-                onChange={(event) => setForm((current) => ({ ...current, genre: event.target.value }))}
-                placeholder="metalcore"
-              />
-            </div>
-          </div>
+        <TrackEditorSections form={createForm} setForm={setCreateForm} idPrefix="create-track" isEdit={false} />
 
-          <div className="form-row">
-            <label htmlFor="track-description">Description</label>
-            <textarea
-              id="track-description"
-              value={form.description}
-              onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
-            />
-          </div>
-        </AdminAccordionSection>
-
-        <AdminAccordionSection title="Track Media" note="Upload files or switch to URL mode for hosted tracks." defaultOpen>
-          <MediaUrlInput
-            id="track-audio-url"
-            label="Audio Source"
-            value={form.audio_url}
-            onChange={(value) => setForm((current) => ({ ...current, audio_url: value }))}
-            folder="audio/tracks"
-            replaceMode={Boolean(form.id)}
-            replaceKey={form.id ? `audio/tracks/${String(form.id)}/main` : ''}
-            accept="audio/*,.mp3,.wav,.ogg,.m4a,.flac,.aac,.webm"
-            showUrlInput={false}
-            placeholder="https://... or /..."
-            help="Upload directly here, or click 'Use URL Instead' to paste a hosted audio URL."
-          />
-
-          <MediaUrlInput
-            id="track-cover-image-url"
-            label="Cover Image URL"
-            value={form.cover_image_url}
-            onChange={(value) => setForm((current) => ({ ...current, cover_image_url: value }))}
-            folder="images/posts"
-            replaceMode={Boolean(form.id)}
-            replaceKey={form.id ? `images/posts/tracks/${String(form.id)}/cover` : ''}
-            accept="image/*"
-            placeholder="https://... or /..."
-            help="Optional. In edit mode, upload replaces this track's cover image."
-          />
-          <p className="meta">If upload fails: verify bucket MIME/file-size settings and `UPLOAD_MAX_BYTES` on the server.</p>
-        </AdminAccordionSection>
-
-        <AdminAccordionSection title="Release and Visibility" note="Sort, date and Hub player toggle." defaultOpen={false}>
-          <div className="grid cols-3">
-            <div className="form-row">
-              <label htmlFor="track-external-url">External Link (optional)</label>
-              <input
-                id="track-external-url"
-                type="text"
-                value={form.external_url}
-                onChange={(event) => setForm((current) => ({ ...current, external_url: event.target.value }))}
-                placeholder="https://spotify.com/... or https://bandcamp.com/..."
-              />
-            </div>
-            <div className="form-row">
-              <label htmlFor="track-release-date">Release Date</label>
-              <input
-                id="track-release-date"
-                type="date"
-                value={form.release_date}
-                onChange={(event) => setForm((current) => ({ ...current, release_date: event.target.value }))}
-              />
-            </div>
-            <div className="form-row">
-              <label htmlFor="track-sort-order">Sort Order</label>
-              <input
-                id="track-sort-order"
-                type="number"
-                min="0"
-                value={form.sort_order}
-                onChange={(event) => setForm((current) => ({ ...current, sort_order: event.target.value }))}
-              />
-            </div>
-          </div>
-
+        <AdminAccordionSection title="Save Track" note="Create a new track in the library." defaultOpen>
           <div className="actions">
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
-              <input
-                type="checkbox"
-                checked={form.is_featured}
-                onChange={(event) => setForm((current) => ({ ...current, is_featured: event.target.checked }))}
-              />
-              <span className="meta">Show in XRKR Hub player</span>
-            </label>
-          </div>
-        </AdminAccordionSection>
-
-        <AdminAccordionSection title="Save Track" note="Create/update or cancel current edit." defaultOpen>
-          <div className="actions">
-            <button className="button primary" type="submit" disabled={saving}>
-              {saving ? 'Saving...' : form.id ? 'Update Track' : 'Create Track'}
+            <button className="button primary" type="submit" disabled={creating}>
+              {creating ? 'Saving...' : 'Create Track'}
             </button>
-            {form.id ? (
-              <button className="button" type="button" onClick={resetForm}>
-                Cancel Edit
-              </button>
-            ) : null}
           </div>
-          {status ? <p className="meta">{status}</p> : null}
+          {createStatus ? <p className="meta">{createStatus}</p> : null}
         </AdminAccordionSection>
       </form>
 
@@ -285,6 +318,11 @@ export default function AdminTracksManager({ initialTracks = [] }) {
             <div className="grid">
               {sortedTracks.map((track) => (
                 <article key={track.id} className="card">
+                  {track.cover_image_url ? (
+                    <img className="admin-track-cover-preview" src={track.cover_image_url} alt={`${track.title} cover art`} />
+                  ) : (
+                    <div className="admin-track-cover-fallback">No cover art uploaded yet.</div>
+                  )}
                   <h4>{track.title}</h4>
                   <p className="meta">
                     {track.artist_name || 'xrkr80hd'} | {track.genre || 'other'} | {formatReleaseDate(track.release_date)} | sort {track.sort_order}
@@ -292,8 +330,18 @@ export default function AdminTracksManager({ initialTracks = [] }) {
                   <p className="meta">Hub player: {track.is_featured ? 'on' : 'off'}</p>
                   {track.audio_url ? <audio controls src={track.audio_url} style={{ width: '100%' }} /> : null}
                   <div className="actions">
-                    <button className="button primary" type="button" onClick={() => startEdit(track)}>
-                      Edit
+                    <button
+                      className="button primary"
+                      type="button"
+                      onClick={() => {
+                        if (Number(editingTrackId) === Number(track.id)) {
+                          cancelEdit();
+                          return;
+                        }
+                        startEdit(track);
+                      }}
+                    >
+                      {Number(editingTrackId) === Number(track.id) ? 'Close Editor' : 'Edit Here'}
                     </button>
                     <button
                       className="button danger"
@@ -304,23 +352,91 @@ export default function AdminTracksManager({ initialTracks = [] }) {
                           return;
                         }
 
-                        setStatus(`Deleting "${track.title}"...`);
+                        setEditStatus(`Deleting "${track.title}"...`);
                         const response = await fetch(`/api/admin/tracks/${encodeURIComponent(track.id)}`, { method: 'DELETE' });
                         const body = await response.json().catch(() => ({}));
                         if (!response.ok) {
-                          setStatus(body.error || 'Delete failed.');
+                          setEditStatus(body.error || 'Delete failed.');
                           return;
                         }
 
-                        await reloadTracks();
+                        setTracks((current) => current.filter((item) => Number(item.id) !== Number(track.id)));
                         const warnings = Array.isArray(body?.storage_cleanup?.warnings) ? body.storage_cleanup.warnings : [];
-                        setStatus(warnings.length ? `Deleted "${track.title}" with warning: ${warnings[0]}` : `Deleted "${track.title}".`);
-                        router.refresh();
+                        setEditStatus(warnings.length ? `Deleted "${track.title}" with warning: ${warnings[0]}` : `Deleted "${track.title}".`);
+                        if (Number(editingTrackId) === Number(track.id)) {
+                          cancelEdit();
+                        }
                       }}
                     >
                       Delete
                     </button>
                   </div>
+
+                  {Number(editingTrackId) === Number(track.id) ? (
+                    <form
+                      className="admin-track-inline-editor section-space"
+                      onSubmit={async (event) => {
+                        event.preventDefault();
+                        setUpdating(true);
+                        setEditStatus(`Updating "${editForm.title}"...`);
+
+                        try {
+                          const response = await fetch(`/api/admin/tracks/${encodeURIComponent(editForm.id)}`, {
+                            method: 'PUT',
+                            headers: { 'content-type': 'application/json' },
+                            body: JSON.stringify(buildTrackPayload(editForm)),
+                          });
+                          const body = await response.json().catch(() => ({}));
+
+                          if (!response.ok) {
+                            setEditStatus(body.error || 'Update failed.');
+                            setUpdating(false);
+                            return;
+                          }
+
+                          if (body?.item) {
+                            upsertTrack(body.item);
+                            setEditForm(normalizeTrack(body.item));
+                          } else {
+                            await reloadTracks();
+                          }
+
+                          setEditStatus(`Updated "${editForm.title}".`);
+                          setUpdating(false);
+                        } catch (error) {
+                          setEditStatus(error instanceof Error ? error.message : 'Update failed due to network error.');
+                          setUpdating(false);
+                        }
+                      }}
+                    >
+                      <AdminAccordionSection
+                        title={`Inline Editor: ${track.title}`}
+                        note="Edit directly here without jumping to the top create form."
+                        defaultOpen
+                      >
+                        <p className="meta">Cover art uploads update this card immediately after save.</p>
+                      </AdminAccordionSection>
+
+                      <TrackEditorSections
+                        form={editForm}
+                        setForm={setEditForm}
+                        idPrefix={`edit-track-${String(track.id)}`}
+                        isEdit
+                      />
+
+                      <AdminAccordionSection title="Save Changes" note="Update this track only." defaultOpen>
+                        <div className="actions">
+                          <button className="button primary" type="submit" disabled={updating}>
+                            {updating ? 'Saving...' : 'Update Track'}
+                          </button>
+                          <button className="button" type="button" onClick={cancelEdit} disabled={updating}>
+                            Cancel
+                          </button>
+                        </div>
+                        {editStatus ? <p className="meta">{editStatus}</p> : null}
+                      </AdminAccordionSection>
+                    </form>
+                  ) : null}
                 </article>
               ))}
             </div>

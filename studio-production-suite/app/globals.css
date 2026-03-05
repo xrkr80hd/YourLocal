@@ -891,6 +891,44 @@ img.cover {
   border: 1px solid var(--line);
 }
 
+.admin-track-cover-preview {
+  width: min(260px, 100%);
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+  border: 1px solid rgba(127, 216, 255, 0.34);
+  margin: 0 auto 0.72rem;
+  box-shadow: 0 12px 24px rgba(4, 10, 20, 0.44);
+}
+
+.admin-track-cover-fallback {
+  width: min(260px, 100%);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto 0.72rem;
+  border-radius: 12px;
+  border: 1px dashed rgba(127, 216, 255, 0.34);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 0.7rem;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(81, 240, 255, 0.2), transparent 40%),
+    radial-gradient(circle at 82% 84%, rgba(255, 122, 60, 0.16), transparent 44%),
+    rgba(8, 13, 23, 0.76);
+  color: #b7cde8;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.admin-track-inline-editor {
+  margin-top: 0.85rem;
+  padding: 0.72rem;
+  border-radius: 12px;
+  border: 1px solid rgba(127, 216, 255, 0.3);
+  background: linear-gradient(160deg, rgba(11, 18, 30, 0.88), rgba(7, 13, 24, 0.92));
+}
+
 .blog-post-card {
   max-width: 960px;
   margin-left: auto;

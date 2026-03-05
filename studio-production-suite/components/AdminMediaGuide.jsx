@@ -7,7 +7,12 @@ const MEDIA_SPECS = [
   { slot: 'Band Member Photo', ratio: '1:1', size: '1000x1000', note: 'Circle avatar crop for current/past members.' },
   { slot: 'Podcast Cover Image', ratio: '16:10', size: '1600x1000', note: 'Podcast card image in /podcast listing.' },
   { slot: 'Blog Cover Image', ratio: '16:9', size: '1600x900', note: 'Used with fixed-height cover blocks.' },
-  { slot: 'Track Cover Image', ratio: '16:9', size: '1600x900', note: 'Used in track cards/player lists.' },
+  {
+    slot: 'Track Cover Image',
+    ratio: '1:1',
+    size: '1400x1400',
+    note: 'Used as square art in XRKR Hub now-playing. Keep subject centered so list crops still look clean.',
+  },
   { slot: 'Episode Cover Image (optional)', ratio: '16:9', size: '1600x900', note: 'For podcast episode art if provided.' },
   { slot: 'Hub Gallery Thumbnail', ratio: '16:10', size: '1600x1000', note: 'Used in hub media thumbs and strips.' },
   { slot: 'XRKR Radio Desktop Skin', ratio: '128:35', size: '1536x420', note: 'Desktop player shell; keep exact dimensions.' },
@@ -44,4 +49,3 @@ export default function AdminMediaGuide() {
     </section>
   );
 }
-

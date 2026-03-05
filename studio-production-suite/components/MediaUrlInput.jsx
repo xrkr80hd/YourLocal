@@ -53,7 +53,7 @@ function inferUploadHint({ id, accept }) {
   if (key.includes('home-') && key.includes('card-image')) return 'Recommended 4:3 at 1600x1200.';
   if (key.includes('band-image')) return 'Recommended 16:10 at 1600x1000.';
   if (key.includes('podcast') && key.includes('cover')) return 'Recommended 16:10 at 1600x1000.';
-  if (key.includes('track-cover')) return 'Recommended 16:9 at 1600x900.';
+  if (key.includes('track-cover')) return 'Recommended 1:1 at 1400x1400.';
   if (key.includes('episode-cover')) return 'Recommended 16:9 at 1600x900.';
   if (key.includes('blog-cover')) return 'Recommended 16:9 at 1600x900.';
   if (key.includes('business') && key.includes('image')) return 'Recommended 1:1 at 1200x1200.';
